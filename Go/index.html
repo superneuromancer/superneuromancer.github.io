@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wizard's Choice 1</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="game-container">
+        <!-- Background Elements -->
+        <div class="background-overlay"></div>
+        <div class="particles"></div>
+        
+        <!-- Header -->
+        <header class="game-header">
+            <h1 class="game-title">Wizard's Choice 1</h1>
+            <p class="game-author">By Sam Landstrom</p>
+        </header>
+        
+        <!-- Game Controls -->
+        <div class="game-controls">
+            <button id="saveBtn" class="control-btn">💾 Save</button>
+            <button id="loadBtn" class="control-btn">📁 Load</button>
+            <button id="resetBtn" class="control-btn">🔄 Reset</button>
+        </div>
+        
+        <!-- Stats Panel -->
+        <div class="stats-panel">
+            <div class="stat-item">
+                <span class="stat-icon">🔮</span>
+                <span class="stat-label">Mana</span>
+                <span id="manaValue" class="stat-value">10</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-icon">🛡️</span>
+                <span class="stat-label">Morale</span>
+                <span id="moraleValue" class="stat-value">10</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-icon">❤️</span>
+                <span class="stat-label">Life</span>
+                <span id="lifeValue" class="stat-value">10</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-icon">🪙</span>
+                <span class="stat-label">Gold</span>
+                <span id="goldValue" class="stat-value">0</span>
+            </div>
+        </div>
+        
+        <!-- Main Game Area -->
+        <main class="game-main">
+            <!-- Story Display -->
+            <div class="story-container">
+                <div id="storyContent" class="story-content">
+                    <div class="story-image" id="storyImage" style="display: none;">
+                        <img id="storyImg" src="" alt="Story illustration">
+                    </div>
+                    <div class="story-text" id="storyText">
+                        <p><strong>Wizard's Choice 1</strong></p>
+                        <p>By Sam Landstrom</p>
+                        <p><em>Summary:</em> You play the part of a wizard in a medieval fantasy world. This is the first part of an epic series.</p>
+                        <p><em>Content warning:</em> Violence and dark themes.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Choice Buttons -->
+            <div class="choices-container" id="choicesContainer">
+                <button class="choice-btn" data-choice="firstChoice">Begin!</button>
+            </div>
+        </main>
+        
+        <!-- Achievement Notification -->
+        <div id="achievementNotification" class="achievement-notification">
+            <span class="achievement-icon">🏆</span>
+            <span class="achievement-text"></span>
+        </div>
+        
+        <!-- Modal for Save/Load -->
+        <div id="gameModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2 id="modalTitle">Save Game</h2>
+                <div id="modalBody">
+                    <p>Game saved successfully!</p>
+                </div>
+                <div class="modal-buttons">
+                    <button id="modalConfirm" class="modal-btn confirm">OK</button>
+                    <button id="modalCancel" class="modal-btn cancel">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="gameData.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
