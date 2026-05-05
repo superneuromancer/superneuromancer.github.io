@@ -1,0 +1,1653 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>APS — Guia de Segurança Digital · Explicação do Código</title>
+<script>
+(function(){
+  var t=localStorage.getItem('aps-theme')||'dark';
+  document.documentElement.setAttribute('data-theme',t);
+})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,600;0,800;1,300;1,600&family=JetBrains+Mono:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ── THEME TOKENS ── */
+:root,[data-theme="dark"]{
+  --bg:#0b0d11;--bg2:#12151c;--bg3:#1a1e28;
+  --border:#22283a;--border2:#2e364d;
+  --text:#bcc5d8;--text-dim:#6e7a94;--text-head:#e4eaf7;
+  --accent:#5de4c7;--accent2:#f7a550;--accent3:#7eb3f7;--accent4:#e8c96a;
+  --danger:#f06060;--success:#5de49a;
+  --kw:#f7a550;--fn:#7eb3f7;--str:#5de4c7;--num:#e8c96a;--cmt:#5a6680;
+  --serif:'Fraunces',Georgia,serif;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --r:10px;--shadow:0 4px 32px rgba(0,0,0,.5);
+  --glow:0 0 32px rgba(93,228,199,.08);
+}
+[data-theme="light"]{
+  --bg:#f0f2f8;--bg2:#ffffff;--bg3:#e4e8f4;
+  --border:#ccd3e8;--border2:#b0bad4;
+  --text:#3a4260;--text-dim:#6a7490;--text-head:#111828;
+  --accent:#0a6b53;--accent2:#b84a0c;--accent3:#1a4ea0;--accent4:#7a5a00;
+  --danger:#c01414;--success:#0a6b3a;
+  --kw:#b84a0c;--fn:#1a4ea0;--str:#0a6b53;--num:#7a5a00;--cmt:#8a96b0;
+  --glow:0 0 32px rgba(10,107,83,.06);--shadow:0 4px 32px rgba(0,0,0,.10);
+}
+[data-theme="midnight"]{
+  --bg:#080b18;--bg2:#0e1225;--bg3:#141930;
+  --border:#1c2240;--border2:#253060;
+  --text:#a8b8e0;--text-dim:#5a6888;--text-head:#dce8ff;
+  --accent:#60aaff;--accent2:#ff8844;--accent3:#80d4ff;--accent4:#ffd060;
+  --danger:#ff6060;--success:#60ffaa;
+  --kw:#ff8844;--fn:#80d4ff;--str:#60ffaa;--num:#ffd060;--cmt:#3a4a6a;
+  --glow:0 0 40px rgba(96,170,255,.10);--shadow:0 4px 32px rgba(0,0,0,.7);
+}
+
+/* ── BASE ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;font-size:16px}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:var(--sans);font-weight:300;line-height:1.8;
+  -webkit-font-smoothing:antialiased;
+  transition:background .22s,color .22s;
+}
+
+/* ── PROGRESS BAR ── */
+#pbar{
+  position:fixed;top:0;left:0;height:3px;width:0%;
+  background:linear-gradient(90deg,var(--accent),var(--accent3));
+  z-index:999;transition:width .08s linear;pointer-events:none;
+}
+
+/* ── LAYOUT ── */
+.shell{
+  display:grid;
+  grid-template-columns:280px 1fr;
+  min-height:100vh;max-width:1360px;margin:0 auto;
+  position:relative;
+}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  position:sticky;top:0;height:100vh;overflow-y:auto;
+  padding:2rem 1.25rem;border-right:1px solid var(--border);
+  background:var(--bg);display:flex;flex-direction:column;gap:.15rem;
+  scrollbar-width:thin;scrollbar-color:var(--border2) transparent;
+  z-index:50;transition:background .22s,transform .25s;
+}
+.sidebar::-webkit-scrollbar{width:3px}
+.sidebar::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+.logo{
+  font-family:var(--mono);font-size:.62rem;font-weight:700;
+  color:var(--accent);letter-spacing:.14em;text-transform:uppercase;
+  margin-bottom:1.2rem;padding-bottom:1.2rem;border-bottom:1px solid var(--border);
+  line-height:1.9;
+}
+.logo small{color:var(--text-dim);font-weight:400;display:block;margin-top:.2rem}
+
+/* themes */
+.themes{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.3rem;margin-bottom:.8rem}
+.t-btn{
+  padding:.32rem .2rem;font-family:var(--mono);font-size:.54rem;
+  letter-spacing:.05em;text-transform:uppercase;border-radius:6px;cursor:pointer;
+  border:1px solid var(--border);background:var(--bg2);color:var(--text-dim);
+  transition:all .15s;display:flex;align-items:center;justify-content:center;gap:.25rem;
+}
+.t-btn:hover{border-color:var(--accent);color:var(--text-head);background:var(--bg3)}
+.t-btn.on{background:var(--accent);border-color:var(--accent);color:var(--bg);font-weight:700}
+.t-swatch{width:8px;height:8px;border-radius:50%}
+
+/* nav links */
+.nav-section{font-family:var(--mono);font-size:.56rem;font-weight:700;
+  color:var(--text-dim);letter-spacing:.14em;text-transform:uppercase;
+  margin:.9rem 0 .35rem .35rem}
+.nav-link{
+  display:block;padding:.38rem .65rem;border-radius:7px;
+  font-family:var(--sans);font-size:.8rem;color:var(--text-dim);
+  text-decoration:none;border:1px solid transparent;
+  transition:all .14s;line-height:1.4;
+}
+.nav-link:hover{background:var(--bg3);color:var(--text-head);border-color:var(--border)}
+.nav-link.active{background:rgba(93,228,199,.08);color:var(--accent);
+  border-color:rgba(93,228,199,.18);font-weight:500}
+.nav-link .badge{
+  float:right;font-family:var(--mono);font-size:.5rem;
+  background:var(--bg3);border:1px solid var(--border2);
+  color:var(--text-dim);padding:.05rem .3rem;border-radius:4px;
+}
+
+/* ── MAIN CONTENT ── */
+main{padding:3.5rem 3rem 5rem;min-width:0}
+
+/* ── HERO ── */
+.hero{margin-bottom:4rem}
+.hero-tag{
+  font-family:var(--mono);font-size:.65rem;font-weight:700;
+  color:var(--accent);letter-spacing:.18em;text-transform:uppercase;
+  display:inline-flex;align-items:center;gap:.5rem;margin-bottom:1.1rem;
+}
+.hero-tag::before{
+  content:'';width:24px;height:2px;background:var(--accent);border-radius:2px;
+}
+h1{
+  font-family:var(--serif);font-size:3.2rem;font-weight:800;
+  color:var(--text-head);line-height:1.12;margin-bottom:1.2rem;
+  letter-spacing:-.02em;
+}
+h1 em{color:var(--accent);font-style:italic;font-weight:300}
+.hero-desc{font-size:1.08rem;color:var(--text-dim);max-width:640px;margin-bottom:2rem;line-height:1.85}
+.hero-chips{display:flex;flex-wrap:wrap;gap:.55rem}
+.chip{
+  font-family:var(--mono);font-size:.65rem;font-weight:600;
+  letter-spacing:.08em;text-transform:uppercase;
+  padding:.32rem .8rem;border-radius:20px;
+  border:1px solid var(--border2);color:var(--text-dim);background:var(--bg2);
+}
+.chip-a{border-color:rgba(93,228,199,.4);color:var(--accent);background:rgba(93,228,199,.06)}
+.chip-o{border-color:rgba(247,165,80,.4);color:var(--accent2);background:rgba(247,165,80,.06)}
+.chip-b{border-color:rgba(126,179,247,.4);color:var(--accent3);background:rgba(126,179,247,.06)}
+
+/* ── SECTION HEADINGS ── */
+.sec{margin-bottom:3.5rem;scroll-margin-top:2rem}
+.sec-tag{
+  font-family:var(--mono);font-size:.58rem;font-weight:700;
+  color:var(--accent2);letter-spacing:.16em;text-transform:uppercase;
+  margin-bottom:.5rem;display:flex;align-items:center;gap:.4rem;
+}
+.sec-tag::after{content:'';flex:1;height:1px;background:var(--border);max-width:80px}
+h2{
+  font-family:var(--serif);font-size:2rem;font-weight:600;
+  color:var(--text-head);line-height:1.2;margin-bottom:.8rem;
+}
+h3{
+  font-family:var(--serif);font-size:1.3rem;font-weight:600;
+  color:var(--text-head);margin-bottom:.5rem;
+}
+
+/* ── CONCEPT CARDS ── */
+.concept-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1rem;margin:1.5rem 0}
+.concept-card{
+  background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);
+  padding:1.2rem 1.3rem;transition:border-color .2s,box-shadow .2s;
+}
+.concept-card:hover{border-color:var(--accent);box-shadow:var(--glow)}
+.cc-icon{font-size:1.5rem;margin-bottom:.5rem}
+.cc-title{font-family:var(--mono);font-size:.72rem;font-weight:700;color:var(--accent);
+  letter-spacing:.1em;text-transform:uppercase;margin-bottom:.35rem}
+.cc-body{font-size:.88rem;color:var(--text-dim);line-height:1.7}
+
+/* ── LINE EXPLANATION BLOCKS ── */
+.code-block{
+  background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);
+  overflow:hidden;margin:2rem 0;box-shadow:var(--shadow);
+}
+.code-block-head{
+  display:flex;align-items:center;gap:.6rem;
+  padding:.7rem 1.2rem;border-bottom:1px solid var(--border);
+  background:var(--bg3);
+}
+.cb-dots{display:flex;gap:.4rem}
+.cb-dot{width:10px;height:10px;border-radius:50%}
+.cb-dot-r{background:#f06060}
+.cb-dot-y{background:#e8c96a}
+.cb-dot-g{background:#5de49a}
+.cb-filename{font-family:var(--mono);font-size:.68rem;color:var(--text-dim);
+  letter-spacing:.06em;margin-left:.2rem}
+.code-scroll{overflow-x:auto;padding:1.4rem 1.6rem}
+pre{font-family:var(--mono);font-size:.83rem;line-height:1.8;tab-size:4}
+
+/* syntax highlight */
+.kw{color:var(--kw);font-weight:700}
+.fn{color:var(--fn)}
+.str{color:var(--str)}
+.num{color:var(--num)}
+.cmt{color:var(--cmt);font-style:italic}
+.cls{color:var(--accent4)}
+.op{color:var(--text-dim)}
+.hl-line{
+  background:rgba(93,228,199,.07);
+  border-left:3px solid var(--accent);
+  display:block;margin-left:-1.6rem;padding-left:1.35rem;
+  margin-right:-1.6rem;padding-right:1.6rem;
+}
+
+/* ── LINE CARDS ── */
+.line-cards{display:flex;flex-direction:column;gap:1.2rem;margin:1.5rem 0}
+.lc{
+  display:grid;grid-template-columns:auto 1fr;gap:0;
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--r);overflow:hidden;
+  transition:border-color .18s,box-shadow .18s;
+}
+.lc:hover{border-color:var(--border2);box-shadow:0 2px 18px rgba(0,0,0,.25)}
+.lc-num{
+  writing-mode:vertical-lr;text-orientation:mixed;transform:rotate(180deg);
+  font-family:var(--mono);font-size:.58rem;font-weight:700;
+  color:var(--bg3);background:var(--accent);
+  display:flex;align-items:center;justify-content:center;
+  padding:.6rem .4rem;letter-spacing:.08em;min-width:28px;text-transform:uppercase;
+}
+.lc-num.kw-num{background:var(--kw)}
+.lc-num.fn-num{background:var(--fn)}
+.lc-num.loop-num{background:var(--accent3)}
+.lc-num.cmt-num{background:var(--cmt)}
+.lc-num.if-num{background:var(--accent2)}
+.lc-num.sw-num{background:var(--accent4)}
+.lc-body{padding:1rem 1.3rem}
+.lc-code{
+  font-family:var(--mono);font-size:.78rem;
+  background:var(--bg3);border:1px solid var(--border);border-radius:6px;
+  padding:.4rem .75rem;margin-bottom:.7rem;overflow-x:auto;white-space:pre;
+}
+.lc-title{font-family:var(--serif);font-size:1rem;font-weight:600;
+  color:var(--text-head);margin-bottom:.3rem}
+.lc-exp{font-size:.88rem;color:var(--text);line-height:1.75}
+.lc-exp strong{color:var(--text-head);font-weight:600}
+.lc-exp em{color:var(--accent);font-style:normal;font-weight:500}
+.lc-analogy{
+  margin-top:.7rem;padding:.6rem .9rem;
+  background:rgba(126,179,247,.06);border:1px solid rgba(126,179,247,.18);
+  border-radius:7px;font-size:.82rem;color:var(--accent3);line-height:1.65;
+}
+.lc-analogy::before{content:'💡 Analogia: ';font-weight:600}
+.lc-warn{
+  margin-top:.7rem;padding:.6rem .9rem;
+  background:rgba(247,165,80,.06);border:1px solid rgba(247,165,80,.18);
+  border-radius:7px;font-size:.82rem;color:var(--accent2);line-height:1.65;
+}
+.lc-warn::before{content:'⚠ Atenção: ';font-weight:600}
+
+/* ── CONCEPT PILLARS ── */
+.pillar{
+  border:1px solid var(--border);border-radius:var(--r);
+  overflow:hidden;margin:1.5rem 0;
+}
+.pillar-head{
+  padding:1rem 1.4rem;background:var(--bg3);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:.8rem;
+}
+.pillar-icon{font-size:1.4rem}
+.pillar-title{font-family:var(--serif);font-size:1.1rem;font-weight:600;color:var(--text-head)}
+.pillar-tag{font-family:var(--mono);font-size:.58rem;font-weight:700;
+  padding:.18rem .5rem;border-radius:4px;letter-spacing:.08em;text-transform:uppercase;}
+.tag-while{background:rgba(126,179,247,.15);color:var(--accent3);border:1px solid rgba(126,179,247,.3)}
+.tag-if{background:rgba(247,165,80,.15);color:var(--accent2);border:1px solid rgba(247,165,80,.3)}
+.tag-switch{background:rgba(232,201,106,.15);color:var(--accent4);border:1px solid rgba(232,201,106,.3)}
+.tag-class{background:rgba(93,228,199,.15);color:var(--accent);border:1px solid rgba(93,228,199,.3)}
+.tag-method{background:rgba(240,96,96,.15);color:var(--danger);border:1px solid rgba(240,96,96,.3)}
+.pillar-body{padding:1.2rem 1.4rem;font-size:.9rem;line-height:1.8}
+.pillar-body p+p{margin-top:.8rem}
+.pillar-body strong{color:var(--text-head)}
+
+/* ── FLOW DIAGRAM ── */
+.flow{
+  background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);
+  padding:1.8rem;margin:1.5rem 0;overflow-x:auto;
+}
+.flow-title{font-family:var(--mono);font-size:.62rem;font-weight:700;
+  color:var(--text-dim);letter-spacing:.12em;text-transform:uppercase;margin-bottom:1.2rem}
+.flow-diagram{display:flex;flex-direction:column;align-items:center;gap:.3rem}
+.flow-box{
+  padding:.55rem 1.4rem;border-radius:8px;font-family:var(--sans);font-size:.85rem;
+  text-align:center;min-width:220px;font-weight:500;
+}
+.fb-start{background:rgba(93,228,199,.15);border:2px solid var(--accent);color:var(--accent)}
+.fb-proc{background:var(--bg3);border:1px solid var(--border2);color:var(--text-head)}
+.fb-dec{
+  background:rgba(247,165,80,.12);border:2px solid var(--accent2);color:var(--accent2);
+  transform:perspective(300px) rotateX(8deg);clip-path:polygon(10% 0,90% 0,100% 50%,90% 100%,10% 100%,0% 50%);
+  padding:.55rem 2rem;
+}
+.fb-end{background:rgba(240,96,96,.12);border:2px solid var(--danger);color:var(--danger)}
+.flow-arrow{font-size:1.1rem;color:var(--text-dim);line-height:1}
+.flow-branch{display:flex;gap:2rem;align-items:flex-start;margin:.3rem 0}
+.flow-branch-item{display:flex;flex-direction:column;align-items:center;gap:.3rem}
+.flow-label{font-family:var(--mono);font-size:.6rem;color:var(--text-dim);letter-spacing:.08em}
+
+/* ── SECURITY CARDS ── */
+.security-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin:1.5rem 0}
+.sec-card{
+  background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);
+  padding:1.3rem;transition:border-color .2s;
+}
+.sec-card:hover{border-color:var(--border2)}
+.sec-card h4{font-family:var(--serif);font-size:1rem;font-weight:600;
+  color:var(--text-head);margin-bottom:.5rem}
+.sec-card p{font-size:.87rem;color:var(--text-dim);line-height:1.7}
+.sec-card .sc-icon{font-size:1.6rem;margin-bottom:.6rem;display:block}
+
+/* ── QUIZ ── */
+.quiz-box{
+  background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);
+  padding:1.8rem;margin:1.5rem 0;
+}
+.quiz-q{font-family:var(--serif);font-size:1.1rem;font-weight:600;
+  color:var(--text-head);margin-bottom:1.1rem}
+.quiz-opts{display:flex;flex-direction:column;gap:.55rem}
+.quiz-opt{
+  display:flex;align-items:flex-start;gap:.75rem;padding:.75rem 1rem;
+  background:var(--bg3);border:1px solid var(--border);border-radius:8px;
+  cursor:pointer;transition:all .15s;font-size:.9rem;color:var(--text);
+}
+.quiz-opt:hover{border-color:var(--accent);color:var(--text-head);background:rgba(93,228,199,.06)}
+.quiz-opt.correct{border-color:var(--success);background:rgba(93,228,154,.08);color:var(--success)}
+.quiz-opt.wrong{border-color:var(--danger);background:rgba(240,96,96,.07);color:var(--danger)}
+.quiz-opt-num{
+  font-family:var(--mono);font-size:.65rem;font-weight:700;
+  width:22px;height:22px;border-radius:50%;
+  background:var(--border2);color:var(--text-dim);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;
+}
+.quiz-feedback{
+  margin-top:1rem;padding:.8rem 1rem;border-radius:8px;
+  font-size:.88rem;display:none;line-height:1.65;
+}
+.quiz-feedback.show{display:block}
+.qf-ok{background:rgba(93,228,154,.08);border:1px solid var(--success);color:var(--success)}
+.qf-no{background:rgba(240,96,96,.07);border:1px solid var(--danger);color:var(--danger)}
+
+/* ── PROGRESS SECTION ── */
+.progress-wrap{margin:2rem 0;background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--r);padding:1.4rem}
+.progress-label{font-family:var(--mono);font-size:.62rem;font-weight:700;
+  color:var(--text-dim);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.5rem}
+.progress-bar-bg{background:var(--bg3);border-radius:20px;height:8px;overflow:hidden}
+.progress-bar-fill{height:100%;border-radius:20px;
+  background:linear-gradient(90deg,var(--accent),var(--accent3));
+  transition:width .5s ease;width:0%}
+.progress-pct{font-family:var(--mono);font-size:.68rem;color:var(--accent);
+  margin-top:.4rem;text-align:right}
+
+/* ── TABS ── */
+.tabs{display:flex;gap:.4rem;margin-bottom:1.2rem;flex-wrap:wrap}
+.tab-btn{
+  padding:.4rem 1rem;font-family:var(--mono);font-size:.68rem;font-weight:600;
+  letter-spacing:.07em;text-transform:uppercase;border-radius:7px;cursor:pointer;
+  border:1px solid var(--border);background:var(--bg2);color:var(--text-dim);
+  transition:all .14s;
+}
+.tab-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(93,228,199,.06)}
+.tab-btn.on{background:var(--accent);border-color:var(--accent);color:var(--bg);font-weight:700}
+.tab-pane{display:none}.tab-pane.on{display:block}
+
+/* ── CALLOUT BOXES ── */
+.callout{
+  padding:1rem 1.2rem;border-radius:9px;margin:1.2rem 0;
+  font-size:.9rem;line-height:1.75;border-left:4px solid;
+}
+.c-info{border-color:var(--accent3);background:rgba(126,179,247,.07);color:var(--accent3)}
+.c-warn{border-color:var(--accent2);background:rgba(247,165,80,.07);color:var(--accent2)}
+.c-tip{border-color:var(--accent);background:rgba(93,228,199,.07);color:var(--accent)}
+.c-danger{border-color:var(--danger);background:rgba(240,96,96,.07);color:var(--danger)}
+.callout strong{font-weight:700;display:block;margin-bottom:.2rem}
+
+/* ── MOBILE ── */
+.mob-header{
+  display:none;position:sticky;top:0;z-index:110;
+  background:var(--bg);border-bottom:1px solid var(--border);
+  padding:.8rem 1.25rem;align-items:center;justify-content:space-between;
+}
+.mob-title{font-family:var(--mono);font-size:.64rem;color:var(--accent);
+  letter-spacing:.1em;text-transform:uppercase}
+.ham{
+  background:none;border:1px solid var(--border);border-radius:7px;
+  padding:.45rem .55rem;cursor:pointer;color:var(--text);
+  display:flex;flex-direction:column;gap:4px;align-items:center;transition:all .15s;
+}
+.ham:hover{border-color:var(--accent);color:var(--accent)}
+.ham span{display:block;width:17px;height:1.5px;background:currentColor;
+  transition:transform .2s,opacity .2s;transform-origin:center}
+.ham.on span:nth-child(1){transform:translateY(5.5px) rotate(45deg)}
+.ham.on span:nth-child(2){opacity:0}
+.ham.on span:nth-child(3){transform:translateY(-5.5px) rotate(-45deg)}
+#overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);
+  z-index:90;backdrop-filter:blur(3px)}
+#overlay.on{display:block}
+
+/* ── SEPARATOR ── */
+.sep{border:none;border-top:1px solid var(--border);margin:2.5rem 0}
+
+/* ── TABLE ── */
+.tbl-wrap{overflow-x:auto;margin:1rem 0}
+table{width:100%;border-collapse:collapse;font-size:.87rem}
+thead th{
+  font-family:var(--mono);font-size:.6rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:.1em;color:var(--text-dim);
+  padding:.6rem .9rem;text-align:left;border-bottom:2px solid var(--border2);
+  background:var(--bg3);
+}
+tbody td{
+  padding:.65rem .9rem;border-bottom:1px solid var(--border);
+  color:var(--text);vertical-align:top;
+}
+tbody tr:hover td{background:var(--bg3)}
+.t-kw{font-family:var(--mono);font-size:.78rem;color:var(--kw);font-weight:700}
+.t-fn{font-family:var(--mono);font-size:.78rem;color:var(--fn)}
+.t-acc{font-family:var(--mono);font-size:.78rem;color:var(--accent)}
+
+/* ── BACK TO TOP ── */
+#btt{
+  position:fixed;bottom:1.5rem;right:1.5rem;z-index:80;
+  width:38px;height:38px;border-radius:50%;cursor:pointer;
+  background:var(--bg3);border:1px solid var(--border2);
+  color:var(--text-dim);font-size:.8rem;display:none;
+  align-items:center;justify-content:center;transition:all .15s;
+  box-shadow:var(--shadow);
+}
+#btt:hover{background:var(--accent);border-color:var(--accent);color:var(--bg)}
+#btt.show{display:flex}
+
+@media(max-width:900px){
+  .shell{grid-template-columns:1fr}
+  .sidebar{
+    position:fixed;top:0;left:0;width:78vw;max-width:320px;height:100vh;
+    transform:translateX(-110%);transition:transform .26s ease;border-right:none;
+    box-shadow:4px 0 30px rgba(0,0,0,.5);z-index:100;
+  }
+  .sidebar.open{transform:translateX(0)}
+  .mob-header{display:flex}
+  main{padding:2rem 1.2rem 4rem}
+  h1{font-size:2.2rem}
+  .security-grid{grid-template-columns:1fr}
+  .concept-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:500px){
+  .concept-grid{grid-template-columns:1fr}
+  .themes{grid-template-columns:1fr 1fr}
+}
+
+/* ── STICKY NAV HIGHLIGHT ── */
+.section-observer-target{scroll-margin-top:1.5rem}
+
+/* ── GLOSSARY HOVER ── */
+.glossary{
+  border-bottom:1px dotted var(--accent);color:var(--accent);cursor:help;
+  position:relative;display:inline;
+}
+</style>
+</head>
+<body>
+<div id="pbar"></div>
+<button id="btt" aria-label="Voltar ao topo">↑</button>
+
+<!-- Mobile Header -->
+<header class="mob-header">
+  <span class="mob-title">APS · Segurança Digital</span>
+  <button class="ham" id="hamBtn" aria-label="Menu" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+</header>
+<div id="overlay"></div>
+
+<div class="shell">
+  <!-- SIDEBAR -->
+  <nav class="sidebar" id="sidebar" aria-label="Navegação principal">
+    <div class="logo">
+      APS — Lógica de Prog.<br>
+      <small>Segurança Digital · Guia Completo</small>
+    </div>
+
+    <div class="themes">
+      <button class="t-btn on" data-theme="dark">
+        <span class="t-swatch" style="background:#5de4c7"></span>Dark
+      </button>
+      <button class="t-btn" data-theme="light">
+        <span class="t-swatch" style="background:#0a6b53"></span>Light
+      </button>
+      <button class="t-btn" data-theme="midnight">
+        <span class="t-swatch" style="background:#60aaff"></span>Night
+      </button>
+    </div>
+
+    <div class="nav-section">Visão Geral</div>
+    <a class="nav-link" href="#intro">Introdução ao Projeto <span class="badge">START</span></a>
+    <a class="nav-link" href="#estrutura">Como Java funciona</a>
+    <a class="nav-link" href="#conceitos">Conceitos Essenciais</a>
+
+    <div class="nav-section">Código Linha a Linha</div>
+    <a class="nav-link" href="#import">import java.util.Scanner</a>
+    <a class="nav-link" href="#classe">public class</a>
+    <a class="nav-link" href="#scanner">Scanner sc</a>
+    <a class="nav-link" href="#main">método main</a>
+    <a class="nav-link" href="#variavel">variável opcao</a>
+    <a class="nav-link" href="#while">loop while</a>
+    <a class="nav-link" href="#menu">impressão do menu</a>
+    <a class="nav-link" href="#switch">switch / case</a>
+    <a class="nav-link" href="#modSenhas">módulo Senhas</a>
+    <a class="nav-link" href="#if-senha">if / else if / else</a>
+    <a class="nav-link" href="#modGolpes">módulo Golpes</a>
+    <a class="nav-link" href="#lerInteiro">método lerInteiro</a>
+
+    <div class="nav-section">Segurança Digital</div>
+    <a class="nav-link" href="#tema-senhas">🔑 Senhas Seguras</a>
+    <a class="nav-link" href="#tema-golpes">🎣 Golpes Online</a>
+    <a class="nav-link" href="#quiz">🧠 Quiz de Verificação</a>
+
+    <div class="nav-section">Avaliação APS</div>
+    <a class="nav-link" href="#criterios">Critérios Atendidos</a>
+    <a class="nav-link" href="#glossario">Glossário</a>
+  </nav>
+
+  <!-- MAIN -->
+  <main id="main-content">
+
+    <!-- HERO -->
+    <section class="hero section-observer-target" id="intro">
+      <div class="hero-tag">APS — Lógica de Programação</div>
+      <h1>Entenda o Código<br><em>linha por linha</em></h1>
+      <p class="hero-desc">
+        Este guia explica <strong>absolutamente cada linha</strong> do programa
+        <code style="font-family:var(--mono);color:var(--accent)">GuiaSegurancaDigital.java</code>
+        em linguagem simples — como se você nunca tivesse visto programação antes.
+        Sem jargão, sem enrolação.
+      </p>
+      <div class="hero-chips">
+        <span class="chip chip-a">Java · Iniciante</span>
+        <span class="chip chip-o">if · switch · while</span>
+        <span class="chip chip-b">Segurança Digital</span>
+        <span class="chip">79 linhas explicadas</span>
+      </div>
+    </section>
+
+    <hr class="sep">
+
+    <!-- ESTRUTURA JAVA -->
+    <section class="sec section-observer-target" id="estrutura">
+      <div class="sec-tag">Antes de começar</div>
+      <h2>Como um programa Java funciona?</h2>
+      <p style="margin-bottom:1.2rem;max-width:680px">
+        Imagine que um programa Java é como uma <strong>receita de bolo muito organizada</strong>.
+        Ela tem ingredientes (variáveis), etapas (comandos), e um cozinheiro central que segue tudo na ordem certa.
+        Veja os blocos que formam nosso programa:
+      </p>
+      <div class="concept-grid">
+        <div class="concept-card">
+          <div class="cc-icon">📦</div>
+          <div class="cc-title">Classe (class)</div>
+          <div class="cc-body">É a "caixa" que contém o programa inteiro. Todo código Java vive dentro de uma classe.</div>
+        </div>
+        <div class="concept-card">
+          <div class="cc-icon">🚪</div>
+          <div class="cc-title">Método main</div>
+          <div class="cc-body">É a porta de entrada. O computador sempre começa a ler um programa Java por aqui, obrigatoriamente.</div>
+        </div>
+        <div class="concept-card">
+          <div class="cc-icon">🔧</div>
+          <div class="cc-title">Métodos (funções)</div>
+          <div class="cc-body">São "blocos de tarefas com nome" que você chama quando precisa. Como chamar um assistente específico para cada serviço.</div>
+        </div>
+        <div class="concept-card">
+          <div class="cc-icon">🗃️</div>
+          <div class="cc-title">Variáveis</div>
+          <div class="cc-body">São caixinhas na memória do computador que guardam informações — números, textos, ou verdadeiro/falso.</div>
+        </div>
+        <div class="concept-card">
+          <div class="cc-icon">🔁</div>
+          <div class="cc-title">while (enquanto)</div>
+          <div class="cc-body">Repete um bloco de código enquanto uma condição for verdadeira. É o "loop" do programa.</div>
+        </div>
+        <div class="concept-card">
+          <div class="cc-icon">🔀</div>
+          <div class="cc-title">if / switch</div>
+          <div class="cc-body">São "decisores". O programa olha para um valor e decide qual caminho seguir, como um GPS escolhendo a rota.</div>
+        </div>
+      </div>
+    </section>
+
+    <hr class="sep">
+
+    <!-- CONCEITOS ESSENCIAIS -->
+    <section class="sec section-observer-target" id="conceitos">
+      <div class="sec-tag">Os 3 pilares obrigatórios</div>
+      <h2>if, switch e while — explicados sem mistério</h2>
+
+      <div class="pillar">
+        <div class="pillar-head">
+          <span class="pillar-icon">🔁</span>
+          <span class="pillar-title">O while — "Enquanto isso..."</span>
+          <span class="pillar-tag tag-while">while</span>
+        </div>
+        <div class="pillar-body">
+          <p>O <strong>while</strong> é como um porteiro que fica perguntando: <em>"Você quer sair?"</em> Enquanto a resposta for <em>não</em>, ele continua deixando você entrar no programa de novo. Assim que você disser <em>0 (sair)</em>, ele encerra.</p>
+          <p>No nosso código: <code style="font-family:var(--mono);color:var(--accent3)">while (opcao != 0)</code> significa literalmente: <em>"enquanto a opção escolhida for diferente de zero, continue rodando"</em>.</p>
+        </div>
+      </div>
+
+      <div class="pillar">
+        <div class="pillar-head">
+          <span class="pillar-icon">🔀</span>
+          <span class="pillar-title">O switch — "Seletor de canais"</span>
+          <span class="pillar-tag tag-switch">switch</span>
+        </div>
+        <div class="pillar-body">
+          <p>O <strong>switch</strong> funciona exatamente como um controle remoto de TV. Você digita um número, e o programa vai direto para o "canal" correspondente — sem ficar testando uma condição por vez.</p>
+          <p><em>case 1:</em> → vai para Senhas | <em>case 2:</em> → vai para Golpes | <em>default:</em> → se nenhum case bater, cai aqui.</p>
+        </div>
+      </div>
+
+      <div class="pillar">
+        <div class="pillar-head">
+          <span class="pillar-icon">🤔</span>
+          <span class="pillar-title">O if — "Perguntador"</span>
+          <span class="pillar-tag tag-if">if / else if / else</span>
+        </div>
+        <div class="pillar-body">
+          <p>O <strong>if</strong> é uma pergunta de sim ou não. Se a condição for verdadeira, faz uma coisa; senão (<strong>else</strong>), faz outra. O <strong>else if</strong> é como um plano B antes do plano C.</p>
+          <p>No módulo de senhas: se o tamanho ≥ 12 → ótimo | se ≥ 8 → razoável | senão → fraca. É uma escada de condições.</p>
+        </div>
+      </div>
+    </section>
+
+    <hr class="sep">
+
+    <!-- CÓDIGO COMPLETO -->
+    <section class="sec section-observer-target" id="import">
+      <div class="sec-tag">O código completo</div>
+      <h2>GuiaSegurancaDigital.java</h2>
+      <p style="margin-bottom:1.2rem;color:var(--text-dim)">Este é o programa completo. Cada bloco colorido será explicado logo abaixo.</p>
+
+      <div class="code-block">
+        <div class="code-block-head">
+          <div class="cb-dots">
+            <div class="cb-dot cb-dot-r"></div>
+            <div class="cb-dot cb-dot-y"></div>
+            <div class="cb-dot cb-dot-g"></div>
+          </div>
+          <span class="cb-filename">GuiaSegurancaDigital.java</span>
+        </div>
+        <div class="code-scroll">
+<pre><span class="kw">import</span> java.util.<span class="cls">Scanner</span>;                          <span class="cmt">// linha 1</span>
+                                                       <span class="cmt">// linha 2</span>
+<span class="kw">public class</span> <span class="cls">GuiaSegurancaDigital</span> {                  <span class="cmt">// linha 3</span>
+                                                       <span class="cmt">// linha 4</span>
+    <span class="kw">static</span> <span class="cls">Scanner</span> sc = <span class="kw">new</span> <span class="cls">Scanner</span>(<span class="cls">System</span>.in);        <span class="cmt">// linha 5</span>
+                                                       <span class="cmt">// linha 6</span>
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="cls">String</span>[] args) {           <span class="cmt">// linha 7</span>
+        <span class="kw">int</span> opcao = <span class="num">-1</span>;                                <span class="cmt">// linha 8</span>
+                                                       <span class="cmt">// linha 9</span>
+        <span class="cmt">// WHILE: mantém o usuário no programa</span>          <span class="cmt">// linha 10</span>
+        <span class="kw">while</span> (opcao != <span class="num">0</span>) {                            <span class="cmt">// linha 11</span>
+            <span class="cls">System</span>.out.<span class="fn">println</span>(<span class="str">"\n========================================"</span>); <span class="cmt">// 12</span>
+            <span class="cls">System</span>.out.<span class="fn">println</span>(<span class="str">"   GUIA DE SEGURANÇA DIGITAL"</span>);         <span class="cmt">// 13</span>
+            <span class="cls">System</span>.out.<span class="fn">println</span>(<span class="str">"========================================"</span>); <span class="cmt">// 14</span>
+            <span class="cls">System</span>.out.<span class="fn">println</span>(<span class="str">"1. Senhas Seguras"</span>);                    <span class="cmt">// 15</span>
+            <span class="cls">System</span>.out.<span class="fn">println</span>(<span class="str">"2. Golpes Online"</span>);                     <span class="cmt">// 16</span>
+            <span class="cls">System</span>.out.<span class="fn">println</span>(<span class="str">"0. Sair"</span>);                              <span class="cmt">// 17</span>
+            <span class="cls">System</span>.out.<span class="fn">print</span>(<span class="str">"Escolha uma opção: "</span>);                   <span class="cmt">// 18</span>
+                                                                        <span class="cmt">// 19</span>
+            opcao = <span class="fn">lerInteiro</span>();                                      <span class="cmt">// 20</span>
+                                                                        <span class="cmt">// 21</span>
+            <span class="cmt">// SWITCH: direciona para o módulo</span>                          <span class="cmt">// 22</span>
+            <span class="kw">switch</span> (opcao) {                                           <span class="cmt">// 23</span>
+                <span class="kw">case</span> <span class="num">1</span>:                                                   <span class="cmt">// 24</span>
+                    <span class="fn">moduloSenhas</span>();                                       <span class="cmt">// 25</span>
+                    <span class="kw">break</span>;                                                <span class="cmt">// 26</span>
+                <span class="kw">case</span> <span class="num">2</span>:                                                   <span class="cmt">// 27</span>
+                    <span class="fn">moduloGolpes</span>();                                        <span class="cmt">// 28</span>
+                    <span class="kw">break</span>;                                                <span class="cmt">// 29</span>
+                <span class="kw">case</span> <span class="num">0</span>:                                                   <span class="cmt">// 30</span>
+                    <span class="cls">System</span>.out.<span class="fn">println</span>(<span class="str">"\nAté mais! Fique seguro online."</span>); <span class="cmt">// 31</span>
+                    <span class="kw">break</span>;                                                <span class="cmt">// 32</span>
+                <span class="kw">default</span>:                                                  <span class="cmt">// 33</span>
+                    <span class="cls">System</span>.out.<span class="fn">println</span>(<span class="str">"Opção inválida. Tente novamente."</span>); <span class="cmt">// 34</span>
+            }                                                             <span class="cmt">// 35</span>
+        }                                                                 <span class="cmt">// 36</span>
+    }                                                                     <span class="cmt">// 37</span>
+                                                                          <span class="cmt">// 38</span>
+    <span class="kw">static void</span> <span class="fn">moduloSenhas</span>() {                                       <span class="cmt">// 39</span>
+        <span class="cls">System</span>.out.<span class="fn">println</span>(<span class="str">"\n--- SENHAS SEGURAS ---"</span>);                  <span class="cmt">// 40</span>
+        <span class="cls">System</span>.out.<span class="fn">println</span>(<span class="str">"Uma boa senha deve ter:"</span>);                   <span class="cmt">// 41</span>
+        <span class="cls">System</span>.out.<span class="fn">println</span>(<span class="str">"- Pelo menos 12 caracteres"</span>);               <span class="cmt">// 42</span>
+        <span class="cls">System</span>.out.<span class="fn">println</span>(<span class="str">"- Letras maiúsculas e minúsculas"</span>);         <span class="cmt">// 43</span>
+        <span class="cls">System</span>.out.<span class="fn">println</span>(<span class="str">"- Números e símbolos (!@#$%)"</span>);             <span class="cmt">// 44</span>
+        <span class="cls">System</span>.out.<span class="fn">println</span>(<span class="str">"- Nunca use datas ou nomes"</span>);               <span class="cmt">// 45</span>
+        <span class="cls">System</span>.out.<span class="fn">println</span>();                                           <span class="cmt">// 46</span>
+        <span class="cls">System</span>.out.<span class="fn">print</span>(<span class="str">"Quantos caracteres tem sua senha? "</span>);         <span class="cmt">// 47</span>
+                                                                          <span class="cmt">// 48</span>
+        <span class="kw">int</span> tamanho = <span class="fn">lerInteiro</span>();                                     <span class="cmt">// 49</span>
+                                                                          <span class="cmt">// 50</span>
+        <span class="cmt">// IF: avalia a força da senha</span>                                    <span class="cmt">// 51</span>
+        <span class="kw">if</span> (tamanho >= <span class="num">12</span>) {                                            <span class="cmt">// 52</span>
+            <span class="cls">System</span>.out.<span class="fn">println</span>(<span class="str">"✓ Bom! Tamanho adequado."</span>);             <span class="cmt">// 53</span>
+        } <span class="kw">else if</span> (tamanho >= <span class="num">8</span>) {                                     <span class="cmt">// 54</span>
+            <span class="cls">System</span>.out.<span class="fn">println</span>(<span class="str">"⚠ Razoável, mas tente 12+ caracteres."</span>); <span class="cmt">// 55</span>
+        } <span class="kw">else</span> {                                                         <span class="cmt">// 56</span>
+            <span class="cls">System</span>.out.<span class="fn">println</span>(<span class="str">"✗ Senha curta e vulnerável. Troque-a!"</span>); <span class="cmt">// 57</span>
+        }                                                                 <span class="cmt">// 58</span>
+    }                                                                     <span class="cmt">// 59</span>
+                                                                          <span class="cmt">// 60</span>
+    <span class="kw">static void</span> <span class="fn">moduloGolpes</span>() {                                       <span class="cmt">// 61</span>
+        <span class="cls">System</span>.out.<span class="fn">println</span>(<span class="str">"\n--- GOLPES ONLINE ---"</span>);                   <span class="cmt">// 62</span>
+        <span class="cls">System</span>.out.<span class="fn">println</span>(<span class="str">"Tipos de golpes mais comuns:"</span>);              <span class="cmt">// 63</span>
+        <span class="cls">System</span>.out.<span class="fn">println</span>(<span class="str">"1. Phishing"</span>);                              <span class="cmt">// 64</span>
+        <span class="cls">System</span>.out.<span class="fn">println</span>(<span class="str">"2. Falso suporte técnico"</span>);                 <span class="cmt">// 65</span>
+        <span class="cls">System</span>.out.<span class="fn">println</span>(<span class="str">"3. Golpe do Pix/pagamento urgente"</span>);        <span class="cmt">// 66</span>
+        <span class="cls">System</span>.out.<span class="fn">println</span>();                                           <span class="cmt">// 67</span>
+        <span class="cls">System</span>.out.<span class="fn">print</span>(<span class="str">"Você já recebeu algum? (1-Sim/2-Não): "</span>);    <span class="cmt">// 68</span>
+                                                                          <span class="cmt">// 69</span>
+        <span class="kw">int</span> resposta = <span class="fn">lerInteiro</span>();                                    <span class="cmt">// 70</span>
+                                                                          <span class="cmt">// 71</span>
+        <span class="kw">if</span> (resposta == <span class="num">1</span>) {                                            <span class="cmt">// 72</span>
+            <span class="cls">System</span>.out.<span class="fn">println</span>(<span class="str">"Dicas se você recebeu um golpe:"</span>);      <span class="cmt">// 73</span>
+            <span class="cls">System</span>.out.<span class="fn">println</span>(<span class="str">"- Não clique em links suspeitos"</span>);       <span class="cmt">// 74</span>
+            <span class="cls">System</span>.out.<span class="fn">println</span>(<span class="str">"- Não forneça dados pessoais"</span>);          <span class="cmt">// 75</span>
+            <span class="cls">System</span>.out.<span class="fn">println</span>(<span class="str">"- Desconfie de urgência e pressão"</span>);    <span class="cmt">// 76</span>
+        } <span class="kw">else</span> {                                                         <span class="cmt">// 77</span>
+            <span class="cls">System</span>.out.<span class="fn">println</span>(<span class="str">"Ótimo! Mas fique sempre atento."</span>);      <span class="cmt">// 78</span>
+        }                                                                 <span class="cmt">// 79</span>
+    }                                                                     <span class="cmt">// 80</span>
+                                                                          <span class="cmt">// 81</span>
+    <span class="kw">static int</span> <span class="fn">lerInteiro</span>() {                                           <span class="cmt">// 82</span>
+        <span class="kw">while</span> (!sc.<span class="fn">hasNextInt</span>()) {                                      <span class="cmt">// 83</span>
+            <span class="cls">System</span>.out.<span class="fn">print</span>(<span class="str">"Digite um número válido: "</span>);               <span class="cmt">// 84</span>
+            sc.<span class="fn">next</span>();                                                  <span class="cmt">// 85</span>
+        }                                                                 <span class="cmt">// 86</span>
+        <span class="kw">return</span> sc.<span class="fn">nextInt</span>();                                            <span class="cmt">// 87</span>
+    }                                                                     <span class="cmt">// 88</span>
+}                                                                         <span class="cmt">// 89</span></pre>
+        </div>
+      </div>
+    </section>
+
+    <hr class="sep">
+
+    <!-- LINHA A LINHA -->
+    <section class="sec section-observer-target" id="import">
+      <div class="sec-tag">Explicação detalhada</div>
+      <h2>Linha 1 — Importando a ferramenta de leitura</h2>
+
+      <div class="line-cards">
+        <div class="lc">
+          <div class="lc-num kw-num">L1</div>
+          <div class="lc-body">
+            <div class="lc-code"><span class="kw">import</span> java.util.<span class="cls">Scanner</span>;</div>
+            <div class="lc-title">Importando o Scanner</div>
+            <div class="lc-exp">
+              <strong>import</strong> significa "trazer de fora". O Java tem uma biblioteca gigante de ferramentas prontas, e aqui estamos buscando especificamente a ferramenta chamada <em>Scanner</em>.
+              <br><br>
+              O <em>Scanner</em> é responsável por <strong>ler o que o usuário digita no teclado</strong>. Sem importar ele, o programa não conseguiria receber dados do usuário.
+              <br><br>
+              O ponto e vírgula <code style="font-family:var(--mono);color:var(--text-dim)">;</code> no final é obrigatório em Java — é como o <strong>ponto final de uma frase</strong>. Toda instrução termina com <code style="font-family:var(--mono);color:var(--text-dim)">;</code>.
+            </div>
+            <div class="lc-analogy">É como pegar uma calculadora da gaveta antes de começar a fazer contas — você precisa ter a ferramenta em mãos antes de usá-la.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CLASSE -->
+    <section class="sec section-observer-target" id="classe">
+      <h2>Linha 3 — Criando a classe principal</h2>
+      <div class="line-cards">
+        <div class="lc">
+          <div class="lc-num kw-num">L3</div>
+          <div class="lc-body">
+            <div class="lc-code"><span class="kw">public class</span> <span class="cls">GuiaSegurancaDigital</span> {</div>
+            <div class="lc-title">A "caixa" que contém tudo</div>
+            <div class="lc-exp">
+              Em Java, <strong>todo</strong> o código precisa estar dentro de uma <em>classe</em>. Pense nela como uma pasta de arquivo com um nome.<br><br>
+              • <strong>public</strong> → qualquer parte do programa pode usar esta classe<br>
+              • <strong>class</strong> → palavra mágica que cria a classe<br>
+              • <strong>GuiaSegurancaDigital</strong> → o nome escolhido (sem espaços, começa com maiúscula)<br>
+              • <strong>{</strong> → abre a caixa. Tudo que ficar entre <code style="font-family:var(--mono)">{</code> e <code style="font-family:var(--mono)">}</code> pertence a esta classe.
+            </div>
+            <div class="lc-analogy">É como criar uma empresa chamada "GuiaSegurancaDigital" — tudo que acontece neste programa acontece dentro desta empresa.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCANNER -->
+    <section class="sec section-observer-target" id="scanner">
+      <h2>Linha 5 — Criando o "ouvinte" do teclado</h2>
+      <div class="line-cards">
+        <div class="lc">
+          <div class="lc-num kw-num">L5</div>
+          <div class="lc-body">
+            <div class="lc-code"><span class="kw">static</span> <span class="cls">Scanner</span> sc = <span class="kw">new</span> <span class="cls">Scanner</span>(<span class="cls">System</span>.in);</div>
+            <div class="lc-title">Criando o leitor de teclado chamado "sc"</div>
+            <div class="lc-exp">
+              Esta linha cria uma variável chamada <em>sc</em> (abreviação de Scanner) que vai ficar <strong>de prontidão o tempo todo</strong> para capturar o que o usuário digitar.<br><br>
+              • <strong>static</strong> → significa que todos os métodos da classe podem usar este <em>sc</em> sem precisar recriá-lo<br>
+              • <strong>Scanner sc</strong> → cria a variável do tipo Scanner com o apelido "sc"<br>
+              • <strong>new Scanner(System.in)</strong> → instancia (fabrica) um novo Scanner ligado ao teclado (<em>System.in</em> = entrada do sistema = teclado)<br>
+            </div>
+            <div class="lc-analogy">É como contratar um assistente chamado "sc" cuja única função é ficar escutando o que você digita e trazer essa informação para o programa.</div>
+            <div class="lc-warn">Como esta variável fica "fora" dos métodos mas dentro da classe, ela pode ser usada por qualquer método — isso se chama <strong>variável de instância</strong>.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MAIN -->
+    <section class="sec section-observer-target" id="main">
+      <h2>Linha 7 — A porta de entrada obrigatória</h2>
+      <div class="line-cards">
+        <div class="lc">
+          <div class="lc-num fn-num">L7</div>
+          <div class="lc-body">
+            <div class="lc-code"><span class="kw">public static void</span> <span class="fn">main</span>(<span class="cls">String</span>[] args) {</div>
+            <div class="lc-title">O método main — início absoluto de tudo</div>
+            <div class="lc-exp">
+              Esta é a linha mais especial de qualquer programa Java. Quando você clica em "executar", o computador procura exatamente esta linha e começa daqui.<br><br>
+              • <strong>public</strong> → visível de fora (para a máquina virtual Java poder chamar)<br>
+              • <strong>static</strong> → existe mesmo antes de criar qualquer objeto<br>
+              • <strong>void</strong> → este método não retorna nenhum valor ao finalizar<br>
+              • <strong>main</strong> → este nome exato é obrigatório — é o ponto de partida universal<br>
+              • <strong>String[] args</strong> → parâmetros que podem ser passados ao iniciar (não usamos neste programa, mas é obrigatório declarar)
+            </div>
+            <div class="lc-analogy">É o "Capítulo 1, página 1" do livro. O Java sempre abre aqui — sem main, o programa simplesmente não roda.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VARIAVEL -->
+    <section class="sec section-observer-target" id="variavel">
+      <h2>Linha 8 — A variável que guarda a escolha do usuário</h2>
+      <div class="line-cards">
+        <div class="lc">
+          <div class="lc-num kw-num">L8</div>
+          <div class="lc-body">
+            <div class="lc-code"><span class="kw">int</span> opcao = <span class="num">-1</span>;</div>
+            <div class="lc-title">Criando a caixinha "opcao" com valor inicial -1</div>
+            <div class="lc-exp">
+              • <strong>int</strong> → tipo de dado: número inteiro (sem casas decimais). Ex: 0, 1, 2, -1<br>
+              • <strong>opcao</strong> → nome da variável (caixinha na memória)<br>
+              • <strong>= -1</strong> → valor inicial. Por que -1? Porque -1 nunca é uma opção válida do menu, então o programa entra no loop while imediatamente<br><br>
+              Se colocássemos <code style="font-family:var(--mono);color:var(--num)">0</code> como valor inicial, o while nunca rodaria (pois 0 significa sair).
+            </div>
+            <div class="lc-analogy">É como colocar um post-it em branco na mesa antes da reunião começar — você sabe que vai preencher logo, mas precisa que ele exista primeiro.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- WHILE -->
+    <section class="sec section-observer-target" id="while">
+      <h2>Linhas 11–36 — O loop while (o coração do programa)</h2>
+
+      <div class="callout c-info">
+        <strong>💡 O que é um loop?</strong>
+        Um loop é um bloco de código que se repete automaticamente. O while repete enquanto uma condição for verdadeira — assim que a condição falha, ele para.
+      </div>
+
+      <div class="line-cards">
+        <div class="lc">
+          <div class="lc-num loop-num">L11</div>
+          <div class="lc-body">
+            <div class="lc-code"><span class="kw">while</span> (opcao != <span class="num">0</span>) {</div>
+            <div class="lc-title">O loop principal — "enquanto não sair, continue"</div>
+            <div class="lc-exp">
+              <strong>!=</strong> significa "diferente de". Então: <em>"enquanto opcao for diferente de 0, execute o bloco { }"</em>.<br><br>
+              Quando o usuário digitar 0, <code style="font-family:var(--mono);color:var(--accent)">opcao</code> recebe o valor 0, a condição <code style="font-family:var(--mono);color:var(--accent3)">opcao != 0</code> se torna FALSA, e o loop encerra.
+            </div>
+            <div class="lc-analogy">É como um Netflix que continua sugerindo filmes enquanto você não clicar em "Sair". Cada volta = um novo menu aparecendo.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MENU IMPRESSAO -->
+    <section class="sec section-observer-target" id="menu">
+      <h2>Linhas 12–18 — Imprimindo o menu na tela</h2>
+      <div class="line-cards">
+        <div class="lc">
+          <div class="lc-num">L12</div>
+          <div class="lc-body">
+            <div class="lc-code"><span class="cls">System</span>.out.<span class="fn">println</span>(<span class="str">"\n==============================="</span>);</div>
+            <div class="lc-title">System.out.println — imprimir e pular linha</div>
+            <div class="lc-exp">
+              <strong>System.out.println</strong> é o comando para escrever texto na tela e depois pular uma linha automaticamente. Pense nele como o <em>Enter</em> automático.<br><br>
+              O <strong>\n</strong> dentro da string é um caractere especial chamado <em>escape de nova linha</em> — ele pula uma linha antes de imprimir o texto. Isso cria um espaço visual entre menus.
+            </div>
+            <div class="lc-analogy">"System.out.println" = "escreve isso na tela e aperta Enter".</div>
+          </div>
+        </div>
+
+        <div class="lc">
+          <div class="lc-num">L18</div>
+          <div class="lc-body">
+            <div class="lc-code"><span class="cls">System</span>.out.<span class="fn">print</span>(<span class="str">"Escolha uma opção: "</span>);</div>
+            <div class="lc-title">System.out.print (sem o "ln") — imprimir SEM pular linha</div>
+            <div class="lc-exp">
+              <strong>print</strong> (sem o <em>ln</em> no final) imprime o texto mas <strong>não pula linha</strong>. O cursor fica na mesma linha, esperando o usuário digitar na continuação.<br><br>
+              Resultado visual: <code style="font-family:var(--mono)">Escolha uma opção: _</code> (o cursor fica logo depois dos dois pontos)
+            </div>
+          </div>
+        </div>
+
+        <div class="lc">
+          <div class="lc-num fn-num">L20</div>
+          <div class="lc-body">
+            <div class="lc-code">opcao = <span class="fn">lerInteiro</span>();</div>
+            <div class="lc-title">Capturando a escolha do usuário</div>
+            <div class="lc-exp">
+              Chama o método <em>lerInteiro()</em> (que veremos na linha 82) e guarda o resultado na variável <em>opcao</em>.<br><br>
+              O <strong>=</strong> aqui é de atribuição: "coloque o resultado de lerInteiro() dentro de opcao". É diferente do == de comparação.
+            </div>
+            <div class="lc-analogy">É como pedir que o assistente "sc" vá ao balcão de atendimento, pegue o número que o cliente digitou e traga de volta para o gerente (main).</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SWITCH -->
+    <section class="sec section-observer-target" id="switch">
+      <h2>Linhas 23–35 — O switch: o direcionador de rotas</h2>
+
+      <div class="callout c-tip">
+        <strong>Por que usar switch em vez de vários if?</strong>
+        Quando você precisa comparar uma variável contra muitos valores fixos, o switch é mais limpo e legível que encadear vários if-else. O Java também consegue otimizá-lo melhor.
+      </div>
+
+      <div class="line-cards">
+        <div class="lc">
+          <div class="lc-num sw-num">L23</div>
+          <div class="lc-body">
+            <div class="lc-code"><span class="kw">switch</span> (opcao) {</div>
+            <div class="lc-title">Abrindo o switch com a variável opcao</div>
+            <div class="lc-exp">
+              O <strong>switch</strong> recebe uma variável (aqui, <em>opcao</em>) e vai procurar qual <em>case</em> combina com o valor dela.
+            </div>
+            <div class="lc-analogy">Imagine uma portaria com várias portas numeradas. O switch olha o número na sua ficha e te manda para a porta certa.</div>
+          </div>
+        </div>
+
+        <div class="lc">
+          <div class="lc-num sw-num">L24–26</div>
+          <div class="lc-body">
+            <div class="lc-code"><span class="kw">case</span> <span class="num">1</span>:
+    <span class="fn">moduloSenhas</span>();
+    <span class="kw">break</span>;</div>
+            <div class="lc-title">case 1 — executar o módulo de Senhas</div>
+            <div class="lc-exp">
+              • <strong>case 1:</strong> → se opcao for igual a 1, execute o que vem abaixo<br>
+              • <strong>moduloSenhas()</strong> → chama o método moduloSenhas (o programa "pula" para lá e executa)<br>
+              • <strong>break</strong> → "pare aqui e saia do switch". Sem o break, o Java continuaria executando o próximo case automaticamente (efeito indesejado chamado <em>fall-through</em>)
+            </div>
+            <div class="lc-warn">O break é obrigatório na maioria dos cases! Esquecer o break é um erro comum que faz o programa executar vários cases ao mesmo tempo.</div>
+          </div>
+        </div>
+
+        <div class="lc">
+          <div class="lc-num sw-num">L27–29</div>
+          <div class="lc-body">
+            <div class="lc-code"><span class="kw">case</span> <span class="num">2</span>:
+    <span class="fn">moduloGolpes</span>();
+    <span class="kw">break</span>;</div>
+            <div class="lc-title">case 2 — executar o módulo de Golpes</div>
+            <div class="lc-exp">Mesma lógica do case 1, mas chama <em>moduloGolpes()</em>. Cada case é um caminho diferente para o mesmo seletor.</div>
+          </div>
+        </div>
+
+        <div class="lc">
+          <div class="lc-num sw-num">L30–32</div>
+          <div class="lc-body">
+            <div class="lc-code"><span class="kw">case</span> <span class="num">0</span>:
+    <span class="cls">System</span>.out.<span class="fn">println</span>(<span class="str">"\nAté mais!"</span>);
+    <span class="kw">break</span>;</div>
+            <div class="lc-title">case 0 — despedida e saída do loop</div>
+            <div class="lc-exp">
+              Quando opcao for 0: imprime a mensagem de tchau e faz o break.<br><br>
+              Depois do break, o switch termina, e o while testa a condição <code style="font-family:var(--mono);color:var(--accent3)">opcao != 0</code> de novo. Como agora opcao = 0, a condição é FALSA e o loop encerra. O programa termina.
+            </div>
+          </div>
+        </div>
+
+        <div class="lc">
+          <div class="lc-num sw-num">L33–34</div>
+          <div class="lc-body">
+            <div class="lc-code"><span class="kw">default</span>:
+    <span class="cls">System</span>.out.<span class="fn">println</span>(<span class="str">"Opção inválida."</span>);</div>
+            <div class="lc-title">default — o "senão" do switch</div>
+            <div class="lc-exp">
+              Se o usuário digitar qualquer número que não seja 0, 1 ou 2, o switch cai no <strong>default</strong>. É o caso curinga — "nenhum dos cases acima bateu, então execute isto".<br><br>
+              Note que o <em>default</em> não precisa de break (é o último bloco). O programa vai mostrar a mensagem de erro e voltar ao início do while.
+            </div>
+            <div class="lc-analogy">É como uma recepcionista que, quando você pede algo fora do cardápio, diz: "Essa opção não existe, por favor escolha outra."</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FLUXO VISUAL -->
+      <div class="flow">
+        <div class="flow-title">📊 Fluxo de execução do switch</div>
+        <div class="flow-diagram">
+          <div class="flow-box fb-start">Usuário digita um número</div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-box fb-proc">switch (opcao) analisa o valor</div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-branch">
+            <div class="flow-branch-item">
+              <span class="flow-label">opcao = 1</span>
+              <div class="flow-box fb-proc" style="min-width:130px;font-size:.78rem">moduloSenhas()</div>
+            </div>
+            <div class="flow-branch-item">
+              <span class="flow-label">opcao = 2</span>
+              <div class="flow-box fb-proc" style="min-width:130px;font-size:.78rem">moduloGolpes()</div>
+            </div>
+            <div class="flow-branch-item">
+              <span class="flow-label">opcao = 0</span>
+              <div class="flow-box fb-end" style="min-width:130px;font-size:.78rem">Encerrar</div>
+            </div>
+            <div class="flow-branch-item">
+              <span class="flow-label">outro</span>
+              <div class="flow-box" style="min-width:130px;font-size:.78rem;background:var(--bg3);border:1px solid var(--border2);color:var(--text-head)">Opção inválida</div>
+            </div>
+          </div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-box fb-proc">Volta ao início do while</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MODULO SENHAS -->
+    <section class="sec section-observer-target" id="modSenhas">
+      <h2>Linhas 39–59 — Módulo de Senhas Seguras</h2>
+
+      <div class="line-cards">
+        <div class="lc">
+          <div class="lc-num fn-num">L39</div>
+          <div class="lc-body">
+            <div class="lc-code"><span class="kw">static void</span> <span class="fn">moduloSenhas</span>() {</div>
+            <div class="lc-title">Definindo o método moduloSenhas</div>
+            <div class="lc-exp">
+              • <strong>static</strong> → pertence à classe, não a um objeto específico<br>
+              • <strong>void</strong> → este método não retorna nenhum valor ao terminar<br>
+              • <strong>moduloSenhas()</strong> → nome do método + parênteses vazios (não recebe parâmetros)<br><br>
+              Este método só é executado quando chamado — na linha 25, quando o switch chama <code style="font-family:var(--mono);color:var(--fn)">moduloSenhas();</code>
+            </div>
+            <div class="lc-analogy">É como ter um funcionário especialista em senhas. Você só o chama quando precisa dele; ele não fica trabalhando o tempo todo.</div>
+          </div>
+        </div>
+
+        <div class="lc">
+          <div class="lc-num">L40–47</div>
+          <div class="lc-body">
+            <div class="lc-code"><span class="cls">System</span>.out.<span class="fn">println</span>(<span class="str">"\n--- SENHAS SEGURAS ---"</span>);
+<span class="cls">System</span>.out.<span class="fn">println</span>(<span class="str">"Uma boa senha deve ter:"</span>);
+<span class="cls">System</span>.out.<span class="fn">println</span>(<span class="str">"- Pelo menos 12 caracteres"</span>);
+<span class="cmt">// ... mais linhas de conteúdo ...</span>
+<span class="cls">System</span>.out.<span class="fn">print</span>(<span class="str">"Quantos caracteres tem sua senha? "</span>);</div>
+            <div class="lc-title">Exibindo o conteúdo educativo sobre senhas</div>
+            <div class="lc-exp">
+              Uma série de <em>println</em> que imprime as dicas de segurança. Cada linha é uma instrução separada — o Java executa uma por vez, de cima para baixo.<br><br>
+              A linha 47 usa <strong>print</strong> (sem ln) para que o cursor fique na mesma linha, esperando o usuário digitar o número de caracteres da senha.
+            </div>
+          </div>
+        </div>
+
+        <div class="lc">
+          <div class="lc-num kw-num">L49</div>
+          <div class="lc-body">
+            <div class="lc-code"><span class="kw">int</span> tamanho = <span class="fn">lerInteiro</span>();</div>
+            <div class="lc-title">Lendo quantos caracteres a senha tem</div>
+            <div class="lc-exp">
+              Cria uma nova variável inteira chamada <em>tamanho</em> e armazena o número digitado pelo usuário (obtido via <em>lerInteiro()</em>).
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- IF SENHA -->
+    <section class="sec section-observer-target" id="if-senha">
+      <h2>Linhas 52–58 — O if/else if/else: avaliando a senha</h2>
+
+      <div class="callout c-warn">
+        <strong>Diferença entre = e ==</strong>
+        Em Java: <code style="font-family:var(--mono)">=</code> é atribuição (guardar um valor). <code style="font-family:var(--mono)">&gt;=</code> é comparação (maior ou igual que). Confundi-los é um dos erros mais comuns!
+      </div>
+
+      <div class="line-cards">
+        <div class="lc">
+          <div class="lc-num if-num">L52</div>
+          <div class="lc-body">
+            <div class="lc-code"><span class="kw">if</span> (tamanho >= <span class="num">12</span>) {</div>
+            <div class="lc-title">if — primeira verificação (senha forte)</div>
+            <div class="lc-exp">
+              Se o tamanho digitado for <strong>maior ou igual a 12</strong>, executa o bloco { }.<br>
+              <strong>>=</strong> = "maior ou igual que"<br><br>
+              Se essa condição for verdadeira, as linhas 52 e 53 são executadas, e o programa pula direto para o final do bloco if-else (linha 58).
+            </div>
+          </div>
+        </div>
+
+        <div class="lc">
+          <div class="lc-num if-num">L54</div>
+          <div class="lc-body">
+            <div class="lc-code">} <span class="kw">else if</span> (tamanho >= <span class="num">8</span>) {</div>
+            <div class="lc-title">else if — plano B (senha razoável)</div>
+            <div class="lc-exp">
+              Só chega aqui se a condição do <em>if</em> anterior for FALSA (ou seja, tamanho &lt; 12).<br><br>
+              Verifica se tamanho é maior ou igual a 8. Se sim → mensagem de aviso "razoável".<br><br>
+              Neste ponto, sabemos implicitamente que tamanho está entre 8 e 11 (pois o if anterior já descartou ≥ 12).
+            </div>
+          </div>
+        </div>
+
+        <div class="lc">
+          <div class="lc-num if-num">L56–57</div>
+          <div class="lc-body">
+            <div class="lc-code">} <span class="kw">else</span> {
+    <span class="cls">System</span>.out.<span class="fn">println</span>(<span class="str">"✗ Senha curta!"</span>);
+}</div>
+            <div class="lc-title">else — plano C (senha fraca)</div>
+            <div class="lc-exp">
+              O <strong>else</strong> sem condição é o "em todos os outros casos". Chegando aqui, sabemos que tamanho &lt; 8 — a senha é muito curta e vulnerável.<br><br>
+              O <code style="font-family:var(--mono);color:var(--border2)">}</code> fecha o bloco if-else-if-else.
+            </div>
+            <div class="lc-analogy">É como uma escada de avaliação: Primeiro testa o melhor caso (≥12), depois o intermediário (≥8), e o que sobrar cai no pior caso.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TABELA COMPARATIVA -->
+      <h3 style="margin:1.8rem 0 .8rem">Tabela: Operadores de comparação usados no código</h3>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr><th>Símbolo</th><th>Significado</th><th>Exemplo no código</th><th>Resulta em...</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="t-kw">!=</td><td>diferente de</td><td><code class="t-acc">opcao != 0</code></td><td>true se opcao não for 0</td></tr>
+            <tr><td class="t-kw">>=</td><td>maior ou igual</td><td><code class="t-acc">tamanho >= 12</code></td><td>true se tamanho for 12 ou mais</td></tr>
+            <tr><td class="t-kw">==</td><td>igual a (comparação)</td><td><code class="t-acc">resposta == 1</code></td><td>true se resposta for exatamente 1</td></tr>
+            <tr><td class="t-kw">!</td><td>negação (NOT)</td><td><code class="t-acc">!sc.hasNextInt()</code></td><td>true se NÃO houver inteiro disponível</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- MODULO GOLPES -->
+    <section class="sec section-observer-target" id="modGolpes">
+      <h2>Linhas 61–80 — Módulo de Golpes Online</h2>
+      <div class="line-cards">
+        <div class="lc">
+          <div class="lc-num fn-num">L61</div>
+          <div class="lc-body">
+            <div class="lc-code"><span class="kw">static void</span> <span class="fn">moduloGolpes</span>() {</div>
+            <div class="lc-title">Segundo método de conteúdo — sobre golpes</div>
+            <div class="lc-exp">
+              Mesma estrutura do <em>moduloSenhas()</em>: um método <em>void</em> que imprime conteúdo educativo e depois faz uma pergunta ao usuário. Demonstra a reutilização do padrão — uma boa prática de programação.
+            </div>
+          </div>
+        </div>
+
+        <div class="lc">
+          <div class="lc-num">L62–68</div>
+          <div class="lc-body">
+            <div class="lc-code"><span class="cmt">// Linhas de println com conteúdo educativo</span>
+<span class="cls">System</span>.out.<span class="fn">print</span>(<span class="str">"Você já recebeu algum? (1-Sim/2-Não): "</span>);</div>
+            <div class="lc-title">Conteúdo educativo + pergunta binária</div>
+            <div class="lc-exp">
+              Imprime os 3 tipos de golpes comuns e então pergunta ao usuário se ele já recebeu algum. A resposta será 1 (Sim) ou 2 (Não) — um padrão simples de sim/não com números.
+            </div>
+          </div>
+        </div>
+
+        <div class="lc">
+          <div class="lc-num kw-num">L70</div>
+          <div class="lc-body">
+            <div class="lc-code"><span class="kw">int</span> resposta = <span class="fn">lerInteiro</span>();</div>
+            <div class="lc-title">Guardando a resposta do usuário</div>
+            <div class="lc-exp">Nova variável local <em>resposta</em> recebe o número digitado. Note que esta variável só existe dentro de <em>moduloGolpes()</em> — ela é uma <strong>variável local</strong>.</div>
+          </div>
+        </div>
+
+        <div class="lc">
+          <div class="lc-num if-num">L72–79</div>
+          <div class="lc-body">
+            <div class="lc-code"><span class="kw">if</span> (resposta == <span class="num">1</span>) {
+    <span class="cmt">// dicas para quem recebeu golpe</span>
+} <span class="kw">else</span> {
+    <span class="cmt">// dicas preventivas para quem ainda não recebeu</span>
+}</div>
+            <div class="lc-title">if/else simples — dois caminhos possíveis</div>
+            <div class="lc-exp">
+              Um <em>if/else</em> binário: se <em>resposta</em> for exatamente igual a 1 (Sim), mostra dicas de recuperação. Caso contrário (else), mostra dicas preventivas.<br><br>
+              <strong>==</strong> com dois sinais de igual é comparação. Um único <strong>=</strong> seria atribuição (erro!).
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LER INTEIRO -->
+    <section class="sec section-observer-target" id="lerInteiro">
+      <h2>Linhas 82–88 — O método lerInteiro: proteção contra erros</h2>
+
+      <div class="callout c-danger">
+        <strong>Por que precisamos deste método?</strong>
+        Se o usuário digitar uma letra quando o programa espera um número, o Scanner lança uma exceção (erro) e o programa trava. O lerInteiro() resolve isso com elegância.
+      </div>
+
+      <div class="line-cards">
+        <div class="lc">
+          <div class="lc-num fn-num">L82</div>
+          <div class="lc-body">
+            <div class="lc-code"><span class="kw">static int</span> <span class="fn">lerInteiro</span>() {</div>
+            <div class="lc-title">Método que retorna um int — diferente do void!</div>
+            <div class="lc-exp">
+              Desta vez, o método <strong>não é void</strong>. É <strong>int</strong> — significa que ele <em>retorna</em> (devolve) um número inteiro para quem o chamou.<br><br>
+              Quando chamamos <code style="font-family:var(--mono);color:var(--fn)">opcao = lerInteiro()</code>, este método executa e entrega um número que vai para a variável <em>opcao</em>.
+            </div>
+          </div>
+        </div>
+
+        <div class="lc">
+          <div class="lc-num loop-num">L83–86</div>
+          <div class="lc-body">
+            <div class="lc-code"><span class="kw">while</span> (!sc.<span class="fn">hasNextInt</span>()) {
+    <span class="cls">System</span>.out.<span class="fn">print</span>(<span class="str">"Digite um número válido: "</span>);
+    sc.<span class="fn">next</span>();
+}</div>
+            <div class="lc-title">while interno — rejeitando entradas inválidas</div>
+            <div class="lc-exp">
+              • <strong>sc.hasNextInt()</strong> → pergunta ao Scanner: "o próximo token digitado é um número inteiro?"<br>
+              • <strong>!</strong> (negação) → inverte: "enquanto NÃO for um número inteiro..."<br>
+              • <strong>sc.next()</strong> → descarta a entrada inválida (lê e joga fora, para não ficar em loop infinito)<br><br>
+              Este loop fica repetindo até o usuário digitar um número de verdade.
+            </div>
+            <div class="lc-analogy">É como uma catraca que só gira se você apresentar o bilhete certo. Se apresentar algo errado, ela pede de novo e descarta a tentativa inválida.</div>
+          </div>
+        </div>
+
+        <div class="lc">
+          <div class="lc-num fn-num">L87</div>
+          <div class="lc-body">
+            <div class="lc-code"><span class="kw">return</span> sc.<span class="fn">nextInt</span>();</div>
+            <div class="lc-title">return — devolvendo o número válido</div>
+            <div class="lc-exp">
+              Chegou aqui, sabemos que o próximo valor é um inteiro válido.<br>
+              • <strong>sc.nextInt()</strong> → lê o número inteiro digitado<br>
+              • <strong>return</strong> → devolve esse número para quem chamou o método<br><br>
+              O valor retornado é o que fica na variável do lado de fora (ex: <code style="font-family:var(--mono);color:var(--accent)">opcao = lerInteiro()</code>).
+            </div>
+          </div>
+        </div>
+
+        <div class="lc">
+          <div class="lc-num">L88–89</div>
+          <div class="lc-body">
+            <div class="lc-code">}   <span class="cmt">// fecha lerInteiro</span>
+}   <span class="cmt">// fecha a classe GuiaSegurancaDigital</span></div>
+            <div class="lc-title">Fechando os blocos abertos</div>
+            <div class="lc-exp">
+              Cada <strong>{</strong> aberta em algum ponto do código precisa de seu <strong>}</strong> correspondente para fechar. A contagem de chaves precisa bater perfeitamente — se faltar uma, o programa nem compila.
+            </div>
+            <div class="lc-analogy">São como parênteses em matemática: cada um que abre precisa de um par que fecha.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <hr class="sep">
+
+    <!-- TEMA SENHAS -->
+    <section class="sec section-observer-target" id="tema-senhas">
+      <div class="sec-tag">Conteúdo educativo</div>
+      <h2>🔑 Senhas Seguras — O que o programa ensina</h2>
+      <p style="max-width:680px;margin-bottom:1.5rem;color:var(--text-dim)">O módulo de senhas do programa aborda estes pontos — aqui explicamos cada um em profundidade:</p>
+
+      <div class="security-grid">
+        <div class="sec-card">
+          <span class="sc-icon">📏</span>
+          <h4>Mínimo de 12 caracteres</h4>
+          <p>Quanto mais longa a senha, mais combinações um hacker precisa testar. Uma senha de 8 dígitos tem 100 bilhões de combinações; uma de 12 tem <strong>3 quintilhões</strong>. O comprimento é a proteção mais eficaz.</p>
+        </div>
+        <div class="sec-card">
+          <span class="sc-icon">🔡</span>
+          <h4>Mistura de tipos de caracteres</h4>
+          <p>Usar maiúsculas, minúsculas, números e símbolos expande o "alfabeto" de cada posição. Isso multiplica exponencialmente o número de tentativas para forçar a senha.</p>
+        </div>
+        <div class="sec-card">
+          <span class="sc-icon">🚫</span>
+          <h4>Sem dados pessoais</h4>
+          <p>Datas de aniversário, nomes de pets, placa do carro — golpistas pesquisam nas redes sociais antes de tentar uma invasão. Evite qualquer informação que alguém possa adivinhar sobre você.</p>
+        </div>
+        <div class="sec-card">
+          <span class="sc-icon">🔒</span>
+          <h4>Uma senha por serviço</h4>
+          <p>Se você usa a mesma senha no e-mail e no banco, e um site é invadido, o criminoso tem acesso a tudo. Use um gerenciador de senhas (como Bitwarden ou 1Password) para manter senhas únicas.</p>
+        </div>
+      </div>
+
+      <div class="callout c-tip">
+        <strong>💡 Dica prática: A técnica da frase-senha</strong>
+        Escolha 4 palavras aleatórias e junte-as: <code style="font-family:var(--mono)">BananaAzulTelhadoXícara</code>. É longa, fácil de lembrar e extremamente difícil de quebrar. Adicione um número e símbolo para ficar perfeita.
+      </div>
+    </section>
+
+    <!-- TEMA GOLPES -->
+    <section class="sec section-observer-target" id="tema-golpes">
+      <h2>🎣 Golpes Online — O que o programa ensina</h2>
+
+      <div class="tabs">
+        <button class="tab-btn on" data-tab="phishing">Phishing</button>
+        <button class="tab-btn" data-tab="suporte">Falso Suporte</button>
+        <button class="tab-btn" data-tab="pix">Golpe do Pix</button>
+      </div>
+
+      <div class="tab-pane on" id="tab-phishing">
+        <div class="sec-card" style="max-width:100%">
+          <span class="sc-icon">🎣</span>
+          <h4>Phishing — E-mail ou link falso</h4>
+          <p>O criminoso envia um e-mail ou mensagem se passando por um banco, empresa ou órgão do governo. O link leva a um site idêntico ao original, mas falso — e tudo que você digitar vai para o golpista.</p>
+          <br>
+          <p><strong>Como identificar:</strong> endereço do remetente estranho, urgência excessiva ("sua conta será bloqueada em 2 horas!"), link com erros ortográficos (ex: <code style="font-family:var(--mono)">bradesc0.com</code> ao invés de <code style="font-family:var(--mono)">bradesco.com</code>).</p>
+        </div>
+      </div>
+
+      <div class="tab-pane" id="tab-suporte">
+        <div class="sec-card" style="max-width:100%">
+          <span class="sc-icon">📞</span>
+          <h4>Falso Suporte Técnico</h4>
+          <p>O golpista liga se passando por funcionário do banco, da operadora ou da Microsoft. Diz que detectou um problema e pede acesso remoto ao seu computador ou que você instale um aplicativo.</p>
+          <br>
+          <p><strong>Como se proteger:</strong> Empresas legítimas <em>nunca</em> ligam pedindo sua senha ou acesso remoto. Desligue e ligue você mesmo para o número oficial da empresa.</p>
+        </div>
+      </div>
+
+      <div class="tab-pane" id="tab-pix">
+        <div class="sec-card" style="max-width:100%">
+          <span class="sc-icon">💸</span>
+          <h4>Golpe do Pix / Pagamento Urgente</h4>
+          <p>A vítima recebe uma mensagem de familiar ou amigo (conta hackeada) pedindo um Pix urgente. Ou recebe uma "promoção" que exige pagamento imediato via Pix antes de receber o prêmio.</p>
+          <br>
+          <p><strong>Como se proteger:</strong> Sempre confirme via ligação de voz para o número salvo na sua agenda. Nunca faça Pix por pressão ou urgência.</p>
+        </div>
+      </div>
+    </section>
+
+    <hr class="sep">
+
+    <!-- QUIZ -->
+    <section class="sec section-observer-target" id="quiz">
+      <div class="sec-tag">Verificação de aprendizado</div>
+      <h2>🧠 Quiz — Você entendeu o código?</h2>
+      <p style="margin-bottom:1.5rem;color:var(--text-dim)">Teste seu entendimento com estas perguntas sobre o programa:</p>
+
+      <div class="quiz-box">
+        <div class="quiz-q">1. O que acontece se o usuário digitar o número 5 no menu principal?</div>
+        <div class="quiz-opts">
+          <div class="quiz-opt" onclick="checkQ(this,'wrong')">
+            <span class="quiz-opt-num">A</span>
+            O programa trava com erro
+          </div>
+          <div class="quiz-opt" onclick="checkQ(this,'correct')">
+            <span class="quiz-opt-num">B</span>
+            Cai no <code style="font-family:var(--mono)">default</code> do switch e mostra "Opção inválida"
+          </div>
+          <div class="quiz-opt" onclick="checkQ(this,'wrong')">
+            <span class="quiz-opt-num">C</span>
+            O programa encerra
+          </div>
+          <div class="quiz-opt" onclick="checkQ(this,'wrong')">
+            <span class="quiz-opt-num">D</span>
+            Vai para o módulo de senhas
+          </div>
+        </div>
+        <div class="quiz-feedback qf-ok" id="fb-correct-1">✅ Correto! O switch tem um bloco <code style="font-family:var(--mono)">default</code> para exatamente esse caso — qualquer número que não seja 0, 1 ou 2.</div>
+        <div class="quiz-feedback qf-no" id="fb-wrong-1">❌ Não exatamente. O switch tem um bloco <code style="font-family:var(--mono)">default</code> que captura qualquer valor não previsto e exibe uma mensagem de erro amigável.</div>
+      </div>
+
+      <div class="quiz-box" style="margin-top:1rem">
+        <div class="quiz-q">2. Por que a variável <code style="font-family:var(--mono)">opcao</code> começa com o valor -1?</div>
+        <div class="quiz-opts">
+          <div class="quiz-opt" onclick="checkQ2(this,'wrong')">
+            <span class="quiz-opt-num">A</span>
+            Para causar um erro intencional
+          </div>
+          <div class="quiz-opt" onclick="checkQ2(this,'wrong')">
+            <span class="quiz-opt-num">B</span>
+            Por convenção — todo programa Java começa com -1
+          </div>
+          <div class="quiz-opt" onclick="checkQ2(this,'correct')">
+            <span class="quiz-opt-num">C</span>
+            Para garantir que o loop while execute pelo menos uma vez (-1 ≠ 0)
+          </div>
+          <div class="quiz-opt" onclick="checkQ2(this,'wrong')">
+            <span class="quiz-opt-num">D</span>
+            Porque -1 representa "erro" em Java
+          </div>
+        </div>
+        <div class="quiz-feedback qf-ok" id="fb-correct-2">✅ Exato! Se começasse com 0, a condição <code style="font-family:var(--mono)">opcao != 0</code> seria imediatamente falsa e o programa encerraria antes de mostrar qualquer coisa.</div>
+        <div class="quiz-feedback qf-no" id="fb-wrong-2">❌ Tente de novo. Pense: se <code style="font-family:var(--mono)">opcao</code> começasse com 0, o que aconteceria com a condição do while?</div>
+      </div>
+
+      <div class="quiz-box" style="margin-top:1rem">
+        <div class="quiz-q">3. Qual é a diferença entre <code style="font-family:var(--mono)">println</code> e <code style="font-family:var(--mono)">print</code>?</div>
+        <div class="quiz-opts">
+          <div class="quiz-opt" onclick="checkQ3(this,'wrong')">
+            <span class="quiz-opt-num">A</span>
+            Não há diferença — são a mesma coisa
+          </div>
+          <div class="quiz-opt" onclick="checkQ3(this,'correct')">
+            <span class="quiz-opt-num">B</span>
+            <code style="font-family:var(--mono)">println</code> pula linha após imprimir; <code style="font-family:var(--mono)">print</code> fica na mesma linha
+          </div>
+          <div class="quiz-opt" onclick="checkQ3(this,'wrong')">
+            <span class="quiz-opt-num">C</span>
+            <code style="font-family:var(--mono)">print</code> é mais rápido que <code style="font-family:var(--mono)">println</code>
+          </div>
+          <div class="quiz-opt" onclick="checkQ3(this,'wrong')">
+            <span class="quiz-opt-num">D</span>
+            <code style="font-family:var(--mono)">print</code> só funciona com números
+          </div>
+        </div>
+        <div class="quiz-feedback qf-ok" id="fb-correct-3">✅ Perfeito! O "ln" em println significa "line" — ele adiciona uma quebra de linha automaticamente após o texto.</div>
+        <div class="quiz-feedback qf-no" id="fb-wrong-3">❌ A diferença está no "ln" do println, que significa "line" — ele pula uma linha depois de imprimir. O print não pula.</div>
+      </div>
+    </section>
+
+    <hr class="sep">
+
+    <!-- CRITERIOS -->
+    <section class="sec section-observer-target" id="criterios">
+      <div class="sec-tag">Avaliação APS</div>
+      <h2>Critérios da APS — Como o código os atende</h2>
+
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Critério</th>
+              <th>Atendido?</th>
+              <th>Onde no código</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Pelo menos 1 <strong>if</strong></td>
+              <td style="color:var(--success);font-weight:600">✅ Sim (múltiplos)</td>
+              <td>Linhas 52, 54, 56, 72, 77 — nas funções moduloSenhas e moduloGolpes</td>
+            </tr>
+            <tr>
+              <td>Pelo menos 1 <strong>switch</strong></td>
+              <td style="color:var(--success);font-weight:600">✅ Sim</td>
+              <td>Linha 23 — switch(opcao) no método main</td>
+            </tr>
+            <tr>
+              <td>Pelo menos 1 <strong>while</strong></td>
+              <td style="color:var(--success);font-weight:600">✅ Sim (2)</td>
+              <td>Linha 11 — loop do menu principal; linha 83 — validação de entrada</td>
+            </tr>
+            <tr>
+              <td>Pelo menos 2 tópicos/áreas</td>
+              <td style="color:var(--success);font-weight:600">✅ Sim</td>
+              <td>Módulo Senhas (linhas 39–59) e Módulo Golpes (linhas 61–80)</td>
+            </tr>
+            <tr>
+              <td>Menu interativo com retorno</td>
+              <td style="color:var(--success);font-weight:600">✅ Sim</td>
+              <td>while principal (linha 11) garante retorno ao menu após cada módulo</td>
+            </tr>
+            <tr>
+              <td>Uso de Scanner (leitura de dados)</td>
+              <td style="color:var(--success);font-weight:600">✅ Sim</td>
+              <td>Linha 5 — declaração; método lerInteiro() — uso</td>
+            </tr>
+            <tr>
+              <td>Organização e legibilidade</td>
+              <td style="color:var(--success);font-weight:600">✅ Sim</td>
+              <td>Comentários nas linhas 10 e 22 e 51; métodos separados por responsabilidade</td>
+            </tr>
+            <tr>
+              <td>Conteúdo educativo adequado</td>
+              <td style="color:var(--success);font-weight:600">✅ Sim</td>
+              <td>Dicas reais sobre senhas e golpes em ambos os módulos</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <hr class="sep">
+
+    <!-- GLOSSARIO -->
+    <section class="sec section-observer-target" id="glossario">
+      <div class="sec-tag">Referência rápida</div>
+      <h2>Glossário — Termos do código</h2>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr><th>Termo</th><th>Tipo</th><th>O que significa</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="t-kw">import</td><td>Palavra-chave</td><td>Traz uma ferramenta/biblioteca externa para usar no código</td></tr>
+            <tr><td class="t-kw">public</td><td>Modificador</td><td>Visível para qualquer parte do programa</td></tr>
+            <tr><td class="t-kw">class</td><td>Palavra-chave</td><td>Cria uma "caixa" que organiza o código</td></tr>
+            <tr><td class="t-kw">static</td><td>Modificador</td><td>Pertence à classe, não a uma instância específica</td></tr>
+            <tr><td class="t-kw">void</td><td>Tipo de retorno</td><td>O método não retorna nenhum valor</td></tr>
+            <tr><td class="t-kw">int</td><td>Tipo de dado</td><td>Número inteiro (ex: -1, 0, 12)</td></tr>
+            <tr><td class="t-kw">while</td><td>Estrutura de repetição</td><td>Repete um bloco enquanto a condição for verdadeira</td></tr>
+            <tr><td class="t-kw">if / else if / else</td><td>Estrutura condicional</td><td>Testa condições e segue caminhos diferentes</td></tr>
+            <tr><td class="t-kw">switch / case</td><td>Estrutura condicional</td><td>Seleciona um bloco com base no valor de uma variável</td></tr>
+            <tr><td class="t-kw">break</td><td>Controle de fluxo</td><td>Encerra o switch ou loop atual</td></tr>
+            <tr><td class="t-kw">return</td><td>Controle de fluxo</td><td>Devolve um valor ao chamador do método</td></tr>
+            <tr><td class="t-fn">System.out.println</td><td>Método</td><td>Imprime texto na tela e pula uma linha</td></tr>
+            <tr><td class="t-fn">System.out.print</td><td>Método</td><td>Imprime texto na tela sem pular linha</td></tr>
+            <tr><td class="t-acc">Scanner</td><td>Classe Java</td><td>Ferramenta para ler dados do teclado</td></tr>
+            <tr><td class="t-acc">System.in</td><td>Stream</td><td>O teclado do computador (entrada padrão)</td></tr>
+            <tr><td class="t-acc">!=</td><td>Operador</td><td>Diferente de</td></tr>
+            <tr><td class="t-acc">==</td><td>Operador</td><td>Igual a (comparação)</td></tr>
+            <tr><td class="t-acc">>=</td><td>Operador</td><td>Maior ou igual que</td></tr>
+            <tr><td class="t-acc">!</td><td>Operador</td><td>Negação lógica (inverte verdadeiro/falso)</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <div style="height:3rem"></div>
+    <div style="text-align:center;font-family:var(--mono);font-size:.65rem;color:var(--text-dim);letter-spacing:.08em;padding:1rem 0 2rem;border-top:1px solid var(--border)">
+      APS — Lógica de Programação · Guia de Segurança Digital · Explicação Completa do Código
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ── PROGRESS BAR ──
+const pbar = document.getElementById('pbar');
+window.addEventListener('scroll', () => {
+  const h = document.body.scrollHeight - window.innerHeight;
+  pbar.style.width = (h > 0 ? (window.scrollY / h) * 100 : 0) + '%';
+}, {passive: true});
+
+// ── BACK TO TOP ──
+const btt = document.getElementById('btt');
+window.addEventListener('scroll', () => {
+  btt.classList.toggle('show', window.scrollY > 400);
+}, {passive: true});
+btt.addEventListener('click', () => window.scrollTo({top: 0, behavior: 'smooth'}));
+
+// ── THEMES ──
+document.querySelectorAll('.t-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const t = btn.dataset.theme;
+    document.documentElement.setAttribute('data-theme', t);
+    localStorage.setItem('aps-theme', t);
+    document.querySelectorAll('.t-btn').forEach(b => b.classList.toggle('on', b === btn));
+  });
+});
+// Sync active button on load
+(function(){
+  const t = localStorage.getItem('aps-theme') || 'dark';
+  document.querySelectorAll('.t-btn').forEach(b => {
+    b.classList.toggle('on', b.dataset.theme === t);
+  });
+})();
+
+// ── MOBILE SIDEBAR ──
+const ham = document.getElementById('hamBtn');
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('overlay');
+function toggleSidebar() {
+  const open = sidebar.classList.toggle('open');
+  ham.classList.toggle('on', open);
+  overlay.classList.toggle('on', open);
+  ham.setAttribute('aria-expanded', open);
+}
+ham.addEventListener('click', toggleSidebar);
+overlay.addEventListener('click', toggleSidebar);
+
+// ── TABS ──
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const pane = document.getElementById('tab-' + btn.dataset.tab);
+    if (!pane) return;
+    btn.closest('section').querySelectorAll('.tab-btn').forEach(b => b.classList.remove('on'));
+    btn.closest('section').querySelectorAll('.tab-pane').forEach(p => p.classList.remove('on'));
+    btn.classList.add('on');
+    pane.classList.add('on');
+  });
+});
+
+// ── ACTIVE NAV LINK ──
+const sections = document.querySelectorAll('.section-observer-target');
+const navLinks = document.querySelectorAll('.nav-link');
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const id = e.target.id;
+      navLinks.forEach(a => {
+        a.classList.toggle('active', a.getAttribute('href') === '#' + id);
+      });
+    }
+  });
+}, {rootMargin: '-20% 0px -60% 0px'});
+sections.forEach(s => obs.observe(s));
+
+// ── QUIZ ──
+function checkQ(el, result) {
+  const box = el.closest('.quiz-box');
+  box.querySelectorAll('.quiz-opt').forEach(o => {
+    o.style.pointerEvents = 'none';
+    o.classList.remove('correct', 'wrong');
+  });
+  el.classList.add(result);
+  const fOk = box.querySelector('.quiz-feedback.qf-ok');
+  const fNo = box.querySelector('.quiz-feedback.qf-no');
+  if (result === 'correct') { fOk.classList.add('show'); fNo.classList.remove('show'); }
+  else { fNo.classList.add('show'); fOk.classList.remove('show'); }
+}
+function checkQ2(el, result) { checkQ(el, result); }
+function checkQ3(el, result) { checkQ(el, result); }
+
+// ── SMOOTH NAV CLOSE ON MOBILE ──
+navLinks.forEach(a => {
+  a.addEventListener('click', () => {
+    if (window.innerWidth < 900 && sidebar.classList.contains('open')) toggleSidebar();
+  });
+});
+</script>
+</body>
+</html>
