@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Incredibly Mundane Quest</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #4c1d95 0%, #1e3a8a 50%, #312e81 100%);
+            min-height: 100vh;
+            padding: 1rem 2rem;
+            color: #e0e7ff;
+        }
+
+        .container {
+            max-width: 56rem;
+            margin: 0 auto;
+        }
+
+        .achievement-popup {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+            z-index: 50;
+            border: 4px solid;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .achievement-popup.normal {
+            background-color: #eab308;
+            border-color: #facc15;
+            color: #000;
+            animation: pulse 0.5s ease-in-out infinite;
+        }
+
+        .achievement-popup.ultimate {
+            background: linear-gradient(to right, #9333ea, #ec4899);
+            border-color: #d8b4fe;
+            color: #fff;
+            animation: bounce 0.6s ease-in-out infinite;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .achievement-icon {
+            width: 24px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+
+        .achievement-content div:first-child {
+            font-weight: bold;
+            font-size: 0.875rem;
+        }
+
+        .achievement-content div:last-child {
+            font-family: 'Courier New', monospace;
+            font-size: 0.75rem;
+        }
+
+        .main-box {
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 0.5rem;
+            padding: 2rem;
+            margin-bottom: 1rem;
+            border: 4px solid #22c55e;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+        }
+
+        .header {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (min-width: 640px) {
+            .header {
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+            }
+        }
+
+        .title {
+            font-size: 1.875rem;
+            font-weight: bold;
+            color: #4ade80;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        @media (min-width: 640px) {
+            .title {
+                font-size: 2.25rem;
+            }
+        }
+
+        .coffee-icon {
+            display: inline-block;
+            animation: bounce 0.6s ease-in-out infinite;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .nav-button {
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.25rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .nav-button:disabled {
+            background-color: #374151;
+            color: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .nav-button:not(:disabled) {
+            background-color: #16a34a;
+            color: #000;
+        }
+
+        .nav-button:not(:disabled):hover {
+            background-color: #22c55e;
+        }
+
+        .location-box {
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            background-color: #1f2937;
+            border-radius: 0.25rem;
+            border: 1px solid #22c55e;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .location-icon {
+            color: #4ade80;
+            flex-shrink: 0;
+        }
+
+        .location-text {
+            color: #4ade80;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+        }
+
+        .location-text strong {
+            font-weight: bold;
+        }
+
+        .achievements-box {
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            background-color: rgba(180, 83, 9, 0.3);
+            border-radius: 0.25rem;
+            border: 1px solid #eab308;
+        }
+
+        .achievements-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .achievements-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .achievements-title-text {
+            color: #facc15;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            font-weight: bold;
+        }
+
+        .achievements-count {
+            color: #fef3c7;
+            font-family: 'Courier New', monospace;
+            font-size: 0.75rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            background-color: #1f2937;
+            border-radius: 9999px;
+            height: 0.75rem;
+            margin-bottom: 0.75rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(to right, #b45309, #fcd34d);
+            height: 0.75rem;
+            border-radius: 9999px;
+            transition: width 0.5s ease;
+        }
+
+        .achievements-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .achievement-badge {
+            font-size: 0.75rem;
+            font-family: 'Courier New', monospace;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            background-color: #b45309;
+            color: #fef3c7;
+        }
+
+        .achievement-badge.ultimate {
+            background: linear-gradient(to right, #9333ea, #ec4899);
+            color: #fff;
+            animation: pulse 0.5s ease-in-out infinite;
+        }
+
+        .ending-warning {
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            background-color: rgba(127, 29, 29, 0.5);
+            border-radius: 0.25rem;
+            border: 2px solid #ef4444;
+            animation: pulse 0.5s ease-in-out infinite;
+        }
+
+        .ending-warning-text {
+            color: #fca5a5;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .scenario-box {
+            background-color: #111827;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            border: 2px solid #22c55e;
+            margin-bottom: 1.5rem;
+            min-height: 200px;
+        }
+
+        .scenario-text {
+            color: #86efac;
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            white-space: pre-wrap;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 640px) {
+            .scenario-text {
+                font-size: 0.875rem;
+            }
+        }
+
+        .ending-text {
+            color: #fef08a;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            white-space: pre-wrap;
+            line-height: 1.5;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #15803d;
+        }
+
+        @media (max-width: 640px) {
+            .ending-text {
+                font-size: 0.75rem;
+            }
+        }
+
+        .choices-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .choice-button {
+            width: 100%;
+            background-color: #16a34a;
+            color: #000;
+            font-weight: bold;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            border: 2px solid #4ade80;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            text-align: left;
+        }
+
+        @media (min-width: 640px) {
+            .choice-button {
+                padding: 1rem 1.5rem;
+                font-size: 1rem;
+            }
+        }
+
+        .choice-button:hover {
+            background-color: #22c55e;
+            transform: scale(1.05);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+
+        .choice-button:active {
+            transform: scale(0.98);
+        }
+
+        .history-box {
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border: 2px solid #374151;
+        }
+
+        .history-title {
+            color: #4ade80;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        @media (min-width: 640px) {
+            .history-title {
+                font-size: 1rem;
+            }
+        }
+
+        .history-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .history-button {
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.25rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .history-button.current {
+            background-color: #16a34a;
+            color: #000;
+            font-weight: bold;
+            transform: scale(1.1);
+        }
+
+        .history-button.visited {
+            background-color: #374151;
+            color: #4ade80;
+        }
+
+        .history-button.visited:hover {
+            background-color: #4b5563;
+        }
+
+        .history-button.unvisited {
+            background-color: #1f2937;
+            color: #6b7280;
+        }
+
+        .history-hint {
+            color: #86efac;
+            font-family: 'Courier New', monospace;
+            font-size: 0.75rem;
+            margin-top: 0.75rem;
+            opacity: 0.7;
+        }
+
+        .quest-log-box {
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            border: 2px solid #374151;
+        }
+
+        .quest-log-title {
+            color: #4ade80;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        @media (min-width: 640px) {
+            .quest-log-title {
+                font-size: 1rem;
+            }
+        }
+
+        .quest-log-entries {
+            color: #86efac;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            max-height: 240px;
+            overflow-y: auto;
+        }
+
+        .quest-log-entry {
+            opacity: 0.7;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #374151;
+            margin-bottom: 0.5rem;
+        }
+
+        .quest-log-entry:last-child {
+            border-bottom: none;
+        }
+
+        @media (max-width: 640px) {
+            .main-box {
+                padding: 1rem;
+            }
+
+            .title {
+                font-size: 1.5rem;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .button-group {
+                width: 100%;
+            }
+
+            .nav-button {
+                flex: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Achievement Popup -->
+        <div id="achievementPopup" class="achievement-popup" style="display: none;">
+            <div class="achievement-icon">🏆</div>
+            <div class="achievement-content">
+                <div id="achievementTitle">🎉 ACHIEVEMENT UNLOCKED!</div>
+                <div id="achievementName"></div>
+            </div>
+        </div>
+
+        <!-- Main Game Box -->
+        <div class="main-box">
+            <!-- Header -->
+            <div class="header">
+                <h1 class="title">
+                    <span class="coffee-icon">☕</span>
+                    THE INCREDIBLY MUNDANE QUEST
+                </h1>
+                <div class="button-group">
+                    <button class="nav-button" id="backBtn" onclick="goBack()" title="Go back">← Back</button>
+                    <button class="nav-button" id="forwardBtn" onclick="goForward()" title="Go forward">Forward →</button>
+                </div>
+            </div>
+
+            <!-- Location -->
+            <div class="location-box">
+                <span class="location-icon">📍</span>
+                <p class="location-text"><strong>LOCATION:</strong> <span id="location"></span></p>
+            </div>
+
+            <!-- Achievements -->
+            <div id="achievementsBox" class="achievements-box" style="display: none;">
+                <div class="achievements-header">
+                    <div class="achievements-title">
+                        <span>✨</span>
+                        <p class="achievements-title-text">ACHIEVEMENTS (<span id="achievementCount">0</span>/<span id="totalAchievements">14</span>)</p>
+                    </div>
+                    <p class="achievements-count"><span id="achievementsLeft">14</span> left to unlock</p>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
+                </div>
+                <div class="achievements-list" id="achievementsList"></div>
+            </div>
+
+            <!-- Ending Warning -->
+            <div id="endingWarning" class="ending-warning" style="display: none;">
+                <p class="ending-warning-text">⚠️ ENDING REACHED ⚠️</p>
+            </div>
+
+            <!-- Scenario Text -->
+            <div class="scenario-box">
+                <p class="scenario-text" id="scenarioText"></p>
+                <p class="ending-text" id="endingText" style="display: none;"></p>
+            </div>
+
+            <!-- Choices -->
+            <div class="choices-container" id="choicesContainer"></div>
+        </div>
+
+        <!-- History -->
+        <div id="historyBox" class="history-box" style="display: none;">
+            <h3 class="history-title">
+                <span>🔄</span>
+                JOURNEY HISTORY (<span id="historyIndex">1</span>/<span id="historyLength">1</span>)
+            </h3>
+            <div class="history-buttons" id="historyButtons"></div>
+            <p class="history-hint">Click any number to jump to that point in your journey</p>
+        </div>
+
+        <!-- Quest Log -->
+        <div id="questLogBox" class="quest-log-box" style="display: none;">
+            <h3 class="quest-log-title">
+                <span>⚠️</span>
+                QUEST LOG
+            </h3>
+            <div class="quest-log-entries" id="questLogEntries"></div>
+        </div>
+    </div>
+
+    <script>
+        // Game Data
+        const scenarios = {
+            start: {
+                text: "You wake up on a Tuesday morning. The most dangerous day of the week. Your quest: Get to work without having an existential crisis.\n\nYour alarm is screaming. What do you do?",
+                location: "🏠 Home - Bedroom",
+                choices: [
+                    { text: "Hit snooze (live dangerously)", next: 'snooze' },
+                    { text: "Get up immediately (you monster)", next: 'getup' },
+                    { text: "Throw phone across room", next: 'throw_phone' }
+                ]
+            },
+            snooze: {
+                text: "You hit snooze. The extra 9 minutes of sleep feel like 3 seconds. Your alarm screams again, but this time it sounds judgmental.\n\nYou're now running late. Panic sets in.",
+                location: "🏠 Home - Bedroom",
+                choices: [
+                    { text: "Skip everything and rush to work", next: 'rush_to_work' },
+                    { text: "Make coffee anyway", next: 'make_coffee' },
+                    { text: "Call in sick and go back to sleep", next: 'call_sick' }
+                ]
+            },
+            getup: {
+                text: "You spring out of bed with the energy of someone who definitely didn't stay up until 2am watching videos about penguins.\n\nYou're actually on time! This feels wrong.",
+                location: "🏠 Home - Bedroom",
+                choices: [
+                    { text: "Make a proper breakfast", next: 'breakfast' },
+                    { text: "Make coffee", next: 'make_coffee' },
+                    { text: "Get dressed and head to work", next: 'get_ready' }
+                ]
+            },
+            throw_phone: {
+                text: "Your phone sails gracefully through the air and lands in your laundry pile. The alarm is now muffled but somehow more annoying.\n\nYou've created a problem that's somehow worse than the original problem. Congratulations.",
+                location: "🏠 Home - Bedroom",
+                choices: [
+                    { text: "Dig through laundry pile", next: 'laundry_quest' },
+                    { text: "Ignore it and get ready", next: 'get_ready' },
+                    { text: "Accept defeat and call in sick", next: 'call_sick' }
+                ]
+            },
+            laundry_quest: {
+                text: "You dive into the laundry pile like Scrooge McDuck into his money bin, but far less pleasant.\n\nYou find: 3 socks (none matching), a receipt from 2019, something sticky, and your phone still screaming.\n\nWait... is that the shirt you thought you lost? Today's looking up!",
+                location: "🏠 Home - Bedroom",
+                choices: [
+                    { text: "Turn off alarm and continue", next: 'getup' }
+                ]
+            },
+            breakfast: {
+                text: "You make eggs, toast, and even squeeze fresh orange juice. Who are you? Your ancestors would be proud.\n\nYou feel like a functional adult. This is deeply unsettling.",
+                location: "🏠 Home - Kitchen",
+                choices: [
+                    { text: "Get ready and leave for work", next: 'get_ready' },
+                    { text: "Make coffee to complete the ritual", next: 'make_coffee' },
+                    { text: "Take a selfie with breakfast (for proof)", next: 'breakfast_selfie' }
+                ]
+            },
+            breakfast_selfie: {
+                text: "You photograph your breakfast like it's a Michelin star meal. 37 attempts later, you have the perfect shot.\n\nBut now you're running late. The breakfast is cold. Was it worth it? (Yes.)",
+                location: "🏠 Home - Kitchen",
+                choices: [
+                    { text: "Rush to work", next: 'rush_to_work' },
+                    { text: "Eat cold breakfast sadly", next: 'cold_breakfast' }
+                ]
+            },
+            cold_breakfast: {
+                text: "You eat your beautiful, now-cold breakfast. Each bite tastes like regret and vanity.\n\nThe eggs have the texture of rubber. Your life choices are questionable.",
+                location: "🏠 Home - Kitchen",
+                choices: [
+                    { text: "Head to work (very late)", next: 'rush_to_work' }
+                ]
+            },
+            make_coffee: {
+                text: "You stumble to the kitchen like a zombie in a low-budget film. The coffee maker awaits.\n\nIt's one of those fancy ones that you bought to 'become a morning person.' That didn't work.",
+                location: "🏠 Home - Kitchen",
+                choices: [
+                    { text: "Make normal coffee", next: 'normal_coffee' },
+                    { text: "Make EXTRA STRONG coffee", next: 'strong_coffee' },
+                    { text: "Just eat the coffee grounds", next: 'eat_grounds' }
+                ]
+            },
+            normal_coffee: {
+                text: "You brew a sensible cup of coffee. It's actually pretty good. You feel 23% more human.\n\nThe caffeine begins its magic. The world seems slightly less terrible.",
+                location: "🏠 Home - Kitchen",
+                choices: [
+                    { text: "Get ready for work", next: 'get_ready' },
+                    { text: "Have another cup (dangerous)", next: 'second_coffee' },
+                    { text: "Stare into coffee contemplating existence", next: 'coffee_philosophy' }
+                ]
+            },
+            second_coffee: {
+                text: "Two cups of coffee. You're playing with fire now. Your hands start to shake slightly.\n\nBut you feel ALIVE. Sort of. Maybe too alive.",
+                location: "🏠 Home - Kitchen",
+                choices: [
+                    { text: "Stop while you're ahead and go to work", next: 'get_ready' },
+                    { text: "GO FOR THREE CUPS", next: 'strong_coffee' }
+                ]
+            },
+            coffee_philosophy: {
+                text: "You gaze into the dark liquid abyss. Is it staring back? What is work? What is Tuesday? Why do we do this?\n\nTen minutes pass. Your coffee is cold. The existential dread is warm.",
+                location: "🏠 Home - Kitchen",
+                choices: [
+                    { text: "Snap out of it and go to work", next: 'get_ready' },
+                    { text: "Make another coffee to replace the cold one", next: 'coffee_loop' }
+                ]
+            },
+            coffee_loop: {
+                text: "You make another coffee. Then you stare into that one too. This one also gets cold.\n\nYou're stuck in a philosophical coffee loop. This is your life now.",
+                location: "🏠 Home - Kitchen",
+                ending: true,
+                achievement: "COFFEE PHILOSOPHER",
+                endingText: "💀 ENDING: You never made it to work. You became one with the coffee. Your boss found you three days later, still staring into a cold mug, muttering about the nature of Tuesdays.",
+                choices: [
+                    { text: "Start Over", next: 'start' }
+                ]
+            },
+            strong_coffee: {
+                text: "You make coffee so strong it might be a war crime. Your spoon stands up in it. Time and space seem negotiable.\n\nYou can see sounds. Colors have feelings. You are ALIVE. TOO ALIVE.",
+                location: "🏠 Home - Kitchen",
+                choices: [
+                    { text: "RUN TO WORK AT SUPER SPEED", next: 'coffee_rush' },
+                    { text: "Clean entire apartment in 5 minutes", next: 'coffee_clean' },
+                    { text: "Vibrate through the floor", next: 'too_much_coffee' }
+                ]
+            },
+            eat_grounds: {
+                text: "You open the bag and consume coffee grounds directly like some kind of caffeinated woodland creature.\n\nThis is... not recommended by doctors. Or anyone. Your mouth feels like a desert made of regret.",
+                location: "🏠 Home - Kitchen",
+                choices: [
+                    { text: "Drink water immediately", next: 'water_after_grounds' },
+                    { text: "Own your choices and go to work", next: 'grounds_commute' },
+                    { text: "Lie on floor and contemplate mistakes", next: 'grounds_regret' }
+                ]
+            },
+            water_after_grounds: {
+                text: "You chug water. It helps. Sort of. Your tongue still feels like sandpaper.\n\nBut hey, you're caffeinated in the most inefficient way possible!",
+                location: "🏠 Home - Kitchen",
+                choices: [
+                    { text: "Get ready for work", next: 'get_ready' }
+                ]
+            },
+            grounds_commute: {
+                text: "You arrive at work with coffee grounds visibly stuck in your teeth. Your coworker asks if you're okay.\n\n'Never better,' you lie, through brown teeth.",
+                location: "🏢 Work",
+                ending: true,
+                achievement: "REGRET COMMUTER",
+                endingText: "💀 ENDING: You made it to work, but at what cost? Your dignity is gone. Your breath smells like a coffee shop floor. But hey, you're here! Your boss gives you a concerned look and suggests you 'take it easy today.'",
+                choices: [
+                    { text: "Start Over", next: 'start' }
+                ]
+            },
+            grounds_regret: {
+                text: "You lie on your kitchen floor, covered in coffee grounds, questioning every decision that led to this moment.\n\nThe ceiling fan mocks you with its slow rotation. Time passes. You're definitely late now.",
+                location: "🏠 Home - Kitchen",
+                ending: true,
+                achievement: "FLOOR DWELLER",
+                endingText: "💀 ENDING: You call in sick from the floor. You spend the day cleaning coffee grounds out of weird places. Tomorrow is a new day. Probably.",
+                choices: [
+                    { text: "Start Over", next: 'start' }
+                ]
+            },
+            get_ready: {
+                text: "You shower, dress, and grab your things. Look at you, being a responsible adult!\n\nYou're ready to face the world. Or at least, the commute.",
+                location: "🏠 Home - Ready to leave",
+                choices: [
+                    { text: "Head to work on time", next: 'commute' },
+                    { text: "Check phone one last time", next: 'phone_check' }
+                ]
+            },
+            phone_check: {
+                text: "You check your phone. 47 unread emails. 3 meeting invites. A text from your mom asking if you're eating vegetables.\n\nSuddenly, staying home seems appealing.",
+                location: "🏠 Home - Ready to leave",
+                choices: [
+                    { text: "Face your responsibilities like an adult", next: 'commute' },
+                    { text: "Throw phone and call in sick", next: 'call_sick' }
+                ]
+            },
+            rush_to_work: {
+                text: "You throw on clothes, skip everything, and sprint out the door.\n\nYou're wearing mismatched shoes. You forgot deodorant. But you're GOING.",
+                location: "🚇 Commuting",
+                choices: [
+                    { text: "Take the bus", next: 'bus_commute' },
+                    { text: "Sprint the whole way", next: 'sprint_commute' }
+                ]
+            },
+            commute: {
+                text: "You step outside. The world is... actually nice today? The weather is pleasant. Birds are chirping.\n\nThis feels suspicious.",
+                location: "🚇 Commuting",
+                choices: [
+                    { text: "Take the bus", next: 'bus_commute' },
+                    { text: "Walk and enjoy the weather", next: 'walk_commute' }
+                ]
+            },
+            bus_commute: {
+                text: "The bus arrives exactly on time. This NEVER happens. You're witnessing a miracle.\n\nYou board and find a seat. Your commute is... pleasant? What timeline is this?",
+                location: "🚇 On the bus",
+                choices: [
+                    { text: "Arrive at work", next: 'arrive_work_good' }
+                ]
+            },
+            walk_commute: {
+                text: "You walk to work, enjoying the morning. A dog wags at you. A stranger smiles.\n\nYou arrive at work feeling refreshed and optimistic. This is deeply unusual.",
+                location: "🚇 Walking",
+                choices: [
+                    { text: "Enter work building", next: 'arrive_work_good' }
+                ]
+            },
+            sprint_commute: {
+                text: "You SPRINT the entire way to work. People stare. Children point. You are a blur of determination and poor planning.\n\nYou arrive sweating like you ran a marathon. Because you basically did.",
+                location: "🚇 Sprinting",
+                choices: [
+                    { text: "Stumble into work", next: 'arrive_work_sweaty' }
+                ]
+            },
+            arrive_work_good: {
+                text: "You arrive at work on time, well-rested, and ready to be productive!\n\nYour coworkers are shocked. Your boss does a double-take. Someone asks if you're feeling okay.",
+                location: "🏢 Work",
+                ending: true,
+                achievement: "FUNCTIONAL ADULT",
+                endingText: "✨ PERFECT ENDING: You have a great day at work. You're productive, helpful, and even enjoy yourself. You leave at a reasonable hour and feel accomplished. You've won Tuesday. Congratulations!",
+                choices: [
+                    { text: "Start Over", next: 'start' }
+                ]
+            },
+            arrive_work_sweaty: {
+                text: "You burst through the office doors, drenched in sweat, gasping for air. The AC hits you like an arctic blast.\n\nYour boss: 'Why didn't you just take the bus?'\nYou: *wheezing noises*",
+                location: "🏢 Work",
+                ending: true,
+                achievement: "DETERMINATION (QUESTIONABLE)",
+                endingText: "💀 ENDING: You made it to work! You're on time! You also need to sit in front of a fan for the next hour and everyone avoids you. But hey, you're here!",
+                choices: [
+                    { text: "Start Over", next: 'start' }
+                ]
+            },
+            coffee_rush: {
+                text: "You BURST out the door at Mach 3. Cars honk. Birds scatter. Small children cry.\n\nYou arrive at work in 47 seconds, sweating profusely and vibrating at a frequency visible to the naked eye.\n\nYou've transcended normal human movement.",
+                location: "🏢 Work",
+                choices: [
+                    { text: "Try to act normal", next: 'act_normal' },
+                    { text: "Do everyone's work for them", next: 'hyperproductive' },
+                    { text: "Just run laps around the building", next: 'run_laps' }
+                ]
+            },
+            act_normal: {
+                text: "You sit at your desk, trying to appear calm. Your leg bounces at 400 BPM. Your eyes are TOO wide.\n\n'Morning!' you say, voice three octaves too high.\n\nEveryone slowly backs away.",
+                location: "🏢 Work",
+                ending: true,
+                achievement: "CAFFEINE VICTIM",
+                endingText: "💀 ENDING: You make it through exactly 2 hours before the caffeine crash hits you like a freight train. You sleep under your desk until 4pm. HR has questions.",
+                choices: [
+                    { text: "Start Over", next: 'start' }
+                ]
+            },
+            hyperproductive: {
+                text: "Fueled by enough caffeine to power a small city, you complete your work, your coworkers' work, and reorganize the entire filing system.\n\nBy 10am, you've done a week's worth of work. By 11am, you crash so hard you fall asleep in the break room.",
+                location: "🏢 Work",
+                ending: true,
+                achievement: "CORPORATE SUPERHERO (BRIEFLY)",
+                endingText: "💀 ENDING: You wake up at 3pm surrounded by concerned coworkers. Your boss gives you the rest of the day off 'to rest.' You've become a cautionary tale about caffeine consumption.",
+                choices: [
+                    { text: "Start Over", next: 'start' }
+                ]
+            },
+            run_laps: {
+                text: "You can't sit still. You CAN'T. You run circles around the entire office building.\n\nLap 1: Weird but okay.\nLap 15: People are filming.\nLap 47: Local news arrives.",
+                location: "🏢 Work - Outside",
+                ending: true,
+                achievement: "OFFICE LEGEND",
+                endingText: "💀 ENDING: You run until the caffeine wears off, then collapse in the parking lot. You become the subject of a company-wide memo about 'appropriate caffeine consumption.' You're famous, but not in a good way.",
+                choices: [
+                    { text: "Start Over", next: 'start' }
+                ]
+            },
+            coffee_clean: {
+                text: "You clean your ENTIRE apartment in under 5 minutes. Every. Single. Surface.\n\nYour place is SPOTLESS. You've achieved domestic perfection... but now you're very late for work.",
+                location: "🏠 Home",
+                choices: [
+                    { text: "Call work and explain", next: 'explain_cleaning' },
+                    { text: "Sprint to work NOW", next: 'coffee_rush' }
+                ]
+            },
+            explain_cleaning: {
+                text: "Boss: 'Where are you?'\nYou: 'I had too much coffee and cleaned my apartment.'\nBoss: '...what?'\nYou: 'MY BATHROOM IS SPARKLING.'",
+                location: "🏠 Home",
+                ending: true,
+                achievement: "DOMESTIC TORNADO",
+                endingText: "💀 ENDING: Your boss lets you work from home today because you're clearly not okay. You spend the day organizing things that don't need organizing. You alphabetize your spices. Tomorrow will be calmer. Probably.",
+                choices: [
+                    { text: "Start Over", next: 'start' }
+                ]
+            },
+            too_much_coffee: {
+                text: "You can hear your heartbeat in colors. You've transcended caffeine and entered a higher plane of existence.\n\nTime is meaningless. Work is meaningless. You are infinite and also need to sit down immediately.\n\nYou phase through the floor into your downstairs neighbor's apartment. They scream.",
+                location: "❓ Unknown dimension",
+                ending: true,
+                achievement: "COFFEE DIMENSION TRAVELER",
+                endingText: "💀 ENDING: You spend the day apologizing to your neighbor and trying to explain quantum mechanics. You never make it to work. You're not even sure work is real anymore.",
+                choices: [
+                    { text: "Start Over", next: 'start' }
+                ]
+            },
+            call_sick: {
+                text: "You call your boss. Your voice sounds perfectly healthy. Your boss knows. You know they know. They know you know they know.\n\n'Sure, feel better,' they say, their voice dripping with barely concealed knowledge of your deception.\n\nYou've won... but at what cost?",
+                location: "🏠 Home",
+                choices: [
+                    { text: "Go back to sleep victoriously", next: 'victory_sleep' },
+                    { text: "Feel guilty and do chores", next: 'guilty_chores' },
+                    { text: "Watch 8 hours of TV", next: 'tv_marathon' }
+                ]
+            },
+            victory_sleep: {
+                text: "You sleep until 2pm. It's glorious. You dream of being a dolphin.\n\nWhen you wake up, you've achieved enlightenment. You understand the universe. But also you're confused about what day it is.",
+                location: "🏠 Home - Bedroom",
+                ending: true,
+                achievement: "PROFESSIONAL SLACKER",
+                endingText: "💀 ENDING: You've successfully avoided work. Tomorrow you'll have to face everyone knowing you weren't really sick. But that's Tomorrow You's problem. Today You is well-rested.",
+                choices: [
+                    { text: "Start Over", next: 'start' }
+                ]
+            },
+            guilty_chores: {
+                text: "Guilt consumes you. You clean the entire house, do laundry, meal prep, and organize your taxes.\n\nBy 3pm, you've been more productive at home than you would've been at work.",
+                location: "🏠 Home",
+                ending: true,
+                achievement: "GUILT-POWERED PRODUCTIVITY",
+                endingText: "💀 ENDING: You've successfully converted guilt into domestic productivity. Your apartment has never looked better. You still feel bad about lying, but at least you accomplished something.",
+                choices: [
+                    { text: "Start Over", next: 'start' }
+                ]
+            },
+            tv_marathon: {
+                text: "You watch an entire season of a show about people doing a job you called in sick from.\n\nThe irony is not lost on you. The day passes in a blur of snacks and minor guilt. Tomorrow you'll have to face the consequences.\n\nBut that's Tomorrow You's problem.",
+                location: "🏠 Home - Couch",
+                ending: true,
+                achievement: "SUCCESSFULLY WASTED A PERFECTLY GOOD DAY",
+                endingText: "💀 ENDING: You spent 8 hours watching fictional people work while avoiding your actual work. The snacks were good though. Your couch has a permanent you-shaped indent now.",
+                choices: [
+                    { text: "Start Over", next: 'start' }
+                ]
+            }
+        };
+
+        const allAchievements = [
+            "COFFEE PHILOSOPHER",
+            "REGRET COMMUTER",
+            "FLOOR DWELLER",
+            "FUNCTIONAL ADULT",
+            "DETERMINATION (QUESTIONABLE)",
+            "CAFFEINE VICTIM",
+            "CORPORATE SUPERHERO (BRIEFLY)",
+            "OFFICE LEGEND",
+            "DOMESTIC TORNADO",
+            "COFFEE DIMENSION TRAVELER",
+            "PROFESSIONAL SLACKER",
+            "GUILT-POWERED PRODUCTIVITY",
+            "SUCCESSFULLY WASTED A PERFECTLY GOOD DAY"
+        ];
+
+        // Game State
+        let gameState = 'start';
+        let stateHistory = ['start'];
+        let currentHistoryIndex = 0;
+        let visitedStates = new Set(['start']);
+        let achievements = [];
+        let questLog = [];
+
+        // Initialize the game
+        function init() {
+            updateDisplay();
+        }
+
+        // Update the display
+        function updateDisplay() {
+            const currentScenario = scenarios[gameState];
+
+            // Update location
+            document.getElementById('location').textContent = currentScenario.location;
+
+            // Update scenario text
+            document.getElementById('scenarioText').textContent = currentScenario.text;
+
+            // Update ending text
+            const endingTextEl = document.getElementById('endingText');
+            if (currentScenario.endingText) {
+                endingTextEl.textContent = currentScenario.endingText;
+                endingTextEl.style.display = 'block';
+            } else {
+                endingTextEl.style.display = 'none';
+            }
+
+            // Update ending warning
+            const endingWarning = document.getElementById('endingWarning');
+            if (currentScenario.ending) {
+                endingWarning.style.display = 'block';
+            } else {
+                endingWarning.style.display = 'none';
+            }
+
+            // Update choices
+            const choicesContainer = document.getElementById('choicesContainer');
+            choicesContainer.innerHTML = '';
+            currentScenario.choices.forEach(choice => {
+                const button = document.createElement('button');
+                button.className = 'choice-button';
+                button.textContent = '→ ' + choice.text;
+                button.onclick = () => handleChoice(choice.next);
+                choicesContainer.appendChild(button);
+            });
+
+            // Update achievements display
+            updateAchievementsDisplay();
+
+            // Update history display
+            updateHistoryDisplay();
+
+            // Update quest log display
+            updateQuestLogDisplay();
+
+            // Update nav buttons
+            document.getElementById('backBtn').disabled = currentHistoryIndex === 0;
+            document.getElementById('forwardBtn').disabled = currentHistoryIndex === stateHistory.length - 1;
+        }
+
+        // Handle choice selection
+        function handleChoice(nextState) {
+            if (currentHistoryIndex < stateHistory.length - 1) {
+                stateHistory = stateHistory.slice(0, currentHistoryIndex + 1);
+            }
+
+            questLog.push(scenarios[gameState].text);
+
+            stateHistory.push(nextState);
+            currentHistoryIndex++;
+            visitedStates.add(nextState);
+
+            const nextScenario = scenarios[nextState];
+            if (nextScenario && nextScenario.achievement) {
+                unlockAchievement(nextScenario.achievement);
+            }
+
+            gameState = nextState;
+
+            if (nextState === 'start') {
+                stateHistory = ['start'];
+                currentHistoryIndex = 0;
+                visitedStates = new Set(['start']);
+                achievements = []; // Reset achievements on start over
+                questLog = [];
+            }
+
+            updateDisplay();
+        }
+
+        // Unlock achievement
+        function unlockAchievement(achievement) {
+            if (!achievements.includes(achievement)) {
+                achievements.push(achievement);
+                showAchievementPopup(achievement);
+
+                if (achievements.length === allAchievements.length && !achievements.includes("THE ULTIMATE ACHIEVEMENT - 100% PERFECT COMPLETION")) {
+                    setTimeout(() => {
+                        achievements.push("THE ULTIMATE ACHIEVEMENT - 100% PERFECT COMPLETION");
+                        showAchievementPopup("THE ULTIMATE ACHIEVEMENT - 100% PERFECT COMPLETION");
+                    }, 3500);
+                }
+            }
+        }
+
+        // Show achievement popup
+        function showAchievementPopup(achievement) {
+            const popup = document.getElementById('achievementPopup');
+            const isUltimate = achievement === "THE ULTIMATE ACHIEVEMENT - 100% PERFECT COMPLETION";
+
+            popup.className = 'achievement-popup ' + (isUltimate ? 'ultimate' : 'normal');
+            document.getElementById('achievementTitle').textContent = isUltimate ? '🌟 ULTIMATE ACHIEVEMENT! 🌟' : '🎉 ACHIEVEMENT UNLOCKED!';
+            document.getElementById('achievementName').textContent = achievement;
+
+            popup.style.display = 'flex';
+            setTimeout(() => {
+                popup.style.display = 'none';
+            }, isUltimate ? 5000 : 3000);
+        }
+
+        // Update achievements display
+        function updateAchievementsDisplay() {
+            const achievementsBox = document.getElementById('achievementsBox');
+            const totalAchievementsCount = allAchievements.length + (achievements.includes("THE ULTIMATE ACHIEVEMENT - 100% PERFECT COMPLETION") ? 0 : 1); // Adjust for ultimate achievement
+
+            if (achievements.length > 0) {
+                achievementsBox.style.display = 'block';
+                document.getElementById('achievementCount').textContent = achievements.length;
+                document.getElementById('totalAchievements').textContent = totalAchievementsCount;
+                document.getElementById('achievementsLeft').textContent = totalAchievementsCount - achievements.length;
+
+                const progressPercentage = (achievements.length / totalAchievementsCount) * 100;
+                document.getElementById('progressFill').style.width = progressPercentage + '%';
+
+                const achievementsList = document.getElementById('achievementsList');
+                achievementsList.innerHTML = '';
+                achievements.forEach(ach => {
+                    const badge = document.createElement('span');
+                    badge.className = 'achievement-badge' + (ach === "THE ULTIMATE ACHIEVEMENT - 100% PERFECT COMPLETION" ? ' ultimate' : '');
+                    badge.textContent = '🏆 ' + ach;
+                    achievementsList.appendChild(badge);
+                });
+            } else {
+                achievementsBox.style.display = 'none';
+            }
+        }
+
+        // Update history display
+        function updateHistoryDisplay() {
+            const historyBox = document.getElementById('historyBox');
+            if (stateHistory.length > 1) {
+                historyBox.style.display = 'block';
+                document.getElementById('historyIndex').textContent = currentHistoryIndex + 1;
+                document.getElementById('historyLength').textContent = stateHistory.length;
+
+                const historyButtons = document.getElementById('historyButtons');
+                historyButtons.innerHTML = '';
+                stateHistory.forEach((state, idx) => {
+                    const button = document.createElement('button');
+                    button.className = 'history-button';
+                    if (idx === currentHistoryIndex) {
+                        button.classList.add('current');
+                    } else if (visitedStates.has(state)) {
+                        button.classList.add('visited');
+                    } else {
+                        button.classList.add('unvisited');
+                    }
+                    button.textContent = idx + 1;
+                    button.title = scenarios[state] ? scenarios[state].location : state;
+                    button.onclick = () => jumpToState(idx);
+                    historyButtons.appendChild(button);
+                });
+            } else {
+                historyBox.style.display = 'none';
+            }
+        }
+
+        // Update quest log display
+        function updateQuestLogDisplay() {
+            const questLogBox = document.getElementById('questLogBox');
+            if (questLog.length > 0) {
+                questLogBox.style.display = 'block';
+                const questLogEntries = document.getElementById('questLogEntries');
+                questLogEntries.innerHTML = '';
+                questLog.forEach((entry, idx) => {
+                    const entryDiv = document.createElement('p');
+                    entryDiv.className = 'quest-log-entry';
+                    entryDiv.textContent = entry;
+                    questLogEntries.appendChild(entryDiv);
+                });
+            } else {
+                questLogBox.style.display = 'none';
+            }
+        }
+
+        // Navigation functions
+        function goBack() {
+            if (currentHistoryIndex > 0) {
+                currentHistoryIndex--;
+                gameState = stateHistory[currentHistoryIndex];
+                updateDisplay();
+            }
+        }
+
+        function goForward() {
+            if (currentHistoryIndex < stateHistory.length - 1) {
+                currentHistoryIndex++;
+                gameState = stateHistory[currentHistoryIndex];
+                updateDisplay();
+            }
+        }
+
+        function jumpToState(index) {
+            currentHistoryIndex = index;
+            gameState = stateHistory[index];
+            updateDisplay();
+        }
+
+        // Start the game
+        init();
+    </script>
+</body>
+</html>
