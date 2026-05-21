@@ -1,0 +1,1342 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SuperSistema — Guia Completo do Código Java</title>
+<script>(function(){var t=localStorage.getItem('ss-theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,600;0,800;1,300;1,600&family=JetBrains+Mono:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ── THEME TOKENS ── */
+:root,[data-theme="dark"]{
+  --bg:#0b0d11;--bg2:#12151c;--bg3:#1a1e28;
+  --border:#22283a;--border2:#2e364d;
+  --text:#bcc5d8;--text-dim:#6e7a94;--text-head:#e4eaf7;
+  --accent:#5de4c7;--accent2:#f7a550;--accent3:#7eb3f7;--accent4:#e8c96a;
+  --danger:#f06060;--success:#5de49a;
+  --kw:#f7a550;--fn:#7eb3f7;--str:#5de4c7;--num:#e8c96a;--cmt:#5a6680;
+  --serif:'Fraunces',Georgia,serif;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --r:10px;--shadow:0 4px 32px rgba(0,0,0,.5);
+  --glow:0 0 32px rgba(93,228,199,.08);
+}
+[data-theme="light"]{
+  --bg:#f0f2f8;--bg2:#ffffff;--bg3:#e4e8f4;
+  --border:#ccd3e8;--border2:#b0bad4;
+  --text:#3a4260;--text-dim:#6a7490;--text-head:#111828;
+  --accent:#0a6b53;--accent2:#b84a0c;--accent3:#1a4ea0;--accent4:#7a5a00;
+  --danger:#c01414;--success:#0a6b3a;
+  --kw:#b84a0c;--fn:#1a4ea0;--str:#0a6b53;--num:#7a5a00;--cmt:#8a96b0;
+  --glow:0 0 32px rgba(10,107,83,.06);--shadow:0 4px 32px rgba(0,0,0,.10);
+}
+[data-theme="midnight"]{
+  --bg:#080b18;--bg2:#0e1225;--bg3:#141930;
+  --border:#1c2240;--border2:#253060;
+  --text:#a8b8e0;--text-dim:#5a6888;--text-head:#dce8ff;
+  --accent:#60aaff;--accent2:#ff8844;--accent3:#80d4ff;--accent4:#ffd060;
+  --danger:#ff6060;--success:#60ffaa;
+  --kw:#ff8844;--fn:#80d4ff;--str:#60ffaa;--num:#ffd060;--cmt:#3a4a6a;
+  --glow:0 0 40px rgba(96,170,255,.10);--shadow:0 4px 32px rgba(0,0,0,.7);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;font-size:16px}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-weight:300;line-height:1.8;-webkit-font-smoothing:antialiased;transition:background .22s,color .22s;}
+#pbar{position:fixed;top:0;left:0;height:3px;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent3));z-index:999;transition:width .08s linear;pointer-events:none;}
+.shell{display:grid;grid-template-columns:280px 1fr;min-height:100vh;max-width:1360px;margin:0 auto;position:relative;}
+.sidebar{position:sticky;top:0;height:100vh;overflow-y:auto;padding:2rem 1.25rem;border-right:1px solid var(--border);background:var(--bg);display:flex;flex-direction:column;gap:.15rem;scrollbar-width:thin;scrollbar-color:var(--border2) transparent;z-index:50;transition:background .22s,transform .25s;}
+.sidebar::-webkit-scrollbar{width:3px}.sidebar::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.logo{font-family:var(--mono);font-size:.62rem;font-weight:700;color:var(--accent);letter-spacing:.14em;text-transform:uppercase;margin-bottom:1.2rem;padding-bottom:1.2rem;border-bottom:1px solid var(--border);line-height:1.9;}
+.logo small{color:var(--text-dim);font-weight:400;display:block;margin-top:.2rem}
+.themes{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.3rem;margin-bottom:.8rem}
+.t-btn{padding:.32rem .2rem;font-family:var(--mono);font-size:.54rem;letter-spacing:.05em;text-transform:uppercase;border-radius:6px;cursor:pointer;border:1px solid var(--border);background:var(--bg2);color:var(--text-dim);transition:all .15s;display:flex;align-items:center;justify-content:center;gap:.25rem;}
+.t-btn:hover{border-color:var(--accent);color:var(--text-head);background:var(--bg3)}.t-btn.on{background:var(--accent);border-color:var(--accent);color:var(--bg);font-weight:700}
+.t-swatch{width:8px;height:8px;border-radius:50%}
+.nav-section{font-family:var(--mono);font-size:.56rem;font-weight:700;color:var(--text-dim);letter-spacing:.14em;text-transform:uppercase;margin:.9rem 0 .35rem .35rem}
+.nav-link{display:block;padding:.38rem .65rem;border-radius:7px;font-family:var(--sans);font-size:.8rem;color:var(--text-dim);text-decoration:none;border:1px solid transparent;transition:all .14s;line-height:1.4;}
+.nav-link:hover{background:var(--bg3);color:var(--text-head);border-color:var(--border)}
+.nav-link.active{background:rgba(93,228,199,.08);color:var(--accent);border-color:rgba(93,228,199,.18);font-weight:500}
+.nav-link .badge{float:right;font-family:var(--mono);font-size:.5rem;background:var(--bg3);border:1px solid var(--border2);color:var(--text-dim);padding:.05rem .3rem;border-radius:4px;}
+main{padding:3.5rem 3rem 5rem;min-width:0}
+.hero{margin-bottom:4rem}
+.hero-tag{font-family:var(--mono);font-size:.65rem;font-weight:700;color:var(--accent);letter-spacing:.18em;text-transform:uppercase;display:inline-flex;align-items:center;gap:.5rem;margin-bottom:1.1rem;}
+.hero-tag::before{content:'';width:24px;height:2px;background:var(--accent);border-radius:2px;}
+h1{font-family:var(--serif);font-size:3.2rem;font-weight:800;color:var(--text-head);line-height:1.12;margin-bottom:1.2rem;letter-spacing:-.02em;}
+h1 em{color:var(--accent);font-style:italic;font-weight:300}
+.hero-desc{font-size:1.08rem;color:var(--text-dim);max-width:640px;margin-bottom:2rem;line-height:1.85}
+.hero-chips{display:flex;flex-wrap:wrap;gap:.55rem}
+.chip{font-family:var(--mono);font-size:.65rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:.32rem .8rem;border-radius:20px;border:1px solid var(--border2);color:var(--text-dim);background:var(--bg2);}
+.chip-a{border-color:rgba(93,228,199,.4);color:var(--accent);background:rgba(93,228,199,.06)}
+.chip-o{border-color:rgba(247,165,80,.4);color:var(--accent2);background:rgba(247,165,80,.06)}
+.chip-b{border-color:rgba(126,179,247,.4);color:var(--accent3);background:rgba(126,179,247,.06)}
+.sec{margin-bottom:3.5rem;scroll-margin-top:2rem}
+.sec-tag{font-family:var(--mono);font-size:.58rem;font-weight:700;color:var(--accent2);letter-spacing:.16em;text-transform:uppercase;margin-bottom:.5rem;display:flex;align-items:center;gap:.4rem;}
+.sec-tag::after{content:'';flex:1;height:1px;background:var(--border);max-width:80px}
+h2{font-family:var(--serif);font-size:2rem;font-weight:600;color:var(--text-head);line-height:1.2;margin-bottom:.8rem;}
+h3{font-family:var(--serif);font-size:1.3rem;font-weight:600;color:var(--text-head);margin-bottom:.5rem;}
+.concept-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1rem;margin:1.5rem 0}
+.concept-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:1.2rem 1.3rem;transition:border-color .2s,box-shadow .2s;}
+.concept-card:hover{border-color:var(--accent);box-shadow:var(--glow)}
+.cc-icon{font-size:1.5rem;margin-bottom:.5rem}.cc-title{font-family:var(--mono);font-size:.72rem;font-weight:700;color:var(--accent);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.35rem}
+.cc-body{font-size:.88rem;color:var(--text-dim);line-height:1.7}
+.code-block{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin:2rem 0;box-shadow:var(--shadow);}
+.code-block-head{display:flex;align-items:center;gap:.6rem;padding:.7rem 1.2rem;border-bottom:1px solid var(--border);background:var(--bg3);}
+.cb-dots{display:flex;gap:.4rem}.cb-dot{width:10px;height:10px;border-radius:50%}
+.cb-dot-r{background:#f06060}.cb-dot-y{background:#e8c96a}.cb-dot-g{background:#5de49a}
+.cb-filename{font-family:var(--mono);font-size:.68rem;color:var(--text-dim);letter-spacing:.06em;margin-left:.2rem}
+.code-scroll{overflow-x:auto;padding:1.4rem 1.6rem}
+pre{font-family:var(--mono);font-size:.83rem;line-height:1.8;tab-size:4}
+.kw{color:var(--kw);font-weight:700}.fn{color:var(--fn)}.str{color:var(--str)}.num{color:var(--num)}.cmt{color:var(--cmt);font-style:italic}.cls{color:var(--accent4)}.op{color:var(--text-dim)}
+.line-cards{display:flex;flex-direction:column;gap:1.2rem;margin:1.5rem 0}
+.lc{display:grid;grid-template-columns:auto 1fr;gap:0;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;transition:border-color .18s,box-shadow .18s;}
+.lc:hover{border-color:var(--border2);box-shadow:0 2px 18px rgba(0,0,0,.25)}
+.lc-num{writing-mode:vertical-lr;text-orientation:mixed;transform:rotate(180deg);font-family:var(--mono);font-size:.58rem;font-weight:700;color:var(--bg3);background:var(--accent);display:flex;align-items:center;justify-content:center;padding:.6rem .4rem;letter-spacing:.08em;min-width:28px;text-transform:uppercase;}
+.lc-num.kw-num{background:var(--kw)}.lc-num.fn-num{background:var(--fn)}.lc-num.loop-num{background:var(--accent3)}.lc-num.cmt-num{background:var(--cmt)}.lc-num.if-num{background:var(--accent2)}.lc-num.sw-num{background:var(--accent4)}.lc-num.db-num{background:var(--danger)}.lc-num.ev-num{background:var(--success)}
+.lc-body{padding:1rem 1.3rem}
+.lc-code{font-family:var(--mono);font-size:.78rem;background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:.4rem .75rem;margin-bottom:.7rem;overflow-x:auto;white-space:pre;}
+.lc-title{font-family:var(--serif);font-size:1rem;font-weight:600;color:var(--text-head);margin-bottom:.3rem}
+.lc-exp{font-size:.88rem;color:var(--text);line-height:1.75}
+.lc-exp strong{color:var(--text-head);font-weight:600}.lc-exp em{color:var(--accent);font-style:normal;font-weight:500}
+.lc-analogy{margin-top:.7rem;padding:.6rem .9rem;background:rgba(126,179,247,.06);border:1px solid rgba(126,179,247,.18);border-radius:7px;font-size:.82rem;color:var(--accent3);line-height:1.65;}
+.lc-analogy::before{content:'💡 Analogia: ';font-weight:600}
+.lc-warn{margin-top:.7rem;padding:.6rem .9rem;background:rgba(247,165,80,.06);border:1px solid rgba(247,165,80,.18);border-radius:7px;font-size:.82rem;color:var(--accent2);line-height:1.65;}
+.lc-warn::before{content:'⚠ Atenção: ';font-weight:600}
+.pillar{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin:1.5rem 0;}
+.pillar-head{padding:1rem 1.4rem;background:var(--bg3);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.8rem;}
+.pillar-icon{font-size:1.4rem}.pillar-title{font-family:var(--serif);font-size:1.1rem;font-weight:600;color:var(--text-head)}
+.pillar-tag{font-family:var(--mono);font-size:.58rem;font-weight:700;padding:.18rem .5rem;border-radius:4px;letter-spacing:.08em;text-transform:uppercase;}
+.tag-jdbc{background:rgba(240,96,96,.15);color:var(--danger);border:1px solid rgba(240,96,96,.3)}
+.tag-swing{background:rgba(93,228,199,.15);color:var(--accent);border:1px solid rgba(93,228,199,.3)}
+.tag-static{background:rgba(232,201,106,.15);color:var(--accent4);border:1px solid rgba(232,201,106,.3)}
+.tag-event{background:rgba(126,179,247,.15);color:var(--accent3);border:1px solid rgba(126,179,247,.3)}
+.tag-sql{background:rgba(247,165,80,.15);color:var(--accent2);border:1px solid rgba(247,165,80,.3)}
+.tag-modal{background:rgba(93,228,154,.15);color:var(--success);border:1px solid rgba(93,228,154,.3)}
+.pillar-body{padding:1.2rem 1.4rem;font-size:.9rem;line-height:1.8}
+.pillar-body p+p{margin-top:.8rem}.pillar-body strong{color:var(--text-head)}
+.flow{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:1.8rem;margin:1.5rem 0;overflow-x:auto;}
+.flow-title{font-family:var(--mono);font-size:.62rem;font-weight:700;color:var(--text-dim);letter-spacing:.12em;text-transform:uppercase;margin-bottom:1.2rem}
+.flow-diagram{display:flex;flex-direction:column;align-items:center;gap:.3rem}
+.flow-box{padding:.55rem 1.4rem;border-radius:8px;font-family:var(--sans);font-size:.85rem;text-align:center;min-width:220px;font-weight:500;}
+.fb-start{background:rgba(93,228,199,.15);border:2px solid var(--accent);color:var(--accent)}
+.fb-proc{background:var(--bg3);border:1px solid var(--border2);color:var(--text-head)}
+.fb-dec{background:rgba(247,165,80,.12);border:2px solid var(--accent2);color:var(--accent2);padding:.55rem 2rem;}
+.fb-end{background:rgba(240,96,96,.12);border:2px solid var(--danger);color:var(--danger)}
+.fb-ok{background:rgba(93,228,154,.12);border:2px solid var(--success);color:var(--success)}
+.flow-arrow{font-size:1.1rem;color:var(--text-dim);line-height:1}
+.flow-branch{display:flex;gap:2rem;align-items:flex-start;margin:.3rem 0}
+.flow-branch-item{display:flex;flex-direction:column;align-items:center;gap:.3rem}
+.flow-label{font-family:var(--mono);font-size:.6rem;color:var(--text-dim);letter-spacing:.08em}
+.arch-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin:1.5rem 0}
+.arch-layer{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:1.1rem;transition:border-color .2s;}
+.arch-layer:hover{border-color:var(--accent2)}
+.arch-title{font-family:var(--mono);font-size:.6rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:.8rem;padding-bottom:.5rem;border-bottom:1px solid var(--border);}
+.arch-item{font-size:.82rem;color:var(--text-dim);padding:.25rem 0;border-bottom:1px dotted var(--border);display:flex;align-items:center;gap:.5rem;}
+.arch-item:last-child{border-bottom:none}
+.arch-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.security-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin:1.5rem 0}
+.sec-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:1.3rem;transition:border-color .2s;}
+.sec-card:hover{border-color:var(--border2)}
+.sec-card h4{font-family:var(--serif);font-size:1rem;font-weight:600;color:var(--text-head);margin-bottom:.5rem}
+.sec-card p{font-size:.87rem;color:var(--text-dim);line-height:1.7}
+.sec-card .sc-icon{font-size:1.6rem;margin-bottom:.6rem;display:block}
+.quiz-box{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);padding:1.8rem;margin:1.5rem 0;}
+.quiz-q{font-family:var(--serif);font-size:1.1rem;font-weight:600;color:var(--text-head);margin-bottom:1.1rem}
+.quiz-opts{display:flex;flex-direction:column;gap:.55rem}
+.quiz-opt{display:flex;align-items:flex-start;gap:.75rem;padding:.75rem 1rem;background:var(--bg3);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all .15s;font-size:.9rem;color:var(--text);}
+.quiz-opt:hover{border-color:var(--accent);color:var(--text-head);background:rgba(93,228,199,.06)}
+.quiz-opt.correct{border-color:var(--success);background:rgba(93,228,154,.08);color:var(--success)}
+.quiz-opt.wrong{border-color:var(--danger);background:rgba(240,96,96,.07);color:var(--danger)}
+.quiz-opt-num{font-family:var(--mono);font-size:.65rem;font-weight:700;width:22px;height:22px;border-radius:50%;background:var(--border2);color:var(--text-dim);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.quiz-feedback{margin-top:1rem;padding:.8rem 1rem;border-radius:8px;font-size:.88rem;display:none;line-height:1.65;}
+.quiz-feedback.show{display:block}
+.qf-ok{background:rgba(93,228,154,.08);border:1px solid var(--success);color:var(--success)}
+.qf-no{background:rgba(240,96,96,.07);border:1px solid var(--danger);color:var(--danger)}
+.tabs{display:flex;gap:.4rem;margin-bottom:1.2rem;flex-wrap:wrap}
+.tab-btn{padding:.4rem 1rem;font-family:var(--mono);font-size:.68rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;border-radius:7px;cursor:pointer;border:1px solid var(--border);background:var(--bg2);color:var(--text-dim);transition:all .14s;}
+.tab-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(93,228,199,.06)}
+.tab-btn.on{background:var(--accent);border-color:var(--accent);color:var(--bg);font-weight:700}
+.tab-pane{display:none}.tab-pane.on{display:block}
+.callout{padding:1rem 1.2rem;border-radius:9px;margin:1.2rem 0;font-size:.9rem;line-height:1.75;border-left:4px solid;}
+.c-info{border-color:var(--accent3);background:rgba(126,179,247,.07);color:var(--accent3)}
+.c-warn{border-color:var(--accent2);background:rgba(247,165,80,.07);color:var(--accent2)}
+.c-tip{border-color:var(--accent);background:rgba(93,228,199,.07);color:var(--accent)}
+.c-danger{border-color:var(--danger);background:rgba(240,96,96,.07);color:var(--danger)}
+.callout strong{font-weight:700;display:block;margin-bottom:.2rem}
+.mob-header{display:none;position:sticky;top:0;z-index:110;background:var(--bg);border-bottom:1px solid var(--border);padding:.8rem 1.25rem;align-items:center;justify-content:space-between;}
+.mob-title{font-family:var(--mono);font-size:.64rem;color:var(--accent);letter-spacing:.1em;text-transform:uppercase}
+.ham{background:none;border:1px solid var(--border);border-radius:7px;padding:.45rem .55rem;cursor:pointer;color:var(--text);display:flex;flex-direction:column;gap:4px;align-items:center;transition:all .15s;}
+.ham:hover{border-color:var(--accent);color:var(--accent)}
+.ham span{display:block;width:17px;height:1.5px;background:currentColor;transition:transform .2s,opacity .2s;transform-origin:center}
+.ham.on span:nth-child(1){transform:translateY(5.5px) rotate(45deg)}.ham.on span:nth-child(2){opacity:0}.ham.on span:nth-child(3){transform:translateY(-5.5px) rotate(-45deg)}
+#overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:90;backdrop-filter:blur(3px)}
+#overlay.on{display:block}
+.sep{border:none;border-top:1px solid var(--border);margin:2.5rem 0}
+.tbl-wrap{overflow-x:auto;margin:1rem 0}
+table{width:100%;border-collapse:collapse;font-size:.87rem}
+thead th{font-family:var(--mono);font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-dim);padding:.6rem .9rem;text-align:left;border-bottom:2px solid var(--border2);background:var(--bg3);}
+tbody td{padding:.65rem .9rem;border-bottom:1px solid var(--border);color:var(--text);vertical-align:top;}
+tbody tr:hover td{background:var(--bg3)}
+.t-kw{font-family:var(--mono);font-size:.78rem;color:var(--kw);font-weight:700}
+.t-fn{font-family:var(--mono);font-size:.78rem;color:var(--fn)}
+.t-acc{font-family:var(--mono);font-size:.78rem;color:var(--accent)}
+.t-str{font-family:var(--mono);font-size:.78rem;color:var(--str)}
+#btt{position:fixed;bottom:1.5rem;right:1.5rem;z-index:80;width:38px;height:38px;border-radius:50%;cursor:pointer;background:var(--bg3);border:1px solid var(--border2);color:var(--text-dim);font-size:.8rem;display:none;align-items:center;justify-content:center;transition:all .15s;box-shadow:var(--shadow);}
+#btt:hover{background:var(--accent);border-color:var(--accent);color:var(--bg)}#btt.show{display:flex}
+.section-observer-target{scroll-margin-top:1.5rem}
+@media(max-width:900px){
+  .shell{grid-template-columns:1fr}
+  .sidebar{position:fixed;top:0;left:0;width:78vw;max-width:320px;height:100vh;transform:translateX(-110%);transition:transform .26s ease;border-right:none;box-shadow:4px 0 30px rgba(0,0,0,.5);z-index:100;}
+  .sidebar.open{transform:translateX(0)}.mob-header{display:flex}
+  main{padding:2rem 1.2rem 4rem}h1{font-size:2.2rem}
+  .security-grid{grid-template-columns:1fr}.concept-grid{grid-template-columns:1fr 1fr}.arch-grid{grid-template-columns:1fr}
+}
+@media(max-width:500px){.concept-grid{grid-template-columns:1fr}.themes{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div id="pbar"></div>
+<button id="btt" aria-label="Voltar ao topo">↑</button>
+<header class="mob-header">
+  <span class="mob-title">SuperSistema · Guia Java</span>
+  <button class="ham" id="hamBtn" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+</header>
+<div id="overlay"></div>
+
+<div class="shell">
+  <!-- SIDEBAR -->
+  <nav class="sidebar" id="sidebar">
+    <div class="logo">SuperSistema · Java<br><small>Guia Completo · 9 Classes</small></div>
+    <div class="themes">
+      <button class="t-btn on" data-theme="dark"><span class="t-swatch" style="background:#5de4c7"></span>Dark</button>
+      <button class="t-btn" data-theme="light"><span class="t-swatch" style="background:#0a6b53"></span>Light</button>
+      <button class="t-btn" data-theme="midnight"><span class="t-swatch" style="background:#60aaff"></span>Night</button>
+    </div>
+    <div class="nav-section">Visão Geral</div>
+    <a class="nav-link" href="#intro">Introdução ao Projeto <span class="badge">START</span></a>
+    <a class="nav-link" href="#arquitetura">Arquitetura e Camadas</a>
+    <a class="nav-link" href="#conceitos">Conceitos Essenciais</a>
+    <div class="nav-section">Infraestrutura</div>
+    <a class="nav-link" href="#conexao">Conexao.java</a>
+    <a class="nav-link" href="#auditoria">AuditoriaUtil.java</a>
+    <div class="nav-section">Interface (Swing)</div>
+    <a class="nav-link" href="#formprincipal">FormPrincipal.java</a>
+    <a class="nav-link" href="#logindialog">LoginDialog.java</a>
+    <a class="nav-link" href="#listar">FormUsuariosListar.java</a>
+    <a class="nav-link" href="#editar">FormUsuarioEditar.java</a>
+    <a class="nav-link" href="#incluir">FormUsuariosIncluir.java</a>
+    <a class="nav-link" href="#excluir">FormUsuariosExcluir.java</a>
+    <a class="nav-link" href="#logform">FormLogAuditoria.java</a>
+    <div class="nav-section">Banco de Dados</div>
+    <a class="nav-link" href="#banco">Esquema MySQL</a>
+    <a class="nav-link" href="#logauditoria">Log de Auditoria</a>
+    <div class="nav-section">Avaliação</div>
+    <a class="nav-link" href="#quiz">🧠 Quiz</a>
+    <a class="nav-link" href="#seguranca">🔐 Pontos de Segurança</a>
+    <a class="nav-link" href="#glossario">📖 Glossário</a>
+  </nav>
+
+  <!-- MAIN -->
+  <main id="main-content">
+
+    <!-- HERO -->
+    <section class="hero section-observer-target" id="intro">
+      <div class="hero-tag">Guia Técnico Completo</div>
+      <h1>SuperSistema<br><em>linha por linha</em></h1>
+      <p class="hero-desc">Explicação <strong>absoluta e sem jargão</strong> de cada classe do sistema desktop Java com Swing e MySQL. Da conexão ao banco até a auditoria de ações — tudo destrinchado como se você nunca tivesse programado.</p>
+      <div class="hero-chips">
+        <span class="chip chip-a">Java Swing · JDBC · MySQL</span>
+        <span class="chip chip-o">9 Classes · CRUD Completo</span>
+        <span class="chip chip-b">JFrame · JDialog · PreparedStatement</span>
+        <span class="chip">Log de Auditoria</span>
+      </div>
+    </section>
+
+    <hr class="sep">
+
+    <!-- ARQUITETURA -->
+    <section class="sec section-observer-target" id="arquitetura">
+      <div class="sec-tag">Como o projeto se organiza</div>
+      <h2>Arquitetura em 3 Camadas</h2>
+      <p style="margin-bottom:1.5rem;max-width:680px;color:var(--text-dim)">O SuperSistema é organizado em três camadas distintas. Cada camada tem uma responsabilidade clara — isso é bom design de software.</p>
+      <div class="arch-grid">
+        <div class="arch-layer">
+          <div class="arch-title" style="color:var(--accent)">🖥 Apresentação (GUI)</div>
+          <div class="arch-item"><span class="arch-dot" style="background:var(--accent)"></span>FormPrincipal</div>
+          <div class="arch-item"><span class="arch-dot" style="background:var(--accent)"></span>LoginDialog</div>
+          <div class="arch-item"><span class="arch-dot" style="background:var(--accent)"></span>FormUsuariosListar</div>
+          <div class="arch-item"><span class="arch-dot" style="background:var(--accent)"></span>FormUsuarioEditar</div>
+          <div class="arch-item"><span class="arch-dot" style="background:var(--accent)"></span>FormLogAuditoria</div>
+        </div>
+        <div class="arch-layer">
+          <div class="arch-title" style="color:var(--accent2)">⚙️ Serviço / Utilitários</div>
+          <div class="arch-item"><span class="arch-dot" style="background:var(--accent2)"></span>FormUsuariosIncluir</div>
+          <div class="arch-item"><span class="arch-dot" style="background:var(--accent2)"></span>FormUsuariosExcluir</div>
+          <div class="arch-item"><span class="arch-dot" style="background:var(--accent2)"></span>AuditoriaUtil</div>
+        </div>
+        <div class="arch-layer">
+          <div class="arch-title" style="color:var(--accent3)">🔌 Infraestrutura</div>
+          <div class="arch-item"><span class="arch-dot" style="background:var(--accent3)"></span>Conexao.java</div>
+          <div class="arch-item"><span class="arch-dot" style="background:var(--accent3)"></span>MySQL (remoto)</div>
+          <div class="arch-item"><span class="arch-dot" style="background:var(--accent3)"></span>auditoria.log</div>
+        </div>
+      </div>
+      <div class="callout c-info">
+        <strong>💡 Por que separar em camadas?</strong>
+        Quando cada parte do código tem uma responsabilidade única, fica mais fácil encontrar bugs, fazer mudanças e entender o que cada arquivo faz. A Conexao.java sabe <em>só</em> como conectar ao banco. O FormPrincipal sabe <em>só</em> como mostrar a janela principal. Nenhum dos dois faz o trabalho do outro.
+      </div>
+    </section>
+
+    <hr class="sep">
+
+    <!-- CONCEITOS ESSENCIAIS -->
+    <section class="sec section-observer-target" id="conceitos">
+      <div class="sec-tag">Base teórica necessária</div>
+      <h2>Conceitos Essenciais — sem mistério</h2>
+      <div class="concept-grid">
+        <div class="concept-card">
+          <div class="cc-icon">🪟</div>
+          <div class="cc-title">JFrame</div>
+          <div class="cc-body">Uma <strong>janela independente</strong> do Windows/Mac/Linux. O <code style="font-family:var(--mono);color:var(--accent)">FormPrincipal</code> e <code style="font-family:var(--mono);color:var(--accent)">FormUsuariosListar</code> são JFrames — cada um abre uma janela nova na tela.</div>
+        </div>
+        <div class="concept-card">
+          <div class="cc-icon">📋</div>
+          <div class="cc-title">JDialog</div>
+          <div class="cc-body">Uma <strong>janela filha modal</strong> — bloqueia a janela pai até ser fechada. O <code style="font-family:var(--mono);color:var(--accent)">LoginDialog</code> e <code style="font-family:var(--mono);color:var(--accent)">FormUsuarioEditar</code> são JDialogs para forçar o usuário a interagir.</div>
+        </div>
+        <div class="concept-card">
+          <div class="cc-icon">🔌</div>
+          <div class="cc-title">JDBC</div>
+          <div class="cc-body">Java Database Connectivity — a "ponte" entre o Java e qualquer banco de dados. Com JDBC, o Java envia SQL ao MySQL e recebe os resultados, tudo via código Java.</div>
+        </div>
+        <div class="concept-card">
+          <div class="cc-icon">🛡</div>
+          <div class="cc-title">PreparedStatement</div>
+          <div class="cc-body">Forma segura de enviar SQL ao banco. Os <code style="font-family:var(--mono);color:var(--num)">?</code> são preenchidos separadamente — isso bloqueia <strong>SQL Injection</strong>, um ataque muito comum.</div>
+        </div>
+        <div class="concept-card">
+          <div class="cc-icon">📄</div>
+          <div class="cc-title">ResultSet</div>
+          <div class="cc-body">É como uma <strong>tabela em memória</strong> com os resultados de um SELECT. Você percorre linha por linha com <code style="font-family:var(--mono);color:var(--fn)">rs.next()</code> e lê cada coluna com <code style="font-family:var(--mono);color:var(--fn)">rs.getString()</code>.</div>
+        </div>
+        <div class="concept-card">
+          <div class="cc-icon">⚡</div>
+          <div class="cc-title">ActionListener</div>
+          <div class="cc-body">Um "ouvinte de eventos". Quando o usuário clica em um botão, o ActionListener <strong>detecta o clique e executa um bloco de código</strong> — é como instalar um campainha que toca quando algo acontece.</div>
+        </div>
+        <div class="concept-card">
+          <div class="cc-icon">📊</div>
+          <div class="cc-title">JTable / DefaultTableModel</div>
+          <div class="cc-body">JTable é a grade visual de linhas e colunas. DefaultTableModel é o <strong>conjunto de dados por trás dela</strong>. Você alimenta o modelo, e a tabela exibe automaticamente.</div>
+        </div>
+        <div class="concept-card">
+          <div class="cc-icon">🧵</div>
+          <div class="cc-title">SwingUtilities.invokeLater</div>
+          <div class="cc-body">O Swing tem uma regra: <strong>toda interface gráfica deve ser criada em uma thread especial</strong> chamada EDT. O <code style="font-family:var(--mono);color:var(--fn)">invokeLater</code> garante isso — sem ele, podem ocorrer bugs visuais aleatórios.</div>
+        </div>
+      </div>
+
+      <div class="pillar">
+        <div class="pillar-head"><span class="pillar-icon">🔌</span><span class="pillar-title">Como o JDBC funciona — do Java ao MySQL</span><span class="pillar-tag tag-jdbc">JDBC</span></div>
+        <div class="pillar-body">
+          <p>Quando o Java precisa buscar ou salvar dados, ele abre uma <strong>Connection</strong> (canal direto ao banco), prepara um <strong>PreparedStatement</strong> (o SQL com <code style="font-family:var(--mono)">?</code> como placeholders), preenche os <code style="font-family:var(--mono)">?</code> com os valores reais, executa a query e recebe um <strong>ResultSet</strong> com os resultados.</p>
+          <p>Cada <code style="font-family:var(--mono)">Connection</code> aberta consome recursos do banco. Por isso, todo código de banco do projeto termina com <code style="font-family:var(--mono)">rs.close() → stmt.close() → conn.close()</code>. Esquecer de fechar a conexão é como deixar a torneira aberta — eventualmente o banco fica sem "água".</p>
+        </div>
+      </div>
+
+      <div class="pillar">
+        <div class="pillar-head"><span class="pillar-icon">🪟</span><span class="pillar-title">Como o Swing funciona — componentes e eventos</span><span class="pillar-tag tag-swing">Swing</span></div>
+        <div class="pillar-body">
+          <p>O Swing monta interfaces empilhando <strong>componentes</strong> (JButton, JTextField, JLabel, JTable...) dentro de <strong>painéis</strong> (JPanel) que ficam dentro de <strong>janelas</strong> (JFrame/JDialog). Cada componente pode ter <strong>listeners</strong> que disparam código quando o usuário interage.</p>
+          <p>Os <strong>LayoutManagers</strong> controlam como os componentes se posicionam. O <code style="font-family:var(--mono)">BorderLayout</code> divide a janela em Norte/Sul/Leste/Oeste/Centro. O <code style="font-family:var(--mono)">GridBagLayout</code> dá controle fino de posição — linha, coluna, espaçamento — como uma planilha.</p>
+        </div>
+      </div>
+    </section>
+
+    <hr class="sep">
+
+    <!-- CONEXAO.JAVA -->
+    <section class="sec section-observer-target" id="conexao">
+      <div class="sec-tag">Camada de infraestrutura</div>
+      <h2>Conexao.java — A fábrica de conexões</h2>
+      <p style="margin-bottom:1.2rem;color:var(--text-dim)">Esta é a classe mais fundamental do projeto: sem ela, nenhuma outra classe consegue falar com o banco de dados.</p>
+
+      <div class="code-block">
+        <div class="code-block-head"><div class="cb-dots"><div class="cb-dot cb-dot-r"></div><div class="cb-dot cb-dot-y"></div><div class="cb-dot cb-dot-g"></div></div><span class="cb-filename">Conexao.java</span></div>
+        <div class="code-scroll"><pre><span class="kw">package</span> javasistema;                                                    <span class="cmt">// linha 1</span>
+<span class="kw">import</span> java.sql.<span class="cls">Connection</span>;                                             <span class="cmt">// linha 3</span>
+<span class="kw">import</span> java.sql.<span class="cls">DriverManager</span>;                                          <span class="cmt">// linha 4</span>
+
+<span class="kw">public class</span> <span class="cls">Conexao</span> {
+    <span class="kw">private static final</span> <span class="cls">String</span> URL = <span class="str">"jdbc:mysql://bd_savir.mysql..."</span>;  <span class="cmt">// linha 7</span>
+    <span class="kw">private static final</span> <span class="cls">String</span> USUARIO = <span class="str">"bd_savir"</span>;                   <span class="cmt">// linha 8</span>
+    <span class="kw">private static final</span> <span class="cls">String</span> SENHA = <span class="str">"B@nc0D@d0s"</span>;                  <span class="cmt">// linha 9</span>
+
+    <span class="kw">static</span> {                                                               <span class="cmt">// linha 11</span>
+        <span class="kw">try</span> {
+            <span class="cls">Class</span>.<span class="fn">forName</span>(<span class="str">"com.mysql.cj.jdbc.Driver"</span>);                   <span class="cmt">// linha 13</span>
+        } <span class="kw">catch</span> (<span class="cls">ClassNotFoundException</span> e) { ... }
+    }
+
+    <span class="kw">public static</span> <span class="cls">Connection</span> <span class="fn">getConnection</span>() <span class="kw">throws</span> <span class="cls">Exception</span> {        <span class="cmt">// linha 20</span>
+        <span class="kw">return</span> <span class="cls">DriverManager</span>.<span class="fn">getConnection</span>(URL, USUARIO, SENHA);          <span class="cmt">// linha 21</span>
+    }
+
+    <span class="kw">public static boolean</span> <span class="fn">testarConexao</span>() {                             <span class="cmt">// linha 26</span>
+        <span class="kw">try</span> (<span class="cls">Connection</span> conn = <span class="fn">getConnection</span>()) {
+            <span class="kw">if</span> (conn != <span class="kw">null</span>) { <span class="kw">return true</span>; }
+        } <span class="kw">catch</span> (<span class="cls">Exception</span> e) { ... }
+        <span class="kw">return false</span>;
+    }
+}</pre></div>
+      </div>
+
+      <div class="line-cards">
+        <div class="lc">
+          <div class="lc-num kw-num">L1</div>
+          <div class="lc-body">
+            <div class="lc-code"><span class="kw">package</span> javasistema;</div>
+            <div class="lc-title">Declaração de pacote — organizando o projeto</div>
+            <div class="lc-exp"><strong>package</strong> é como uma "pasta lógica" no Java. Todas as 9 classes do projeto pertencem ao pacote <em>javasistema</em>, o que significa que elas podem se enxergar e usar umas às outras livremente sem importações extras.<br><br>Sem essa declaração, o Java trataria cada arquivo como uma classe isolada e não saberia que elas pertencem ao mesmo sistema.</div>
+            <div class="lc-analogy">É como colocar todos os arquivos de um departamento na mesma pasta do servidor — eles se encontram e colaboram automaticamente.</div>
+          </div>
+        </div>
+
+        <div class="lc">
+          <div class="lc-num kw-num">L7–9</div>
+          <div class="lc-body">
+            <div class="lc-code"><span class="kw">private static final</span> <span class="cls">String</span> URL = <span class="str">"jdbc:mysql://..."</span>;
+<span class="kw">private static final</span> <span class="cls">String</span> USUARIO = <span class="str">"bd_savir"</span>;
+<span class="kw">private static final</span> <span class="cls">String</span> SENHA = <span class="str">"B@nc0D@d0s"</span>;</div>
+            <div class="lc-title">Constantes de configuração do banco</div>
+            <div class="lc-exp">
+              Cada palavra tem um significado preciso:<br><br>
+              • <strong>private</strong> → só a própria classe <em>Conexao</em> pode ver esses valores<br>
+              • <strong>static</strong> → existem uma única vez na memória, não se repetem por instância<br>
+              • <strong>final</strong> → o valor <em>nunca</em> pode ser alterado depois de definido (é uma constante)<br>
+              • <strong>String</strong> → tipo de dado: texto<br><br>
+              A <em>URL</em> tem o formato <code style="font-family:var(--mono);color:var(--str)">jdbc:mysql://host:porta/banco?parametros</code>. Cada parte instrui o driver JDBC sobre onde conectar e com quais configurações.
+            </div>
+            <div class="lc-warn">Credenciais em texto claro no código-fonte são uma vulnerabilidade de segurança grave. Qualquer pessoa com acesso ao .java vê a senha. A solução correta é usar variáveis de ambiente ou arquivo .properties fora do repositório.</div>
+          </div>
+        </div>
+
+        <div class="lc">
+          <div class="lc-num sw-num">L11–15</div>
+          <div class="lc-body">
+            <div class="lc-code"><span class="kw">static</span> {
+    <span class="cls">Class</span>.<span class="fn">forName</span>(<span class="str">"com.mysql.cj.jdbc.Driver"</span>);
+}</div>
+            <div class="lc-title">Bloco estático — executa UMA vez quando a classe é carregada</div>
+            <div class="lc-exp">
+              O <strong>bloco static { }</strong> é especial: ele roda automaticamente quando a JVM (Java Virtual Machine) carrega a classe na memória pela primeira vez — antes de qualquer método ser chamado.<br><br>
+              <strong>Class.forName()</strong> localiza e registra o driver MySQL na memória. Sem isso, o <em>DriverManager</em> não saberia como se comunicar com um banco MySQL — ele não saberia "falar a língua" do MySQL.
+            </div>
+            <div class="lc-analogy">É como instalar um tradutor antes de começar uma reunião com alguém que fala outro idioma. O bloco static instala o "tradutor MySQL" antes de qualquer conversa com o banco.</div>
+          </div>
+        </div>
+
+        <div class="lc">
+          <div class="lc-num db-num">L20–22</div>
+          <div class="lc-body">
+            <div class="lc-code"><span class="kw">public static</span> <span class="cls">Connection</span> <span class="fn">getConnection</span>() <span class="kw">throws</span> <span class="cls">Exception</span> {
+    <span class="kw">return</span> <span class="cls">DriverManager</span>.<span class="fn">getConnection</span>(URL, USUARIO, SENHA);
+}</div>
+            <div class="lc-title">getConnection() — abre e devolve um canal ao banco</div>
+            <div class="lc-exp">
+              Este método é o <strong>ponto central do projeto</strong> — toda classe que precisa do banco chama <code style="font-family:var(--mono);color:var(--fn)">Conexao.getConnection()</code>.<br><br>
+              • <strong>public static</strong> → qualquer classe pode chamar sem criar um objeto Conexao<br>
+              • Retorna uma <strong>Connection</strong> — o canal aberto com o banco<br>
+              • <strong>throws Exception</strong> → se a conexão falhar, o método lança uma exceção para quem o chamou tratar<br><br>
+              <em>Cada chamada abre uma nova conexão</em>. Por isso, toda chamada deve ser seguida por <code style="font-family:var(--mono)">conn.close()</code> para não esgotar as conexões disponíveis.
+            </div>
+            <div class="lc-analogy">É como um ramal telefônico centralizado. Qualquer funcionário (classe) liga para o mesmo número (getConnection) e recebe uma linha direta ao banco.</div>
+          </div>
+        </div>
+
+        <div class="lc">
+          <div class="lc-num ev-num">L26–33</div>
+          <div class="lc-body">
+            <div class="lc-code"><span class="kw">public static boolean</span> <span class="fn">testarConexao</span>() {
+    <span class="kw">try</span> (<span class="cls">Connection</span> conn = <span class="fn">getConnection</span>()) {
+        <span class="kw">if</span> (conn != <span class="kw">null</span>) { <span class="kw">return true</span>; }
+    } <span class="kw">catch</span> (<span class="cls">Exception</span> e) { ... }
+    <span class="kw">return false</span>;
+}</div>
+            <div class="lc-title">testarConexao() — verifica se o banco está acessível antes de logar</div>
+            <div class="lc-exp">
+              O <em>LoginDialog</em> chama este método antes de tentar autenticar o usuário. Se o banco estiver offline, evita que a tela trave esperando por uma conexão que nunca virá.<br><br>
+              O <strong>try-with-resources</strong> (try com parênteses) fecha a conexão automaticamente ao sair do bloco — mesmo que dê erro. É uma versão mais segura de abrir e fechar conexão.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <hr class="sep">
+
+    <!-- AUDITORIAUTIL -->
+    <section class="sec section-observer-target" id="auditoria">
+      <div class="sec-tag">Preocupação transversal</div>
+      <h2>AuditoriaUtil.java — O registrador de eventos</h2>
+      <p style="margin-bottom:1.2rem;color:var(--text-dim)">Toda ação importante no sistema é registrada permanentemente em um arquivo texto — login, logout, criação, edição e exclusão de usuários.</p>
+
+      <div class="code-block">
+        <div class="code-block-head"><div class="cb-dots"><div class="cb-dot cb-dot-r"></div><div class="cb-dot cb-dot-y"></div><div class="cb-dot cb-dot-g"></div></div><span class="cb-filename">AuditoriaUtil.java</span></div>
+        <div class="code-scroll"><pre><span class="kw">private static final</span> <span class="cls">String</span> ARQUIVO_LOG = <span class="str">"auditoria.log"</span>;             <span class="cmt">// linha 17</span>
+<span class="kw">private static final</span> <span class="cls">DateTimeFormatter</span> FORMATO =
+    <span class="cls">DateTimeFormatter</span>.<span class="fn">ofPattern</span>(<span class="str">"yyyy-MM-dd HH:mm:ss"</span>);               <span class="cmt">// linha 20</span>
+
+<span class="kw">public static void</span> <span class="fn">registrar</span>(<span class="cls">String</span> login, <span class="cls">String</span> evento, <span class="cls">String</span> detalhe) {
+    <span class="cls">String</span> dataHora = <span class="cls">LocalDateTime</span>.<span class="fn">now</span>().<span class="fn">format</span>(FORMATO);              <span class="cmt">// linha 27</span>
+    <span class="cls">String</span> linha = dataHora + <span class="str">" | "</span> + login + <span class="str">" | "</span> + evento + <span class="str">" | "</span> + detalhe; <span class="cmt">// linha 30</span>
+
+    <span class="kw">try</span> {
+        <span class="cls">FileWriter</span> fw = <span class="kw">new</span> <span class="cls">FileWriter</span>(ARQUIVO_LOG, <span class="kw">true</span>);              <span class="cmt">// linha 33 — append!</span>
+        <span class="cls">PrintWriter</span> pw = <span class="kw">new</span> <span class="cls">PrintWriter</span>(fw);
+        pw.<span class="fn">println</span>(linha);
+        pw.<span class="fn">close</span>();
+    } <span class="kw">catch</span> (<span class="cls">IOException</span> e) {
+        <span class="cls">System</span>.err.<span class="fn">println</span>(<span class="str">"Erro ao gravar auditoria: "</span> + e.<span class="fn">getMessage</span>()); <span class="cmt">// linha 40</span>
+    }
+}</pre></div>
+      </div>
+
+      <div class="line-cards">
+        <div class="lc">
+          <div class="lc-num sw-num">Classe</div>
+          <div class="lc-body">
+            <div class="lc-code"><span class="kw">public class</span> <span class="cls">AuditoriaUtil</span> — sem atributos de instância</div>
+            <div class="lc-title">Classe utilitária totalmente estática</div>
+            <div class="lc-exp">Esta classe existe apenas para fornecer o método <em>registrar()</em>. Nunca é instanciada com <code style="font-family:var(--mono)">new AuditoriaUtil()</code>. Todos os seus membros são <strong>static</strong>, o que significa que são chamados diretamente pela classe: <code style="font-family:var(--mono);color:var(--fn)">AuditoriaUtil.registrar(...)</code>.<br><br>É chamado de <strong>padrão utilitário</strong> — uma classe-ferramenta que outras classes usam sem precisar criar objetos.</div>
+            <div class="lc-analogy">É como uma impressora de rede compartilhada. Qualquer departamento (classe) pode mandar imprimir (registrar) sem precisar ter uma impressora própria (instanciar).</div>
+          </div>
+        </div>
+
+        <div class="lc">
+          <div class="lc-num kw-num">L20</div>
+          <div class="lc-body">
+            <div class="lc-code"><span class="cls">DateTimeFormatter</span>.<span class="fn">ofPattern</span>(<span class="str">"yyyy-MM-dd HH:mm:ss"</span>)</div>
+            <div class="lc-title">Formatador de data e hora</div>
+            <div class="lc-exp">
+              O <strong>DateTimeFormatter</strong> define como a data e hora serão escritas no log. O padrão <code style="font-family:var(--mono);color:var(--str)">yyyy-MM-dd HH:mm:ss</code> gera datas no formato ISO: <code style="font-family:var(--mono);color:var(--num)">2026-05-14 00:53:54</code>.<br><br>
+              • <strong>yyyy</strong> = ano com 4 dígitos &nbsp;• <strong>MM</strong> = mês &nbsp;• <strong>dd</strong> = dia<br>
+              • <strong>HH</strong> = hora (24h) &nbsp;• <strong>mm</strong> = minuto &nbsp;• <strong>ss</strong> = segundo
+            </div>
+          </div>
+        </div>
+
+        <div class="lc">
+          <div class="lc-num fn-num">L33</div>
+          <div class="lc-body">
+            <div class="lc-code"><span class="kw">new</span> <span class="cls">FileWriter</span>(ARQUIVO_LOG, <span class="kw">true</span>)</div>
+            <div class="lc-title">FileWriter com append=true — nunca apaga o histórico</div>
+            <div class="lc-exp">
+              O segundo parâmetro <strong>true</strong> ativa o modo <em>append</em> (adicionar). Isso significa que cada nova linha de log é <strong>adicionada ao final do arquivo</strong>, nunca sobrescrevendo o que já está lá.<br><br>
+              Se esse parâmetro fosse <code style="font-family:var(--mono);color:var(--num)">false</code>, o arquivo seria apagado e reescrito a cada ação — perdendo todo o histórico. Com <code style="font-family:var(--mono);color:var(--num)">true</code>, o log cresce indefinidamente e nunca perde eventos anteriores.
+            </div>
+            <div class="lc-analogy">É como um diário que só aceita novas entradas no final — você não pode apagar o que escreveu antes.</div>
+          </div>
+        </div>
+
+        <div class="lc">
+          <div class="lc-num if-num">L40</div>
+          <div class="lc-body">
+            <div class="lc-code"><span class="cls">System</span>.err.<span class="fn">println</span>(<span class="str">"Erro ao gravar auditoria: "</span> + e.<span class="fn">getMessage</span>());</div>
+            <div class="lc-title">Tratamento silencioso de erro — o sistema não trava</div>
+            <div class="lc-exp">
+              Se o arquivo de log não puder ser gravado (disco cheio, permissão negada...), o código captura o erro e imprime no console de erro — mas <strong>não lança a exceção nem interrompe o sistema</strong>.<br><br>
+              Essa é uma decisão de design deliberada: a auditoria é importante, mas não tão crítica a ponto de impedir uma operação de cadastro, por exemplo.<br><br>
+              <strong>System.err</strong> (diferente de <strong>System.out</strong>) é o canal de erros — aparece em vermelho no terminal e pode ser redirecionado separadamente dos logs normais.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h3 style="margin:1.8rem 0 .8rem">Eventos registrados pelo sistema</h3>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Evento</th><th>Quem chama</th><th>Quando</th></tr></thead>
+          <tbody>
+            <tr><td class="t-acc">LOGIN</td><td>FormPrincipal.realizarLogin()</td><td>Após autenticação bem-sucedida no banco</td></tr>
+            <tr><td class="t-acc">LOGOUT</td><td>FormPrincipal (listener do menu)</td><td>Após usuário confirmar "Sim" na caixa de logout</td></tr>
+            <tr><td class="t-acc">INCLUIR_USUARIO</td><td>FormUsuarioEditar.salvar()</td><td>Após INSERT bem-sucedido na tb_usuarios</td></tr>
+            <tr><td class="t-acc">EDITAR_USUARIO</td><td>FormUsuarioEditar.salvar()</td><td>Após UPDATE bem-sucedido na tb_usuarios</td></tr>
+            <tr><td class="t-acc">EXCLUIR_USUARIO</td><td>FormUsuariosExcluir.excluir()</td><td>Após DELETE bem-sucedido na tb_usuarios</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <hr class="sep">
+
+    <!-- FORMPRINCIPAL -->
+    <section class="sec section-observer-target" id="formprincipal">
+      <div class="sec-tag">Ponto de entrada do sistema</div>
+      <h2>FormPrincipal.java — A janela mãe</h2>
+      <p style="margin-bottom:1.2rem;color:var(--text-dim)">É o primeiro arquivo a rodar e a janela que nunca fecha enquanto o sistema está aberto. Contém o método <code style="font-family:var(--mono);color:var(--accent)">main</code> e gerencia o menu dinâmico.</p>
+
+      <div class="code-block">
+        <div class="code-block-head"><div class="cb-dots"><div class="cb-dot cb-dot-r"></div><div class="cb-dot cb-dot-y"></div><div class="cb-dot cb-dot-g"></div></div><span class="cb-filename">FormPrincipal.java</span></div>
+        <div class="code-scroll"><pre><span class="kw">public class</span> <span class="cls">FormPrincipal</span> <span class="kw">extends</span> <span class="cls">JFrame</span> {                       <span class="cmt">// linha 7</span>
+
+    <span class="kw">private</span> <span class="cls">String</span> usuarioLogado = <span class="kw">null</span>;                              <span class="cmt">// linha 9</span>
+    <span class="kw">private</span> <span class="cls">String</span> loginUsuarioLogado = <span class="kw">null</span>;                         <span class="cmt">// linha 11</span>
+    <span class="kw">private</span> <span class="cls">String</span> empresaLogada = <span class="kw">null</span>;                              <span class="cmt">// linha 13</span>
+
+    <span class="kw">private final</span> <span class="cls">JMenuBar</span> menuBar;                                   <span class="cmt">// linha 16</span>
+    <span class="kw">private</span> <span class="cls">JMenu</span> menuUsuarios;    <span class="cmt">// aparece só logado</span>               <span class="cmt">// linha 21</span>
+    <span class="kw">private</span> <span class="cls">JMenu</span> menuSeguranca;   <span class="cmt">// aparece só logado</span>               <span class="cmt">// linha 24</span>
+
+    <span class="kw">public static void</span> <span class="fn">main</span>(<span class="cls">String</span>[] args) {                          <span class="cmt">// método main</span>
+        <span class="cls">SwingUtilities</span>.<span class="fn">invokeLater</span>(<span class="cls">FormPrincipal</span>::<span class="kw">new</span>);              <span class="cmt">// linha final</span>
+    }
+}</pre></div>
+      </div>
+
+      <div class="line-cards">
+        <div class="lc">
+          <div class="lc-num kw-num">Herança</div>
+          <div class="lc-body">
+            <div class="lc-code"><span class="kw">public class</span> <span class="cls">FormPrincipal</span> <span class="kw">extends</span> <span class="cls">JFrame</span></div>
+            <div class="lc-title">extends JFrame — herança de uma janela pronta</div>
+            <div class="lc-exp">
+              <strong>extends</strong> é herança em Java — <em>FormPrincipal</em> herda todo o comportamento e visual de um <em>JFrame</em> (janela do sistema operacional).<br><br>
+              Isso significa que <em>FormPrincipal</em> <strong>é</strong> um JFrame com poderes extras. Ela ganha de graça: barra de título, botões de minimizar/maximizar/fechar, suporte a menus, redimensionamento. Você só precisa adicionar o que é específico do SuperSistema.
+            </div>
+            <div class="lc-analogy">É como comprar uma casa pronta (JFrame) e fazer a decoração do jeito que quer (adicionar menus, logo, lógica de login) sem precisar construir a estrutura do zero.</div>
+          </div>
+        </div>
+
+        <div class="lc">
+          <div class="lc-num kw-num">L9–13</div>
+          <div class="lc-body">
+            <div class="lc-code"><span class="kw">private</span> <span class="cls">String</span> usuarioLogado = <span class="kw">null</span>;
+<span class="kw">private</span> <span class="cls">String</span> loginUsuarioLogado = <span class="kw">null</span>;
+<span class="kw">private</span> <span class="cls">String</span> empresaLogada = <span class="kw">null</span>;</div>
+            <div class="lc-title">Estado da sessão — null = deslogado</div>
+            <div class="lc-exp">
+              Essas três variáveis guardam o <strong>estado da sessão ativa</strong>. Quando valem <code style="font-family:var(--mono);color:var(--kw)">null</code>, significa que ninguém está logado. Quando têm valores, a sessão está ativa.<br><br>
+              O método <code style="font-family:var(--mono);color:var(--fn)">aplicarEstadoAutenticacao()</code> verifica constantemente se <code style="font-family:var(--mono);color:var(--accent)">usuarioLogado != null</code> para decidir o que mostrar no menu.
+            </div>
+          </div>
+        </div>
+
+        <div class="lc">
+          <div class="lc-num fn-num">paintComponent</div>
+          <div class="lc-body">
+            <div class="lc-code"><span class="cls">JPanel</span> painelFundo = <span class="kw">new</span> <span class="cls">JPanel</span>() {
+    <span class="kw">protected void</span> <span class="fn">paintComponent</span>(<span class="cls">Graphics</span> g) {
+        super.<span class="fn">paintComponent</span>(g);
+        <span class="cls">Image</span> img = <span class="kw">new</span> <span class="cls">ImageIcon</span>(...<span class="str">"/logo.jpg"</span>).<span class="fn">getImage</span>();
+        g.<span class="fn">drawImage</span>(img, <span class="num">0</span>, <span class="num">0</span>, <span class="fn">getWidth</span>(), <span class="fn">getHeight</span>(), <span class="kw">this</span>);
+    }
+};</div>
+            <div class="lc-title">Classe anônima com override — desenhando o fundo personalizado</div>
+            <div class="lc-exp">
+              Este é um padrão avançado: criamos uma <strong>classe anônima</strong> (uma subclasse sem nome) que herda de JPanel e <em>substitui</em> o método <code style="font-family:var(--mono);color:var(--fn)">paintComponent</code>.<br><br>
+              Toda vez que o Swing precisa redesenhar o painel (ao redimensionar a janela, por exemplo), ele chama <code style="font-family:var(--mono);color:var(--fn)">paintComponent</code>. Ao sobrescrevê-lo, garantimos que a <strong>logo.jpg é sempre redesenhada cobrindo toda a janela</strong>.<br><br>
+              <code style="font-family:var(--mono);color:var(--fn)">super.paintComponent(g)</code> primeiro limpa o painel (obrigatório), depois desenhamos a imagem sobre ele.
+            </div>
+            <div class="lc-analogy">É como contratar um pintor que sabe sua técnica padrão mas, neste projeto, você pede que ele também coloque um fundo personalizado toda vez que pintar a parede.</div>
+          </div>
+        </div>
+
+        <div class="lc">
+          <div class="lc-num if-num">Menu dinâmico</div>
+          <div class="lc-body">
+            <div class="lc-code"><span class="kw">private void</span> <span class="fn">aplicarEstadoAutenticacao</span>() {
+    <span class="kw">boolean</span> logado = (usuarioLogado != <span class="kw">null</span>);
+    itemLogin.<span class="fn">setText</span>(logado ? <span class="str">"Logout"</span> : <span class="str">"Logar"</span>);
+    <span class="kw">if</span> (logado) {
+        menuBar.<span class="fn">add</span>(menuUsuarios);
+        menuBar.<span class="fn">add</span>(menuSeguranca);
+    } <span class="kw">else</span> {
+        menuBar.<span class="fn">remove</span>(menuUsuarios);
+        menuBar.<span class="fn">remove</span>(menuSeguranca);
+    }
+    menuBar.<span class="fn">revalidate</span>(); menuBar.<span class="fn">repaint</span>();
+}</div>
+            <div class="lc-title">Menu dinâmico — adiciona/remove menus conforme o login</div>
+            <div class="lc-exp">
+              Este é o coração da lógica de sessão. O método é chamado em três momentos: ao iniciar (sem login), após login bem-sucedido e após logout.<br><br>
+              • <strong>logado ? "Logout" : "Logar"</strong> → operador ternário: se logado, texto "Logout"; senão, "Logar"<br>
+              • <strong>menuBar.add/remove</strong> → adiciona ou remove menus dinamicamente<br>
+              • <strong>revalidate() + repaint()</strong> → força o Swing a recalcular e redesenhar a barra de menus imediatamente
+            </div>
+            <div class="lc-warn">Sem revalidate() e repaint(), a mudança nos menus não apareceria visualmente — o Swing não redesenha automaticamente quando você modifica componentes programaticamente.</div>
+          </div>
+        </div>
+
+        <div class="lc">
+          <div class="lc-num fn-num">main</div>
+          <div class="lc-body">
+            <div class="lc-code"><span class="kw">public static void</span> <span class="fn">main</span>(<span class="cls">String</span>[] args) {
+    <span class="cls">SwingUtilities</span>.<span class="fn">invokeLater</span>(<span class="cls">FormPrincipal</span>::<span class="kw">new</span>);
+}</div>
+            <div class="lc-title">main + invokeLater — a porta de entrada correta para Swing</div>
+            <div class="lc-exp">
+              <strong>SwingUtilities.invokeLater</strong> agenda a criação da janela para ser executada na <strong>Event Dispatch Thread (EDT)</strong> — a thread dedicada ao Swing. Criar componentes Swing fora da EDT pode causar comportamentos imprevisíveis e bugs visuais.<br><br>
+              <strong>FormPrincipal::new</strong> é uma <em>method reference</em> — uma forma compacta de dizer "crie um novo FormPrincipal". É equivalente a <code style="font-family:var(--mono)">() -> new FormPrincipal()</code>.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow">
+        <div class="flow-title">📊 Fluxo de estados do menu dinâmico</div>
+        <div class="flow-diagram">
+          <div class="flow-box fb-start">Sistema inicia — usuarioLogado = null</div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-box fb-proc">Menu: [Sistema → Logar] [Sistema → Fechar]</div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-box fb-dec">Usuário clica "Logar"</div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-branch">
+            <div class="flow-branch-item">
+              <span class="flow-label">✓ Autenticado</span>
+              <div class="flow-box fb-ok" style="min-width:150px;font-size:.78rem">+ menu [Usuários]<br>+ menu [Segurança]</div>
+            </div>
+            <div class="flow-branch-item">
+              <span class="flow-label">✗ Falhou</span>
+              <div class="flow-box fb-end" style="min-width:150px;font-size:.78rem">Erro → volta ao menu inicial</div>
+            </div>
+          </div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-box fb-proc">Usuário clica "Logout" → confirma</div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-box fb-proc">Registra LOGOUT na auditoria, limpa sessão</div>
+          <div class="flow-arrow">↓</div>
+          <div class="flow-box fb-proc">Remove [Usuários] e [Segurança] do menu</div>
+        </div>
+      </div>
+    </section>
+
+    <hr class="sep">
+
+    <!-- LOGINDIALOG -->
+    <section class="sec section-observer-target" id="logindialog">
+      <div class="sec-tag">Autenticação</div>
+      <h2>LoginDialog.java — A tela de login com banco de dados</h2>
+
+      <div class="callout c-info">
+        <strong>JDialog vs JFrame</strong>
+        LoginDialog extende <code style="font-family:var(--mono)">JDialog</code>, não JFrame. A diferença crucial: ao passar <code style="font-family:var(--mono)">true</code> no construtor do JDialog, ele se torna <strong>modal</strong> — a janela pai (FormPrincipal) fica bloqueada até que o diálogo seja fechado. Isso força o usuário a completar o login antes de fazer qualquer outra coisa.
+      </div>
+
+      <div class="line-cards">
+        <div class="lc">
+          <div class="lc-num kw-num">Campos</div>
+          <div class="lc-body">
+            <div class="lc-code"><span class="kw">private final</span> <span class="cls">JComboBox</span>&lt;<span class="cls">String</span>&gt; comboEmpresa;
+<span class="kw">private final</span> <span class="cls">JTextField</span> campoUsuario;
+<span class="kw">private final</span> <span class="cls">JPasswordField</span> campoSenha;</div>
+            <div class="lc-title">Os três campos de entrada — cada um com um tipo específico</div>
+            <div class="lc-exp">
+              • <strong>JComboBox</strong> → lista suspensa (SELECT). O <code style="font-family:var(--mono)">&lt;String&gt;</code> é o <em>genérico</em> — indica que esta caixa contém Strings (textos)<br>
+              • <strong>JTextField</strong> → campo de texto simples, o usuário vê o que digita<br>
+              • <strong>JPasswordField</strong> → campo de senha: mostra <code style="font-family:var(--mono)">•••</code> em vez das letras digitadas, protegendo visualmente a senha
+            </div>
+          </div>
+        </div>
+
+        <div class="lc">
+          <div class="lc-num if-num">Validação</div>
+          <div class="lc-body">
+            <div class="lc-code"><span class="kw">if</span> (empresaSel.<span class="fn">equals</span>(<span class="str">"Selecione uma empresa..."</span>)) { <span class="kw">return</span>; }
+<span class="kw">if</span> (usr.<span class="fn">isEmpty</span>()) { <span class="kw">return</span>; }
+<span class="kw">if</span> (sen.<span class="fn">isEmpty</span>()) { <span class="kw">return</span>; }</div>
+            <div class="lc-title">Três barreiras de validação antes de tocar o banco</div>
+            <div class="lc-exp">
+              Antes de qualquer consulta ao banco, o código verifica se todos os campos estão preenchidos. Cada <code style="font-family:var(--mono);color:var(--kw)">return</code> abandona o método imediatamente após mostrar um aviso.<br><br>
+              Esse padrão é chamado de <strong>"guarda cláusula"</strong> — validações antecipadas que evitam código profundamente aninhado. O caminho feliz (tudo válido) fica no final, limpo.
+            </div>
+          </div>
+        </div>
+
+        <div class="lc">
+          <div class="lc-num db-num">SQL</div>
+          <div class="lc-body">
+            <div class="lc-code"><span class="cls">String</span> sql = <span class="str">"SELECT nome FROM tb_usuarios WHERE login = ? AND senha = ? LIMIT 1"</span>;
+<span class="kw">try</span> (<span class="cls">Connection</span> conn = <span class="cls">Conexao</span>.<span class="fn">getConnection</span>();
+     <span class="cls">PreparedStatement</span> pst = conn.<span class="fn">prepareStatement</span>(sql)) {
+    pst.<span class="fn">setString</span>(<span class="num">1</span>, usuarioLogin);
+    pst.<span class="fn">setString</span>(<span class="num">2</span>, senhaLogin);
+    <span class="cls">ResultSet</span> rs = pst.<span class="fn">executeQuery</span>();
+    <span class="kw">if</span> (rs.<span class="fn">next</span>()) { autenticado = <span class="kw">true</span>; }
+}</div>
+            <div class="lc-title">A query de autenticação com PreparedStatement</div>
+            <div class="lc-exp">
+              A query busca um usuário com o login E a senha exatos. O <strong>LIMIT 1</strong> garante que apenas um resultado seja retornado (otimização).<br><br>
+              Os <strong>?</strong> são <em>parâmetros</em> — preenchidos por <code style="font-family:var(--mono);color:var(--fn)">setString(1, ...)</code> e <code style="font-family:var(--mono);color:var(--fn)">setString(2, ...)</code>. Isso é crucial: o driver JDBC <strong>escapa automaticamente</strong> qualquer caractere especial, impedindo SQL Injection.<br><br>
+              <code style="font-family:var(--mono);color:var(--fn)">rs.next()</code> retorna <code style="font-family:var(--mono);color:var(--kw)">true</code> se encontrou pelo menos um resultado — se achou, o login está correto.
+            </div>
+            <div class="lc-analogy">É como uma catraca que só abre quando você apresenta o crachá exato (login + senha). O PreparedStatement é o leitor de crachá que não se deixa enganar por crachás falsificados (SQL Injection).</div>
+          </div>
+        </div>
+
+        <div class="lc">
+          <div class="lc-num ev-num">Getters</div>
+          <div class="lc-body">
+            <div class="lc-code"><span class="kw">public boolean</span> <span class="fn">isAutenticado</span>() { <span class="kw">return</span> autenticado; }
+<span class="kw">public</span> <span class="cls">String</span> <span class="fn">getUsuario</span>() { <span class="kw">return</span> usuario; }
+<span class="kw">public</span> <span class="cls">String</span> <span class="fn">getLoginAutenticado</span>() { <span class="kw">return</span> loginDigitado; }
+<span class="kw">public</span> <span class="cls">String</span> <span class="fn">getEmpresa</span>() { <span class="kw">return</span> empresa; }</div>
+            <div class="lc-title">Getters — a interface pública entre LoginDialog e FormPrincipal</div>
+            <div class="lc-exp">
+              Depois que o LoginDialog fecha, o FormPrincipal precisa saber o resultado. Como as variáveis internas são <em>private</em>, ele acessa através desses métodos públicos de leitura (<strong>getters</strong>).<br><br>
+              Esse é o princípio de <strong>encapsulamento</strong>: os dados ficam protegidos internamente, mas valores relevantes são expostos de forma controlada.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <hr class="sep">
+
+    <!-- FORMUSUARIOSLISTAR -->
+    <section class="sec section-observer-target" id="listar">
+      <div class="sec-tag">CRUD — Listagem</div>
+      <h2>FormUsuariosListar.java — O hub do CRUD</h2>
+      <p style="margin-bottom:1.2rem;color:var(--text-dim)">Esta é a janela central do CRUD. Exibe todos os usuários em uma tabela e oferece botões para todas as operações. É o "gerenciador de arquivos" do sistema.</p>
+
+      <div class="line-cards">
+        <div class="lc">
+          <div class="lc-num sw-num">JTable</div>
+          <div class="lc-body">
+            <div class="lc-code"><span class="cls">DefaultTableModel</span> modelo = <span class="kw">new</span> <span class="cls">DefaultTableModel</span>(colunas, <span class="num">0</span>) {
+    <span class="kw">public boolean</span> <span class="fn">isCellEditable</span>(<span class="kw">int</span> row, <span class="kw">int</span> col) {
+        <span class="kw">return false</span>;
+    }
+};
+<span class="cls">JTable</span> tabela = <span class="kw">new</span> <span class="cls">JTable</span>(modelo);</div>
+            <div class="lc-title">JTable somente leitura com DefaultTableModel customizado</div>
+            <div class="lc-exp">
+              O <strong>DefaultTableModel</strong> é criado com uma classe anônima que sobrescreve <code style="font-family:var(--mono);color:var(--fn)">isCellEditable</code> para sempre retornar <code style="font-family:var(--mono);color:var(--kw)">false</code>. Isso impede que o usuário edite dados diretamente na tabela — as edições só acontecem pelo formulário adequado.<br><br>
+              O construtor <code style="font-family:var(--mono)">DefaultTableModel(colunas, 0)</code> cria a tabela com os cabeçalhos definidos e zero linhas de dados — as linhas serão adicionadas pelo método <code style="font-family:var(--mono);color:var(--fn)">carregarUsuarios()</code>.
+            </div>
+          </div>
+        </div>
+
+        <div class="lc">
+          <div class="lc-num fn-num">Loop</div>
+          <div class="lc-body">
+            <div class="lc-code"><span class="cls">JButton</span>[] botoes = {btnIncluir, btnEditar, btnExcluir, btnAtualizar, btnSair};
+<span class="kw">for</span> (<span class="cls">JButton</span> b : botoes) {
+    b.<span class="fn">setPreferredSize</span>(tamanhoPadrao);
+    b.<span class="fn">setMinimumSize</span>(tamanhoPadrao);
+    b.<span class="fn">setMaximumSize</span>(tamanhoPadrao);
+    barra.<span class="fn">add</span>(b);
+}</div>
+            <div class="lc-title">For-each para aplicar o mesmo tamanho a todos os botões</div>
+            <div class="lc-exp">
+              Em vez de repetir as mesmas 4 linhas para cada botão, o código os coloca em um array e usa um <strong>for-each</strong> (para cada botão no array, faça...). Este é o princípio <strong>DRY</strong> (Don't Repeat Yourself) — não repetir código.<br><br>
+              <strong>setPreferredSize + setMinimumSize + setMaximumSize</strong> juntos fixam o tamanho exato do botão — o LayoutManager não pode nem aumentar nem diminuir.
+            </div>
+          </div>
+        </div>
+
+        <div class="lc">
+          <div class="lc-num ev-num">Mouse</div>
+          <div class="lc-body">
+            <div class="lc-code">tabela.<span class="fn">addMouseListener</span>(<span class="kw">new</span> java.awt.event.<span class="cls">MouseAdapter</span>() {
+    <span class="kw">public void</span> <span class="fn">mouseClicked</span>(java.awt.event.<span class="cls">MouseEvent</span> e) {
+        <span class="kw">if</span> (e.<span class="fn">getClickCount</span>() == <span class="num">2</span>) {
+            <span class="fn">abrirFormEdicao</span>();
+        }
+    }
+});</div>
+            <div class="lc-title">Duplo clique na linha abre formulário de edição</div>
+            <div class="lc-exp">
+              Este é um <strong>MouseAdapter</strong> — uma classe que já implementa todos os eventos de mouse com corpos vazios. Você sobrescreve apenas o que precisa (<code style="font-family:var(--mono);color:var(--fn)">mouseClicked</code>).<br><br>
+              <code style="font-family:var(--mono);color:var(--fn)">e.getClickCount() == 2</code> detecta duplo clique. Ao clicar duas vezes numa linha, o sistema abre automaticamente o formulário de edição com aquele usuário — uma experiência de usuário mais fluida.
+            </div>
+            <div class="lc-analogy">É como no Windows Explorer: duplo clique em um arquivo abre ele. Aqui, duplo clique em uma linha de usuário abre o formulário de edição.</div>
+          </div>
+        </div>
+
+        <div class="lc">
+          <div class="lc-num db-num">SQL Listar</div>
+          <div class="lc-body">
+            <div class="lc-code"><span class="cls">String</span> sql = <span class="str">"SELECT usuario_id, nome, login, email FROM tb_usuarios ORDER BY nome"</span>;
+<span class="kw">while</span> (rs.<span class="fn">next</span>()) {
+    modelo.<span class="fn">addRow</span>(<span class="kw">new</span> <span class="cls">Object</span>[]{
+        rs.<span class="fn">getInt</span>(<span class="str">"usuario_id"</span>), rs.<span class="fn">getString</span>(<span class="str">"nome"</span>),
+        rs.<span class="fn">getString</span>(<span class="str">"login"</span>), (email != <span class="kw">null</span> ? email : <span class="str">"—"</span>)
+    });
+}</div>
+            <div class="lc-title">carregarUsuarios() — lê o banco e popula a JTable</div>
+            <div class="lc-exp">
+              O <strong>ORDER BY nome</strong> garante que os usuários apareçam sempre em ordem alfabética — uma boa prática de usabilidade.<br><br>
+              <code style="font-family:var(--mono);color:var(--fn)">modelo.addRow()</code> recebe um array de Objects (um por coluna) e adiciona uma linha na tabela. O <strong>ternário</strong> <code style="font-family:var(--mono)">(email != null ? email : "—")</code> evita que apareça a palavra "null" quando o e-mail não está cadastrado.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <hr class="sep">
+
+    <!-- FORMUSUARIOEDITAR -->
+    <section class="sec section-observer-target" id="editar">
+      <div class="sec-tag">CRUD — Inclusão e Edição</div>
+      <h2>FormUsuarioEditar.java — Um formulário, dois modos</h2>
+
+      <div class="callout c-tip">
+        <strong>Design inteligente: um formulário para dois casos de uso</strong>
+        Ao receber <code style="font-family:var(--mono)">usuarioId = 0</code>, o formulário entra em modo <strong>inclusão</strong> e executa um INSERT. Com qualquer ID maior que zero, entra em modo <strong>edição</strong> e carrega os dados do banco para exibir, executando um UPDATE ao salvar. Mesma tela, dois comportamentos — elimina código duplicado.
+      </div>
+
+      <div class="line-cards">
+        <div class="lc">
+          <div class="lc-num kw-num">Construtor</div>
+          <div class="lc-body">
+            <div class="lc-code"><span class="kw">super</span>(janelaPai, usuarioId == <span class="num">0</span> ? <span class="str">"Incluir Usuário"</span> : <span class="str">"Editar Usuário"</span>, <span class="kw">true</span>);</div>
+            <div class="lc-title">Título dinâmico baseado no modo</div>
+            <div class="lc-exp">
+              <strong>super()</strong> chama o construtor da classe pai (JDialog) com três argumentos:<br>
+              • <em>janelaPai</em> → a janela que está "abrindo" este diálogo (FormUsuariosListar)<br>
+              • <em>título</em> → determinado por operador ternário — "Incluir" se id=0, "Editar" caso contrário<br>
+              • <strong>true</strong> → torna o diálogo modal (bloqueia a janela pai)
+            </div>
+          </div>
+        </div>
+
+        <div class="lc">
+          <div class="lc-num fn-num">GridBag</div>
+          <div class="lc-body">
+            <div class="lc-code"><span class="cls">GridBagConstraints</span> gbc = <span class="kw">new</span> <span class="cls">GridBagConstraints</span>();
+gbc.insets = <span class="kw">new</span> <span class="cls">Insets</span>(<span class="num">6</span>, <span class="num">6</span>, <span class="num">6</span>, <span class="num">6</span>);
+gbc.fill = <span class="cls">GridBagConstraints</span>.HORIZONTAL;
+gbc.gridx = <span class="num">0</span>; gbc.gridy = <span class="num">0</span>; <span class="cmt">// coluna 0, linha 0</span>
+painel.add(<span class="kw">new</span> <span class="cls">JLabel</span>(<span class="str">"Nome completo:"</span>), gbc);
+gbc.gridx = <span class="num">1</span>; gbc.weightx = <span class="num">1</span>;
+painel.add(campoNome, gbc);</div>
+            <div class="lc-title">GridBagLayout — posicionamento preciso em grade</div>
+            <div class="lc-exp">
+              O <strong>GridBagLayout</strong> é o mais poderoso dos layout managers. Cada componente tem um <em>GridBagConstraints</em> que define sua posição:<br><br>
+              • <strong>gridx/gridy</strong> → coluna e linha na grade<br>
+              • <strong>insets</strong> → espaçamento externo (topo, esquerda, baixo, direita)<br>
+              • <strong>fill = HORIZONTAL</strong> → o componente se expande para preencher o espaço horizontal disponível<br>
+              • <strong>weightx = 1</strong> → "este componente pode crescer horizontalmente"
+            </div>
+          </div>
+        </div>
+
+        <div class="lc">
+          <div class="lc-num db-num">INSERT / UPDATE</div>
+          <div class="lc-body">
+            <div class="lc-code"><span class="kw">if</span> (usuarioId == <span class="num">0</span>) {
+    sql = <span class="str">"INSERT INTO tb_usuarios (nome, login, senha, email) VALUES (?, ?, ?, ?)"</span>;
+} <span class="kw">else</span> {
+    sql = <span class="str">"UPDATE tb_usuarios SET nome=?, login=?, senha=?, email=? WHERE usuario_id=?"</span>;
+    stmt.<span class="fn">setInt</span>(<span class="num">5</span>, usuarioId);
+}
+stmt.<span class="fn">executeUpdate</span>();</div>
+            <div class="lc-title">Bifurcação INSERT vs UPDATE baseada no ID</div>
+            <div class="lc-exp">
+              O mesmo método <code style="font-family:var(--mono);color:var(--fn)">salvar()</code> executa operações diferentes dependendo do <em>usuarioId</em>:<br><br>
+              • <strong>INSERT</strong> adiciona uma nova linha ao banco — não precisa do ID (o banco gera automaticamente via AUTO_INCREMENT)<br>
+              • <strong>UPDATE</strong> modifica uma linha existente — precisa do <code style="font-family:var(--mono);color:var(--num)">WHERE usuario_id = ?</code> para saber qual linha atualizar<br><br>
+              <code style="font-family:var(--mono);color:var(--fn)">executeUpdate()</code> executa tanto INSERT quanto UPDATE — retorna o número de linhas afetadas.
+            </div>
+          </div>
+        </div>
+
+        <div class="lc">
+          <div class="lc-num if-num">Duplicate</div>
+          <div class="lc-body">
+            <div class="lc-code"><span class="kw">if</span> (mensagem != <span class="kw">null</span> && mensagem.<span class="fn">contains</span>(<span class="str">"Duplicate entry"</span>)) {
+    <span class="cls">JOptionPane</span>.<span class="fn">showMessageDialog</span>(..., <span class="str">"Este login já está em uso."</span>...);
+    campoLogin.<span class="fn">requestFocus</span>();
+}</div>
+            <div class="lc-title">Tratamento específico de login duplicado</div>
+            <div class="lc-exp">
+              A coluna <code style="font-family:var(--mono)">login</code> na tabela tem uma constraint <strong>UNIQUE</strong> — o banco rejeita logins repetidos. Quando isso acontece, o MySQL lança uma exceção com a mensagem "Duplicate entry".<br><br>
+              O código intercepta essa mensagem específica e exibe um aviso mais amigável que "Erro genérico de banco". <code style="font-family:var(--mono);color:var(--fn)">requestFocus()</code> coloca o cursor automaticamente no campo login para facilitar a correção.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <hr class="sep">
+
+    <!-- FORMUSUARIOSINCLUIR + EXCLUIR -->
+    <section class="sec section-observer-target" id="incluir">
+      <div class="sec-tag">Padrão utilitário</div>
+      <h2>FormUsuariosIncluir.java e FormUsuariosExcluir.java</h2>
+      <p style="margin-bottom:1.2rem;color:var(--text-dim)">Dois arquivos que aplicam o mesmo padrão: classes utilitárias com método estático chamado por FormUsuariosListar para cada operação.</p>
+
+      <div class="tabs">
+        <button class="tab-btn on" data-tab="incluir-tab">Incluir</button>
+        <button class="tab-btn" data-tab="excluir-tab">Excluir</button>
+      </div>
+
+      <div class="tab-pane on" id="tab-incluir-tab">
+        <div class="line-cards">
+          <div class="lc">
+            <div class="lc-num sw-num">Classe</div>
+            <div class="lc-body">
+              <div class="lc-code"><span class="kw">public class</span> <span class="cls">FormUsuariosIncluir</span> {
+    <span class="kw">private</span> <span class="cls">FormUsuariosIncluir</span>() {} <span class="cmt">// construtor privado!</span>
+
+    <span class="kw">public static void</span> <span class="fn">abrir</span>(<span class="cls">FormUsuariosListar</span> formListar, <span class="cls">String</span> loginOperador) {
+        <span class="cls">FormUsuarioEditar</span> form = <span class="kw">new</span> <span class="cls">FormUsuarioEditar</span>(formListar, <span class="num">0</span>);
+        form.<span class="fn">setLoginOperador</span>(loginOperador);
+        form.<span class="fn">setVisible</span>(<span class="kw">true</span>);
+        <span class="kw">if</span> (form.<span class="fn">isSalvo</span>()) { formListar.<span class="fn">carregarUsuarios</span>(); }
+    }
+}</div>
+              <div class="lc-title">Delegador — abre o formulário de inclusão e atualiza a lista</div>
+              <div class="lc-exp">
+                O <strong>construtor privado</strong> é uma forma de dizer "esta classe não deve ser instanciada com new". É apenas uma coleção de métodos estáticos — um padrão chamado <strong>Utility Class</strong>.<br><br>
+                O método <code style="font-family:var(--mono);color:var(--fn)">abrir()</code> cria o <em>FormUsuarioEditar</em> com id=0 (modo inclusão), passa o login do operador para auditoria e exibe o formulário. Quando o formulário fecha, <code style="font-family:var(--mono);color:var(--fn)">isSalvo()</code> verifica se o usuário confirmou — se sim, atualiza a lista.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-pane" id="tab-excluir-tab">
+        <div class="line-cards">
+          <div class="lc">
+            <div class="lc-num db-num">Confirmação</div>
+            <div class="lc-body">
+              <div class="lc-code"><span class="kw">int</span> confirmacao = <span class="cls">JOptionPane</span>.<span class="fn">showConfirmDialog</span>(
+    formListar,
+    <span class="str">"Deseja realmente excluir \""</span> + nomeUsuario + <span class="str">"\"?\nEsta ação não pode ser desfeita."</span>,
+    <span class="str">"Confirmar Exclusão"</span>,
+    <span class="cls">JOptionPane</span>.YES_NO_OPTION,
+    <span class="cls">JOptionPane</span>.WARNING_MESSAGE
+);
+<span class="kw">if</span> (confirmacao != <span class="cls">JOptionPane</span>.YES_OPTION) { <span class="kw">return</span>; }</div>
+              <div class="lc-title">Caixa de confirmação antes do DELETE — ação irreversível</div>
+              <div class="lc-exp">
+                Exclusões são irreversíveis — uma vez executado o DELETE, o dado some do banco. Por isso, o código exibe uma caixa de confirmação com aviso antes de agir.<br><br>
+                <strong>JOptionPane.showConfirmDialog</strong> retorna um inteiro: <code style="font-family:var(--mono);color:var(--num)">YES_OPTION</code>, <code style="font-family:var(--mono);color:var(--num)">NO_OPTION</code> ou <code style="font-family:var(--mono);color:var(--num)">CANCEL_OPTION</code>. Se não for YES, o método retorna sem fazer nada — um <em>early return</em> de segurança.
+              </div>
+              <div class="lc-analogy">É como o prompt "Você tem certeza que deseja esvaziar a Lixeira?" — uma última chance de cancelar antes de uma ação definitiva.</div>
+            </div>
+          </div>
+          <div class="lc">
+            <div class="lc-num db-num">DELETE</div>
+            <div class="lc-body">
+              <div class="lc-code"><span class="cls">String</span> sql = <span class="str">"DELETE FROM tb_usuarios WHERE usuario_id = ?"</span>;
+<span class="cls">PreparedStatement</span> stmt = conn.<span class="fn">prepareStatement</span>(sql);
+stmt.<span class="fn">setInt</span>(<span class="num">1</span>, usuarioId);
+stmt.<span class="fn">executeUpdate</span>();
+<span class="cls">AuditoriaUtil</span>.<span class="fn">registrar</span>(loginOperador, <span class="str">"EXCLUIR_USUARIO"</span>, <span class="str">"id="</span> + usuarioId...);
+formListar.<span class="fn">carregarUsuarios</span>();</div>
+              <div class="lc-title">DELETE seguro + auditoria + atualização da lista</div>
+              <div class="lc-exp">
+                A sequência após a confirmação segue 4 passos: (1) executa o DELETE no banco, (2) exibe mensagem de sucesso, (3) registra a exclusão na auditoria e (4) recarrega a lista sem o registro excluído.<br><br>
+                O DELETE usa PreparedStatement com <code style="font-family:var(--mono);color:var(--num)">?</code> — mesmo padrão das outras operações, protegendo contra SQL Injection.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <hr class="sep">
+
+    <!-- FORMLOGAUDITORIA -->
+    <section class="sec section-observer-target" id="logform">
+      <div class="sec-tag">Visualização de auditoria</div>
+      <h2>FormLogAuditoria.java — O leitor do histórico</h2>
+
+      <div class="line-cards">
+        <div class="lc">
+          <div class="lc-num fn-num">BufferedReader</div>
+          <div class="lc-body">
+            <div class="lc-code"><span class="cls">BufferedReader</span> br = <span class="kw">new</span> <span class="cls">BufferedReader</span>(<span class="kw">new</span> <span class="cls">FileReader</span>(ARQUIVO_LOG));
+<span class="cls">String</span> linha;
+<span class="kw">while</span> ((linha = br.<span class="fn">readLine</span>()) != <span class="kw">null</span>) {
+    <span class="cls">String</span>[] partes = linha.<span class="fn">split</span>(<span class="str">"\\|"</span>);
+    <span class="kw">if</span> (partes.length == <span class="num">4</span>) {
+        modelo.<span class="fn">addRow</span>(<span class="kw">new</span> <span class="cls">Object</span>[]{partes[<span class="num">0</span>].trim(), partes[<span class="num">1</span>].trim(), ...});
+    }
+}</div>
+            <div class="lc-title">Lendo o arquivo linha a linha e parseando o formato</div>
+            <div class="lc-exp">
+              <strong>BufferedReader</strong> envolve o FileReader para ler o arquivo com buffer — mais eficiente que ler byte por byte. O loop <code style="font-family:var(--mono)">(linha = br.readLine()) != null</code> lê e atribui na mesma expressão: enquanto houver linhas (não for null), processa.<br><br>
+              <code style="font-family:var(--mono);color:var(--fn)">split("\\|")</code> divide a linha pelo caractere <code style="font-family:var(--mono)">|</code>. O <code style="font-family:var(--mono)">\\|</code> é necessário porque <code style="font-family:var(--mono)">|</code> tem significado especial em expressões regulares (OR) — a barra dupla o "escapa" para tratar como caractere literal.<br><br>
+              <code style="font-family:var(--mono);color:var(--fn)">partes.length == 4</code> valida que a linha tem exatamente 4 campos — ignora linhas corrompidas ou em branco.
+            </div>
+          </div>
+        </div>
+
+        <div class="lc">
+          <div class="lc-num if-num">FileNotFound</div>
+          <div class="lc-body">
+            <div class="lc-code"><span class="kw">catch</span> (<span class="cls">FileNotFoundException</span> e) {
+    <span class="cls">JOptionPane</span>.<span class="fn">showMessageDialog</span>(...,
+        <span class="str">"Nenhum registro de auditoria encontrado ainda.\n"</span>
+        + <span class="str">"O arquivo será criado automaticamente ao realizar o primeiro login."</span>...);
+}</div>
+            <div class="lc-title">Tratamento amigável para arquivo inexistente</div>
+            <div class="lc-exp">
+              O arquivo <em>auditoria.log</em> só existe após o primeiro evento ser registrado. Ao abrir o visualizador antes do primeiro login, o arquivo não existe — sem esse catch, o programa quebraria com um erro confuso.<br><br>
+              Ao separar <strong>FileNotFoundException</strong> do catch genérico de <strong>IOException</strong>, o código exibe mensagens diferentes para situações diferentes: "arquivo não existe" vs "erro ao ler".
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <hr class="sep">
+
+    <!-- BANCO DE DADOS -->
+    <section class="sec section-observer-target" id="banco">
+      <div class="sec-tag">Persistência</div>
+      <h2>Esquema MySQL — A estrutura dos dados</h2>
+
+      <div class="code-block">
+        <div class="code-block-head"><div class="cb-dots"><div class="cb-dot cb-dot-r"></div><div class="cb-dot cb-dot-y"></div><div class="cb-dot cb-dot-g"></div></div><span class="cb-filename">tb_usuarios — DDL</span></div>
+        <div class="code-scroll"><pre><span class="kw">CREATE TABLE</span> tb_usuarios (
+    usuario_id <span class="cls">INT</span>          <span class="kw">NOT NULL</span> AUTO_INCREMENT,  <span class="cmt">-- PK autogerada</span>
+    nome       <span class="cls">VARCHAR</span>(<span class="num">100</span>) <span class="kw">NOT NULL</span>,               <span class="cmt">-- nome completo</span>
+    login      <span class="cls">VARCHAR</span>(<span class="num">50</span>)  <span class="kw">NOT NULL UNIQUE</span>,         <span class="cmt">-- sem duplicatas!</span>
+    senha      <span class="cls">VARCHAR</span>(<span class="num">100</span>) <span class="kw">NOT NULL</span>,               <span class="cmt">-- ⚠ texto plano</span>
+    email      <span class="cls">VARCHAR</span>(<span class="num">150</span>)     <span class="kw">NULL</span>,               <span class="cmt">-- opcional</span>
+    <span class="kw">PRIMARY KEY</span> (usuario_id)
+);</pre></div>
+      </div>
+
+      <div class="line-cards">
+        <div class="lc">
+          <div class="lc-num sw-num">PK</div>
+          <div class="lc-body">
+            <div class="lc-code">usuario_id <span class="cls">INT</span> <span class="kw">NOT NULL</span> AUTO_INCREMENT</div>
+            <div class="lc-title">Chave primária com auto incremento</div>
+            <div class="lc-exp"><strong>PRIMARY KEY</strong> identifica cada linha de forma única. <strong>AUTO_INCREMENT</strong> faz o MySQL gerar automaticamente o próximo número disponível (1, 2, 3...) ao inserir um novo usuário — você nunca precisa definir o ID manualmente.</div>
+          </div>
+        </div>
+        <div class="lc">
+          <div class="lc-num db-num">UNIQUE</div>
+          <div class="lc-body">
+            <div class="lc-code">login <span class="cls">VARCHAR</span>(<span class="num">50</span>) <span class="kw">NOT NULL UNIQUE</span></div>
+            <div class="lc-title">Constraint UNIQUE — o banco garante logins únicos</div>
+            <div class="lc-exp">A constraint <strong>UNIQUE</strong> faz o banco rejeitar qualquer INSERT ou UPDATE que tente inserir um login já existente. É uma <em>garantia de integridade</em> no nível do banco — mesmo que o código Java esqueça de verificar, o banco protege.</div>
+          </div>
+        </div>
+      </div>
+
+      <h3 style="margin:1.8rem 0 .8rem">Parâmetros de conexão</h3>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Parâmetro</th><th>Valor</th><th>Significado</th></tr></thead>
+          <tbody>
+            <tr><td class="t-acc">Host</td><td>bd_savir.mysql.dbaas.com.br</td><td>Servidor MySQL remoto (na nuvem)</td></tr>
+            <tr><td class="t-acc">Porta</td><td>3306</td><td>Porta padrão do MySQL</td></tr>
+            <tr><td class="t-acc">Banco</td><td>bd_savir</td><td>Nome do schema/database</td></tr>
+            <tr><td class="t-acc">useSSL=false</td><td>desabilitado</td><td>⚠ Sem criptografia na conexão</td></tr>
+            <tr><td class="t-acc">serverTimezone</td><td>America/Fortaleza</td><td>Fuso horário para datas e horas</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <hr class="sep">
+
+    <!-- LOG AUDITORIA -->
+    <section class="sec section-observer-target" id="logauditoria">
+      <div class="sec-tag">Rastreabilidade</div>
+      <h2>Log de Auditoria — Exemplo real do arquivo</h2>
+
+      <div class="code-block">
+        <div class="code-block-head"><div class="cb-dots"><div class="cb-dot cb-dot-r"></div><div class="cb-dot cb-dot-y"></div><div class="cb-dot cb-dot-g"></div></div><span class="cb-filename">auditoria.log — exemplo real</span></div>
+        <div class="code-scroll"><pre><span class="num">2026-05-07 09:01:50</span> <span class="op">|</span> <span class="fn">savir</span> <span class="op">|</span> <span class="kw">LOGIN</span>          <span class="op">|</span> <span class="str">Acesso ao sistema. Usuário: Hiran Savir Junior. Empresa: Matriz - São Paulo</span>
+<span class="num">2026-05-07 09:27:06</span> <span class="op">|</span> <span class="fn">savir</span> <span class="op">|</span> <span class="kw">LOGOUT</span>         <span class="op">|</span> <span class="str">Sessão encerrada. Usuário: Hiran Savir Junior. Empresa: Matriz - São Paulo</span>
+<span class="num">2026-05-14 00:53:54</span> <span class="op">|</span> <span class="fn">savir</span> <span class="op">|</span> <span class="kw">INCLUIR_USUARIO</span><span class="op">|</span> <span class="str">Usuário incluído: login=hackerman, nome=hackerman</span>
+<span class="num">2026-05-14 00:58:30</span> <span class="op">|</span> <span class="fn">savir</span> <span class="op">|</span> <span class="kw">EDITAR_USUARIO</span> <span class="op">|</span> <span class="str">Usuário editado: id=137, login=ab, nome=ab</span>
+<span class="num">2026-05-14 00:58:46</span> <span class="op">|</span> <span class="fn">savir</span> <span class="op">|</span> <span class="kw">EXCLUIR_USUARIO</span><span class="op">|</span> <span class="str">Usuário excluído: id=137, nome=ab</span></pre></div>
+      </div>
+
+      <div class="callout c-warn">
+        <strong>⚠ Limitação do log em arquivo texto</strong>
+        O arquivo pode ser editado ou apagado manualmente por qualquer pessoa com acesso ao servidor. Para um ambiente de produção, o correto é armazenar o log em uma tabela do banco de dados (<code style="font-family:var(--mono)">tb_auditoria</code>) ou usar um sistema de log assinado digitalmente.
+      </div>
+    </section>
+
+    <hr class="sep">
+
+    <!-- QUIZ -->
+    <section class="sec section-observer-target" id="quiz">
+      <div class="sec-tag">Verificação de aprendizado</div>
+      <h2>🧠 Quiz — Você entendeu o SuperSistema?</h2>
+
+      <div class="quiz-box">
+        <div class="quiz-q">1. Por que o LoginDialog usa JDialog em vez de JFrame?</div>
+        <div class="quiz-opts">
+          <div class="quiz-opt" onclick="checkQ(this,'wrong')"><span class="quiz-opt-num">A</span>Porque JDialog é mais moderno que JFrame</div>
+          <div class="quiz-opt" onclick="checkQ(this,'correct')"><span class="quiz-opt-num">B</span>Para bloquear a janela principal enquanto o login está aberto (comportamento modal)</div>
+          <div class="quiz-opt" onclick="checkQ(this,'wrong')"><span class="quiz-opt-num">C</span>Porque JFrame não suporta campos de senha</div>
+          <div class="quiz-opt" onclick="checkQ(this,'wrong')"><span class="quiz-opt-num">D</span>Para economizar memória no sistema</div>
+        </div>
+        <div class="quiz-feedback qf-ok">✅ Correto! Com <code style="font-family:var(--mono)">true</code> no construtor do JDialog, ele se torna modal — a janela pai (FormPrincipal) fica bloqueada até o diálogo fechar, forçando o usuário a completar o login antes de qualquer outra ação.</div>
+        <div class="quiz-feedback qf-no">❌ A razão principal é o comportamento <strong>modal</strong>: o JDialog com modal=true bloqueia a janela pai até ser fechado. Isso é essencial para um fluxo de autenticação correto.</div>
+      </div>
+
+      <div class="quiz-box" style="margin-top:1rem">
+        <div class="quiz-q">2. Por que o FileWriter em AuditoriaUtil é criado com o segundo parâmetro <code style="font-family:var(--mono)">true</code>?</div>
+        <div class="quiz-opts">
+          <div class="quiz-opt" onclick="checkQ2(this,'wrong')"><span class="quiz-opt-num">A</span>Para criar o arquivo automaticamente se não existir</div>
+          <div class="quiz-opt" onclick="checkQ2(this,'wrong')"><span class="quiz-opt-num">B</span>Para fazer o arquivo crescer mais rápido</div>
+          <div class="quiz-opt" onclick="checkQ2(this,'correct')"><span class="quiz-opt-num">C</span>Para ativar o modo append — novas linhas são adicionadas ao final, sem apagar o histórico</div>
+          <div class="quiz-opt" onclick="checkQ2(this,'wrong')"><span class="quiz-opt-num">D</span>Para sincronizar com o banco de dados</div>
+        </div>
+        <div class="quiz-feedback qf-ok">✅ Exato! <code style="font-family:var(--mono)">new FileWriter(arquivo, true)</code> abre em modo append. Sem esse <code style="font-family:var(--mono)">true</code>, o arquivo seria apagado e reescrito em cada nova ação, destruindo todo o histórico anterior.</div>
+        <div class="quiz-feedback qf-no">❌ O segundo parâmetro <code style="font-family:var(--mono)">true</code> ativa o modo <strong>append</strong>: cada nova linha é adicionada ao final do arquivo, nunca apagando o que já foi registrado.</div>
+      </div>
+
+      <div class="quiz-box" style="margin-top:1rem">
+        <div class="quiz-q">3. O que o método <code style="font-family:var(--mono)">menuBar.revalidate()</code> faz após adicionar/remover menus?</div>
+        <div class="quiz-opts">
+          <div class="quiz-opt" onclick="checkQ3(this,'wrong')"><span class="quiz-opt-num">A</span>Salva as configurações do menu no banco de dados</div>
+          <div class="quiz-opt" onclick="checkQ3(this,'wrong')"><span class="quiz-opt-num">B</span>Verifica se os menus têm permissão para aparecer</div>
+          <div class="quiz-opt" onclick="checkQ3(this,'correct')"><span class="quiz-opt-num">C</span>Força o Swing a recalcular o layout e redesenhar a barra — sem isso, a mudança não apareceria na tela</div>
+          <div class="quiz-opt" onclick="checkQ3(this,'wrong')"><span class="quiz-opt-num">D</span>Reinicia a sessão do usuário</div>
+        </div>
+        <div class="quiz-feedback qf-ok">✅ Perfeito! O Swing não redesenha automaticamente quando você modifica componentes programaticamente. <code style="font-family:var(--mono)">revalidate()</code> recalcula o layout e <code style="font-family:var(--mono)">repaint()</code> redesenha visualmente — os dois juntos garantem que a mudança seja imediatamente visível.</div>
+        <div class="quiz-feedback qf-no">❌ <code style="font-family:var(--mono)">revalidate()</code> + <code style="font-family:var(--mono)">repaint()</code> são necessários porque o Swing não reflete mudanças programáticas automaticamente — você precisa pedir explicitamente que ele redesenhe o componente.</div>
+      </div>
+
+      <div class="quiz-box" style="margin-top:1rem">
+        <div class="quiz-q">4. Por que usar <code style="font-family:var(--mono)">PreparedStatement</code> em vez de concatenar strings para montar o SQL?</div>
+        <div class="quiz-opts">
+          <div class="quiz-opt" onclick="checkQ4(this,'wrong')"><span class="quiz-opt-num">A</span>PreparedStatement é mais rápido de digitar</div>
+          <div class="quiz-opt" onclick="checkQ4(this,'correct')"><span class="quiz-opt-num">B</span>Protege contra SQL Injection — os ? são escapados automaticamente pelo driver JDBC</div>
+          <div class="quiz-opt" onclick="checkQ4(this,'wrong')"><span class="quiz-opt-num">C</span>Porque VARCHAR(100) não aceita strings concatenadas</div>
+          <div class="quiz-opt" onclick="checkQ4(this,'wrong')"><span class="quiz-opt-num">D</span>Para funcionar com MySQL versão 8 e superior</div>
+        </div>
+        <div class="quiz-feedback qf-ok">✅ Correto! Se você concatenar diretamente (ex: <code style="font-family:var(--mono)">"WHERE login = '" + input + "'"</code>), um usuário mal-intencionado pode digitar <code style="font-family:var(--mono)">' OR '1'='1</code> e acessar qualquer conta. O PreparedStatement escapa os parâmetros antes de enviá-los, bloqueando esse ataque.</div>
+        <div class="quiz-feedback qf-no">❌ A razão principal é segurança: <strong>SQL Injection</strong>. Concatenar input do usuário diretamente no SQL permite ataques que burlam a autenticação ou apagam dados do banco.</div>
+      </div>
+    </section>
+
+    <hr class="sep">
+
+    <!-- SEGURANÇA -->
+    <section class="sec section-observer-target" id="seguranca">
+      <div class="sec-tag">Análise crítica</div>
+      <h2>🔐 Pontos de Segurança — Limitações conhecidas</h2>
+      <p style="margin-bottom:1.5rem;color:var(--text-dim)">O SuperSistema é um projeto didático funcional, mas possui vulnerabilidades importantes para quem for evoluí-lo:</p>
+
+      <div class="security-grid">
+        <div class="sec-card">
+          <span class="sc-icon">🔑</span>
+          <h4>Senhas em texto plano</h4>
+          <p>As senhas são salvas diretamente na <code style="font-family:var(--mono)">tb_usuarios</code> sem hash. Se o banco vazar, todas as senhas ficam expostas. <strong>Solução:</strong> aplicar BCrypt ou SHA-256+salt antes de persistir.</p>
+        </div>
+        <div class="sec-card">
+          <span class="sc-icon">🔒</span>
+          <h4>Credenciais no código-fonte</h4>
+          <p>A URL, usuário e senha do banco estão em texto claro em <code style="font-family:var(--mono)">Conexao.java</code>. Qualquer pessoa com acesso ao repositório vê tudo. <strong>Solução:</strong> variáveis de ambiente ou <code style="font-family:var(--mono)">config.properties</code> no .gitignore.</p>
+        </div>
+        <div class="sec-card">
+          <span class="sc-icon">🚪</span>
+          <h4>Sem limite de tentativas</h4>
+          <p>É possível tentar login ilimitadas vezes sem bloqueio — suscetível a ataque de força bruta. <strong>Solução:</strong> bloquear após N tentativas falhas e registrar IPs suspeitos.</p>
+        </div>
+        <div class="sec-card">
+          <span class="sc-icon">👤</span>
+          <h4>Sem controle de permissões</h4>
+          <p>Qualquer usuário logado acessa todos os menus (Usuários e Segurança). <strong>Solução:</strong> adicionar coluna <code style="font-family:var(--mono)">perfil ENUM('admin','operador')</code> e exibir menus conforme o perfil.</p>
+        </div>
+        <div class="sec-card">
+          <span class="sc-icon">📝</span>
+          <h4>Log editável manualmente</h4>
+          <p>O <code style="font-family:var(--mono)">auditoria.log</code> é um arquivo texto comum — pode ser editado ou apagado. <strong>Solução:</strong> gravar em tabela no banco com constraint de integridade ou usar log assinado.</p>
+        </div>
+        <div class="sec-card">
+          <span class="sc-icon">🔓</span>
+          <h4>Conexão sem SSL</h4>
+          <p>O parâmetro <code style="font-family:var(--mono)">useSSL=false</code> desabilita criptografia na comunicação com o banco. Dados trafegam em texto claro na rede. <strong>Solução:</strong> habilitar SSL/TLS na conexão JDBC.</p>
+        </div>
+      </div>
+    </section>
+
+    <hr class="sep">
+
+    <!-- GLOSSÁRIO -->
+    <section class="sec section-observer-target" id="glossario">
+      <div class="sec-tag">Referência rápida</div>
+      <h2>📖 Glossário — Todos os termos do projeto</h2>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Termo</th><th>Tipo</th><th>O que significa neste projeto</th></tr></thead>
+          <tbody>
+            <tr><td class="t-kw">extends</td><td>Herança Java</td><td>FormPrincipal extends JFrame — "é um JFrame com extras"</td></tr>
+            <tr><td class="t-kw">static</td><td>Modificador</td><td>Pertence à classe, não a uma instância — pode ser chamado sem criar objeto</td></tr>
+            <tr><td class="t-kw">final</td><td>Modificador</td><td>Valor não pode ser alterado após definição (constante)</td></tr>
+            <tr><td class="t-kw">private</td><td>Visibilidade</td><td>Só a própria classe pode acessar</td></tr>
+            <tr><td class="t-kw">void</td><td>Tipo de retorno</td><td>Método não devolve nenhum valor</td></tr>
+            <tr><td class="t-kw">null</td><td>Valor especial</td><td>"Nenhum valor" — usuarioLogado=null significa sessão inativa</td></tr>
+            <tr><td class="t-kw">throws</td><td>Exceção</td><td>Declara que o método pode lançar erros para o chamador tratar</td></tr>
+            <tr><td class="t-fn">JFrame</td><td>Swing</td><td>Janela independente do sistema operacional</td></tr>
+            <tr><td class="t-fn">JDialog</td><td>Swing</td><td>Janela filha, pode ser modal (bloqueia a janela pai)</td></tr>
+            <tr><td class="t-fn">JTable</td><td>Swing</td><td>Grade de dados com linhas e colunas</td></tr>
+            <tr><td class="t-fn">DefaultTableModel</td><td>Swing</td><td>Modelo de dados por trás da JTable</td></tr>
+            <tr><td class="t-fn">GridBagLayout</td><td>Layout</td><td>Posicionamento preciso em grade com linha/coluna/espaçamento</td></tr>
+            <tr><td class="t-fn">BorderLayout</td><td>Layout</td><td>Divide o painel em 5 regiões: Norte/Sul/Leste/Oeste/Centro</td></tr>
+            <tr><td class="t-fn">ActionListener</td><td>Evento</td><td>Ouvinte de clique em botão — executa código quando clicado</td></tr>
+            <tr><td class="t-fn">MouseAdapter</td><td>Evento</td><td>Ouvinte de eventos de mouse — aqui detecta duplo clique na tabela</td></tr>
+            <tr><td class="t-acc">Connection</td><td>JDBC</td><td>Canal aberto com o banco de dados — deve ser fechado após uso</td></tr>
+            <tr><td class="t-acc">PreparedStatement</td><td>JDBC</td><td>Query SQL parametrizada com ? — protege contra SQL Injection</td></tr>
+            <tr><td class="t-acc">ResultSet</td><td>JDBC</td><td>Tabela de resultados de um SELECT — percorrida com rs.next()</td></tr>
+            <tr><td class="t-acc">DriverManager</td><td>JDBC</td><td>Gerenciador de drivers JDBC — cria conexões via getConnection()</td></tr>
+            <tr><td class="t-acc">AUTO_INCREMENT</td><td>MySQL</td><td>Gera automaticamente IDs únicos crescentes na tabela</td></tr>
+            <tr><td class="t-acc">UNIQUE</td><td>MySQL</td><td>Constraint que impede valores duplicados na coluna (login)</td></tr>
+            <tr><td class="t-acc">append mode</td><td>I/O</td><td>FileWriter com true — adiciona ao final do arquivo sem apagar</td></tr>
+            <tr><td class="t-acc">invokeLater</td><td>Threading</td><td>Agenda criação da GUI na thread correta do Swing (EDT)</td></tr>
+            <tr><td class="t-acc">modal</td><td>UI</td><td>Janela que bloqueia a interação com outras janelas até ser fechada</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <div style="height:3rem"></div>
+    <div style="text-align:center;font-family:var(--mono);font-size:.65rem;color:var(--text-dim);letter-spacing:.08em;padding:1rem 0 2rem;border-top:1px solid var(--border)">
+      SuperSistema · Java Swing + JDBC + MySQL · Guia Completo de Todas as Classes
+    </div>
+  </main>
+</div>
+
+<script>
+const pbar=document.getElementById('pbar');
+window.addEventListener('scroll',()=>{const h=document.body.scrollHeight-window.innerHeight;pbar.style.width=(h>0?(window.scrollY/h)*100:0)+'%';},{passive:true});
+const btt=document.getElementById('btt');
+window.addEventListener('scroll',()=>btt.classList.toggle('show',window.scrollY>400),{passive:true});
+btt.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+document.querySelectorAll('.t-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const t=btn.dataset.theme;
+    document.documentElement.setAttribute('data-theme',t);
+    localStorage.setItem('ss-theme',t);
+    document.querySelectorAll('.t-btn').forEach(b=>b.classList.toggle('on',b===btn));
+  });
+});
+(function(){const t=localStorage.getItem('ss-theme')||'dark';document.querySelectorAll('.t-btn').forEach(b=>b.classList.toggle('on',b.dataset.theme===t));})();
+const ham=document.getElementById('hamBtn'),sidebar=document.getElementById('sidebar'),overlay=document.getElementById('overlay');
+function toggleSidebar(){const open=sidebar.classList.toggle('open');ham.classList.toggle('on',open);overlay.classList.toggle('on',open);ham.setAttribute('aria-expanded',open);}
+ham.addEventListener('click',toggleSidebar);overlay.addEventListener('click',toggleSidebar);
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const pane=document.getElementById('tab-'+btn.dataset.tab);if(!pane)return;
+    btn.closest('section').querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('on'));
+    btn.closest('section').querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('on'));
+    btn.classList.add('on');pane.classList.add('on');
+  });
+});
+const sections=document.querySelectorAll('.section-observer-target');
+const navLinks=document.querySelectorAll('.nav-link');
+const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){const id=e.target.id;navLinks.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+id));}});},{rootMargin:'-20% 0px -60% 0px'});
+sections.forEach(s=>obs.observe(s));
+function checkQ(el,result){const box=el.closest('.quiz-box');box.querySelectorAll('.quiz-opt').forEach(o=>{o.style.pointerEvents='none';o.classList.remove('correct','wrong');});el.classList.add(result);const fbs=box.querySelectorAll('.quiz-feedback');fbs[0].classList.toggle('show',result==='correct');fbs[1].classList.toggle('show',result==='wrong');}
+function checkQ2(el,r){checkQ(el,r);}function checkQ3(el,r){checkQ(el,r);}function checkQ4(el,r){checkQ(el,r);}
+document.querySelectorAll('.nav-link').forEach(a=>{a.addEventListener('click',()=>{if(window.innerWidth<900&&sidebar.classList.contains('open'))toggleSidebar();});});
+</script>
+</body>
+</html>
