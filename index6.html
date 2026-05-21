@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SuperSistema — Fluxo de Uso</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Mono:wght@400;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:     #0e0f0d;
+  --bg2:    #161815;
+  --bg3:    #1f211d;
+  --bg4:    #282b25;
+  --border: #2e3229;
+  --border2:#3a3f34;
+  --text:   #bdc4b0;
+  --dim:    #6b7561;
+  --head:   #e8edd8;
+  --amber:  #d4a843;
+  --a-dim:  rgba(212,168,67,.13);
+  --a-bdr:  rgba(212,168,67,.28);
+  --green:  #6fcf7c;
+  --g-dim:  rgba(111,207,124,.11);
+  --g-bdr:  rgba(111,207,124,.25);
+  --blue:   #7bafd4;
+  --b-dim:  rgba(123,175,212,.11);
+  --b-bdr:  rgba(123,175,212,.25);
+  --red:    #e06060;
+  --r-dim:  rgba(224,96,96,.11);
+  --r-bdr:  rgba(224,96,96,.25);
+  --orange: #d48843;
+  --o-dim:  rgba(212,136,67,.11);
+  --o-bdr:  rgba(212,136,67,.25);
+  --serif:  'DM Serif Display', Georgia, serif;
+  --mono:   'IBM Plex Mono', monospace;
+  --sans:   'DM Sans', system-ui, sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { background: var(--bg); }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-weight: 300;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 3rem 1.5rem 4rem;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── HEADER ── */
+.hdr {
+  text-align: center;
+  margin-bottom: 3rem;
+  animation: fadeup .5s ease both;
+}
+.hdr-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  font-family: var(--mono);
+  font-size: .65rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--amber);
+  background: var(--a-dim);
+  border: 1px solid var(--a-bdr);
+  border-radius: 999px;
+  padding: .22rem .8rem;
+  margin-bottom: 1rem;
+}
+.hdr h1 {
+  font-family: var(--serif);
+  font-size: 2.2rem;
+  font-weight: 400;
+  color: var(--head);
+  line-height: 1.15;
+  margin-bottom: .5rem;
+}
+.hdr h1 em { font-style: italic; color: var(--amber); }
+.hdr p {
+  font-size: .9rem;
+  color: var(--dim);
+  font-family: var(--mono);
+  font-size: .7rem;
+  letter-spacing: .04em;
+}
+
+/* ── CANVAS ── */
+.canvas {
+  width: 100%;
+  max-width: 920px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+/* ── ENTRY NODE ── */
+.entry {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  font-family: var(--mono);
+  font-size: .65rem;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: var(--dim);
+  border: 1px solid var(--border2);
+  border-radius: 999px;
+  padding: .3rem 1rem;
+  animation: fadeup .4s .05s ease both;
+}
+.entry-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+
+/* ── CONNECTOR LINES ── */
+.vline {
+  width: 1px;
+  background: linear-gradient(to bottom, var(--border2), var(--border));
+  flex-shrink: 0;
+}
+.vline-lg { height: 36px; }
+.vline-sm { height: 24px; }
+.vline-xs { height: 18px; }
+
+/* ── HUB: JANELA PRINCIPAL ── */
+.hub {
+  width: 100%;
+  background: var(--bg2);
+  border: 1px solid var(--a-bdr);
+  border-radius: 12px;
+  padding: 1.3rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  position: relative;
+  animation: fadeup .4s .12s ease both;
+  box-shadow: 0 0 40px rgba(212,168,67,.06);
+}
+.hub::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(212,168,67,.12) 0%, transparent 60%);
+  pointer-events: none;
+}
+.hub-left { display: flex; flex-direction: column; gap: .35rem; }
+.hub-tag {
+  font-family: var(--mono);
+  font-size: .6rem;
+  color: var(--amber);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+.hub-name {
+  font-family: var(--serif);
+  font-size: 1.35rem;
+  color: var(--head);
+  line-height: 1;
+}
+.hub-desc {
+  font-family: var(--mono);
+  font-size: .68rem;
+  color: var(--dim);
+  line-height: 1.5;
+}
+.hub-right {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  flex-shrink: 0;
+}
+.hub-chip {
+  font-family: var(--mono);
+  font-size: .6rem;
+  color: var(--amber);
+  background: var(--a-dim);
+  border: 1px solid var(--a-bdr);
+  border-radius: 5px;
+  padding: .2rem .5rem;
+  white-space: nowrap;
+}
+
+/* ── BRANCH ROW ── */
+.branch-row {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: .75rem;
+  position: relative;
+  animation: fadeup .4s .22s ease both;
+}
+
+/* horizontal connector across branches */
+.branch-row::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: calc(12.5% + .375rem);
+  right: calc(12.5% + .375rem);
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--border2), var(--border2), transparent);
+}
+
+/* ── BRANCH COLUMN ── */
+.branch {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+/* ── BRANCH LABEL ── */
+.blabel {
+  font-family: var(--mono);
+  font-size: .6rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  border: 1.5px solid var(--amber);
+  color: var(--amber);
+  border-radius: 999px;
+  padding: .18rem .55rem;
+  background: var(--bg);
+  position: relative;
+  z-index: 2;
+  white-space: nowrap;
+}
+.blabel.g { border-color: var(--green); color: var(--green); }
+.blabel.b { border-color: var(--blue);  color: var(--blue);  }
+.blabel.r { border-color: var(--red);   color: var(--red);   }
+
+/* ── CARD ── */
+.card {
+  width: 100%;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.1rem 1rem;
+  transition: border-color .18s, background .18s, transform .18s;
+  cursor: default;
+  display: flex;
+  flex-direction: column;
+  gap: .4rem;
+  min-height: 120px;
+}
+.card:hover {
+  border-color: var(--a-bdr);
+  background: var(--bg3);
+  transform: translateY(-2px);
+}
+.card.g:hover { border-color: var(--g-bdr); }
+.card.b:hover { border-color: var(--b-bdr); }
+.card.r:hover { border-color: var(--r-bdr); }
+
+/* left accent bar */
+.card { border-left: 3px solid var(--border2); }
+.card.g { border-left-color: var(--green); }
+.card.b { border-left-color: var(--blue);  }
+.card.r { border-left-color: var(--red);   }
+
+.card-icon {
+  font-size: 1rem;
+  margin-bottom: .1rem;
+  line-height: 1;
+}
+.card-name {
+  font-family: var(--mono);
+  font-size: .8rem;
+  font-weight: 600;
+  color: var(--head);
+  line-height: 1.2;
+}
+.card-name.amber { color: var(--amber); }
+.card-name.green { color: var(--green); }
+.card-name.blue  { color: var(--blue);  }
+.card-name.red   { color: var(--red);   }
+.card-desc {
+  font-family: var(--mono);
+  font-size: .67rem;
+  color: var(--dim);
+  line-height: 1.6;
+}
+.card-ret {
+  margin-top: auto;
+  padding-top: .5rem;
+  display: flex;
+  align-items: center;
+  gap: .3rem;
+  font-family: var(--mono);
+  font-size: .63rem;
+  color: var(--dim);
+  border-top: 1px solid var(--border);
+}
+.card-ret-arrow { color: var(--amber); font-size: .8rem; }
+.card-ret.g .card-ret-arrow { color: var(--green); }
+.card-ret.b .card-ret-arrow { color: var(--blue);  }
+
+/* ── DETAIL BLOCK ── */
+.detail-block {
+  width: 100%;
+  max-width: 920px;
+  margin-top: 2.5rem;
+  animation: fadeup .4s .35s ease both;
+}
+.detail-block-title {
+  font-family: var(--mono);
+  font-size: .65rem;
+  color: var(--dim);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  margin-bottom: .75rem;
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+}
+.detail-block-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+}
+.step {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: .9rem 1.1rem;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: .85rem;
+  align-items: start;
+  transition: background .15s, border-color .15s;
+  cursor: default;
+}
+.step:hover { background: var(--bg3); border-color: var(--border2); }
+.step.incl { border-left: 3px solid var(--green); }
+.step.edit { border-left: 3px solid var(--amber); }
+.step.excl { border-left: 3px solid var(--red); }
+
+.step-num {
+  font-family: var(--mono);
+  font-size: .75rem;
+  font-weight: 600;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.step.incl .step-num { background: var(--g-dim); color: var(--green); border: 1px solid var(--g-bdr); }
+.step.edit .step-num { background: var(--a-dim); color: var(--amber); border: 1px solid var(--a-bdr); }
+.step.excl .step-num { background: var(--r-dim); color: var(--red);   border: 1px solid var(--r-bdr); }
+
+.step-body {}
+.step-label {
+  font-family: var(--mono);
+  font-size: .7rem;
+  font-weight: 600;
+  margin-bottom: .35rem;
+}
+.step.incl .step-label { color: var(--green); }
+.step.edit .step-label { color: var(--amber); }
+.step.excl .step-label { color: var(--red);   }
+
+.step-chain {
+  font-family: var(--mono);
+  font-size: .72rem;
+  color: var(--dim);
+  line-height: 1.9;
+  white-space: pre;
+}
+.step-chain .hl-a { color: var(--amber); }
+.step-chain .hl-g { color: var(--green); }
+.step-chain .hl-r { color: var(--red);   }
+.step-chain .hl-b { color: var(--blue);  }
+.step-chain .hl-d { color: var(--text-dim, #6b7561); opacity: .7; }
+
+/* ── LEGEND ── */
+.legend {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+  width: 100%;
+  max-width: 920px;
+  animation: fadeup .4s .45s ease both;
+}
+.leg-item {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  font-family: var(--mono);
+  font-size: .65rem;
+  color: var(--dim);
+}
+.leg-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeup {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 720px) {
+  .branch-row { grid-template-columns: 1fr 1fr; }
+  .branch-row::before { display: none; }
+  .hub { flex-direction: column; align-items: flex-start; }
+  .hub-right { align-self: flex-start; }
+}
+@media (max-width: 480px) {
+  .branch-row { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-badge">▸ 13 — Fluxo de Uso</div>
+  <h1>Fluxo de <em>Uso</em></h1>
+  <p>Do início da aplicação ao encerramento de sessão</p>
+</div>
+
+<div class="canvas">
+
+  <!-- ENTRY -->
+  <div class="entry" style="animation-delay:.05s">
+    <span class="entry-dot"></span>
+    java javasistema.FormPrincipal
+  </div>
+
+  <div class="vline vline-lg"></div>
+
+  <!-- HUB -->
+  <div class="hub">
+    <div class="hub-left">
+      <span class="hub-tag">Ponto de entrada · JFrame maximizado</span>
+      <span class="hub-name">FormPrincipal</span>
+      <span class="hub-desc">Logo de fundo via paintComponent · Menus dinâmicos pós-login</span>
+    </div>
+    <div class="hub-right">
+      <span class="hub-chip">Sistema → Logar</span>
+      <span class="hub-chip">Sistema → Fechar</span>
+    </div>
+  </div>
+
+  <div class="vline vline-lg"></div>
+
+  <!-- BRANCHES -->
+  <div class="branch-row">
+
+    <!-- LOGIN -->
+    <div class="branch">
+      <span class="blabel">Login</span>
+      <div class="vline vline-xs"></div>
+      <div class="card">
+        <div class="card-icon">🔐</div>
+        <div class="card-name amber">LoginDialog</div>
+        <div class="card-desc">JDialog modal<br>Empresa + Usuário + Senha<br>SELECT WHERE login+senha</div>
+        <div class="card-ret">
+          <span class="card-ret-arrow">↩</span>
+          menus Usuários + Segurança
+        </div>
+      </div>
+    </div>
+
+    <!-- GESTÃO -->
+    <div class="branch">
+      <span class="blabel b">Gestão</span>
+      <div class="vline vline-xs"></div>
+      <div class="card b">
+        <div class="card-icon">📋</div>
+        <div class="card-name blue">FormUsuariosListar</div>
+        <div class="card-desc">JFrame · JTable<br>Incluir / Editar / Excluir<br>SELECT ORDER BY nome</div>
+        <div class="card-ret b">
+          <span class="card-ret-arrow">↩</span>
+          volta à janela principal
+        </div>
+      </div>
+    </div>
+
+    <!-- LOG -->
+    <div class="branch">
+      <span class="blabel g">Log</span>
+      <div class="vline vline-xs"></div>
+      <div class="card g">
+        <div class="card-icon">📑</div>
+        <div class="card-name green">FormLogAuditoria</div>
+        <div class="card-desc">JFrame · JTable<br>Lê auditoria.log linha a linha<br>4 colunas: data·login·evento·detalhe</div>
+        <div class="card-ret g">
+          <span class="card-ret-arrow">↩</span>
+          volta à janela principal
+        </div>
+      </div>
+    </div>
+
+    <!-- LOGOUT -->
+    <div class="branch">
+      <span class="blabel r">Logout</span>
+      <div class="vline vline-xs"></div>
+      <div class="card r">
+        <div class="card-icon">🚪</div>
+        <div class="card-name red">Sessão Encerrada</div>
+        <div class="card-desc">Confirma saída via JOptionPane<br>Registra LOGOUT no log<br>Remove menus da barra</div>
+        <div class="card-ret" style="border-top-color:var(--r-bdr)">
+          <span class="card-ret-arrow" style="color:var(--red)">✕</span>
+          <span style="color:var(--red);opacity:.7">fim de sessão</span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /branch-row -->
+
+</div><!-- /canvas -->
+
+<!-- DETAIL: CRUD STEPS -->
+<div class="detail-block">
+  <div class="detail-block-title">Detalhe — operações CRUD dentro de FormUsuariosListar</div>
+
+  <div class="steps">
+
+    <div class="step incl">
+      <div class="step-num">+</div>
+      <div class="step-body">
+        <div class="step-label">INCLUIR</div>
+        <div class="step-chain"><span class="hl-b">FormUsuariosListar</span> → [INCLUIR]
+  → <span class="hl-g">FormUsuariosIncluir</span>.abrir(this, loginOperador)
+    → new <span class="hl-a">FormUsuarioEditar</span>(this, <span class="hl-g">id=0</span>)    <span class="hl-d">// modo inclusão</span>
+    → [preenche campos] → [SALVAR]
+      → <span class="hl-g">INSERT INTO tb_usuarios (...)</span>
+      → AuditoriaUtil.registrar(<span class="hl-g">"INCLUIR_USUARIO"</span>)
+      → dispose() → isSalvo() = true
+  → <span class="hl-b">carregarUsuarios()</span>                        <span class="hl-d">// atualiza a grade</span></div>
+      </div>
+    </div>
+
+    <div class="step edit">
+      <div class="step-num">✎</div>
+      <div class="step-body">
+        <div class="step-label">EDITAR</div>
+        <div class="step-chain"><span class="hl-b">FormUsuariosListar</span> → [EDITAR] <span class="hl-d">ou duplo clique</span>
+  → abrirFormEdicao() → obtém id da linha selecionada
+    → new <span class="hl-a">FormUsuarioEditar</span>(this, <span class="hl-a">id</span>)       <span class="hl-d">// modo edição</span>
+    → carregarDados()                           <span class="hl-d">// SELECT preenche campos</span>
+    → [edita campos] → [SALVAR]
+      → <span class="hl-a">UPDATE tb_usuarios SET ... WHERE usuario_id=?</span>
+      → AuditoriaUtil.registrar(<span class="hl-a">"EDITAR_USUARIO"</span>)
+  → <span class="hl-b">carregarUsuarios()</span></div>
+      </div>
+    </div>
+
+    <div class="step excl">
+      <div class="step-num">✕</div>
+      <div class="step-body">
+        <div class="step-label">EXCLUIR</div>
+        <div class="step-chain"><span class="hl-b">FormUsuariosListar</span> → [EXCLUIR]
+  → <span class="hl-r">FormUsuariosExcluir</span>.excluir(this, loginOperador)
+    → obtém id e nome da linha selecionada
+    → JOptionPane.showConfirmDialog             <span class="hl-d">// confirmação obrigatória</span>
+    → <span class="hl-r">DELETE FROM tb_usuarios WHERE usuario_id=?</span>
+    → AuditoriaUtil.registrar(<span class="hl-r">"EXCLUIR_USUARIO"</span>)
+  → <span class="hl-b">carregarUsuarios()</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- LEGEND -->
+<div class="legend">
+  <div class="leg-item"><div class="leg-dot" style="background:var(--amber)"></div> Fluxo principal / autenticação</div>
+  <div class="leg-item"><div class="leg-dot" style="background:var(--blue)"></div> Janela modal (bloqueia pai)</div>
+  <div class="leg-item"><div class="leg-dot" style="background:var(--green)"></div> Operação INSERIR ou sucesso</div>
+  <div class="leg-item"><div class="leg-dot" style="background:var(--red)"></div> Encerramento / exclusão</div>
+  <div class="leg-item"><div class="leg-dot" style="background:var(--dim)"></div> Retorno à janela principal</div>
+</div>
+
+</body>
+</html>
