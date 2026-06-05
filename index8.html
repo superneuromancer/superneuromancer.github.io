@@ -1,0 +1,1543 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Banco de Dados · Aula 4 — Sistema Corporativo Completo</title>
+<script>
+(function(){
+  var t=localStorage.getItem('bd-theme');
+  var cb=localStorage.getItem('bd-cb')==='true';
+  var pref=window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark';
+  document.documentElement.setAttribute('data-theme',t||pref);
+  if(cb) document.documentElement.setAttribute('data-colorblind','true');
+})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;600&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+
+/* ═══════════════════════════════ TEMAS ═══════════════════════════════ */
+:root,[data-theme="dark"]{
+  --bg:#0d0f12;--bg2:#13161b;--bg3:#1a1e26;--border:#252932;
+  --text:#c8cdd8;--text-dim:#7e8599;--text-head:#e8ecf4;
+  --accent:#4a9ef0;--accent2:#f0894a;--accent3:#c04af0;--accent4:#f0d44a;
+  --danger:#f05a5a;--success:#4af090;
+  --serif:'Instrument Serif',Georgia,serif;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+  --sans:'Sora',system-ui,sans-serif;
+  --radius:8px;--glow:0 0 28px rgba(74,158,240,.10);
+  --shadow:0 2px 20px rgba(0,0,0,.40);--noise:.025;
+}
+[data-theme="nord"]{
+  --bg:#2e3440;--bg2:#3b4252;--bg3:#434c5e;--border:#4c566a;
+  --text:#d8dee9;--text-dim:#9aa5bb;--text-head:#eceff4;
+  --accent:#88c0d0;--accent2:#d08770;--accent3:#b48ead;--accent4:#ebcb8b;
+  --danger:#bf616a;--success:#a3be8c;
+  --glow:0 0 28px rgba(136,192,208,.12);--shadow:0 2px 20px rgba(0,0,0,.25);--noise:.015;
+}
+[data-theme="tokyo"]{
+  --bg:#1a1b26;--bg2:#24283b;--bg3:#292e42;--border:#33395a;
+  --text:#a9b1d6;--text-dim:#8087a8;--text-head:#c0caf5;
+  --accent:#7aa2f7;--accent2:#ff9e64;--accent3:#bb9af7;--accent4:#e0af68;
+  --danger:#f7768e;--success:#9ece6a;
+  --glow:0 0 28px rgba(122,162,247,.12);--shadow:0 2px 20px rgba(0,0,0,.30);--noise:.018;
+}
+[data-theme="catppuccin"]{
+  --bg:#1e1e2e;--bg2:#313244;--bg3:#45475a;--border:#585b70;
+  --text:#cdd6f4;--text-dim:#9399b2;--text-head:#cdd6f4;
+  --accent:#89b4fa;--accent2:#fab387;--accent3:#cba6f7;--accent4:#f9e2af;
+  --danger:#f38ba8;--success:#a6e3a1;
+  --glow:0 0 28px rgba(137,180,250,.12);--shadow:0 2px 20px rgba(0,0,0,.35);--noise:.018;
+}
+[data-theme="light"]{
+  --bg:#f7f9fc;--bg2:#ffffff;--bg3:#eef1f7;--border:#dde3ef;
+  --text:#3d4557;--text-dim:#5e6880;--text-head:#111828;
+  --accent:#1a4fb5;--accent2:#b84a0e;--accent3:#7a1fa8;--accent4:#7a5700;
+  --danger:#a61414;--success:#155230;
+  --glow:0 0 28px rgba(26,79,181,.08);--shadow:0 2px 20px rgba(0,0,0,.08);--noise:.008;
+}
+[data-theme="hc"]{
+  --bg:#000000;--bg2:#0a0a0a;--bg3:#141414;--border:#555555;
+  --text:#ffffff;--text-dim:#bbbbbb;--text-head:#ffffff;
+  --accent:#00aaff;--accent2:#ff8800;--accent3:#cc44ff;--accent4:#ffee00;
+  --danger:#ff4444;--success:#00ff66;
+  --glow:0 0 24px rgba(0,170,255,.30);--shadow:0 2px 16px rgba(0,0,0,.9);--noise:0;
+}
+[data-colorblind="true"]{
+  --accent:#0077bb;--accent2:#ee7733;--accent3:#aa3377;--accent4:#ddcc77;
+  --success:#009988;--danger:#cc3311;
+}
+
+/* ═══════════════════════════════ RESET ═══════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;font-size:16px;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-weight:300;line-height:1.75;-webkit-font-smoothing:antialiased;transition:background .22s ease,color .22s ease;}
+body::before{content:'';position:fixed;inset:0;z-index:0;opacity:var(--noise);background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");pointer-events:none;transition:opacity .22s;}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
+:focus-visible{outline:2.5px solid var(--accent);outline-offset:3px;border-radius:3px;}
+
+/* PROGRESS */
+#progress-bar{position:fixed;top:0;left:0;height:2.5px;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent3));z-index:200;transition:width .08s linear;pointer-events:none;}
+
+/* SKIP */
+.skip-link{position:fixed;top:-100%;left:1rem;z-index:9999;background:var(--accent);color:var(--bg);font-family:var(--mono);font-size:.78rem;font-weight:600;padding:.6rem 1.1rem;border-radius:0 0 var(--radius) var(--radius);text-decoration:none;letter-spacing:.04em;transition:top .12s ease;box-shadow:var(--shadow);}
+.skip-link:focus{top:0;}
+
+/* MOBILE HEADER */
+.mobile-header{display:none;position:sticky;top:0;z-index:110;background:var(--bg);border-bottom:1px solid var(--border);padding:.8rem 1.25rem;align-items:center;justify-content:space-between;transition:background .22s;}
+.mobile-title{font-family:var(--mono);font-size:.68rem;color:var(--accent);letter-spacing:.1em;text-transform:uppercase;}
+.hamburger{background:none;border:1px solid var(--border);border-radius:var(--radius);padding:.45rem .55rem;cursor:pointer;color:var(--text);display:flex;flex-direction:column;gap:4px;align-items:center;transition:border-color .15s,color .15s;}
+.hamburger:hover{border-color:var(--accent);color:var(--accent);}
+.hamburger span{display:block;width:17px;height:1.5px;background:currentColor;transition:transform .2s ease,opacity .2s;transform-origin:center;}
+.hamburger.active span:nth-child(1){transform:translateY(5.5px) rotate(45deg);}
+.hamburger.active span:nth-child(2){opacity:0;}
+.hamburger.active span:nth-child(3){transform:translateY(-5.5px) rotate(-45deg);}
+#sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:90;backdrop-filter:blur(3px);}
+#sidebar-overlay.visible{display:block;}
+
+/* LAYOUT */
+.layout{display:grid;grid-template-columns:248px 1fr;min-height:100vh;position:relative;z-index:1;max-width:1240px;margin:0 auto;}
+
+/* SIDEBAR */
+.sidebar{position:sticky;top:0;height:100vh;overflow-y:auto;padding:2rem 1.25rem;border-right:1px solid var(--border);display:flex;flex-direction:column;gap:.15rem;background:var(--bg);z-index:99;transition:transform .25s ease,background .22s;scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
+.sidebar::-webkit-scrollbar{width:3px;}
+.sidebar::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+.sidebar-logo{font-family:var(--mono);font-size:.68rem;font-weight:600;color:var(--accent);letter-spacing:.12em;text-transform:uppercase;margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid var(--border);line-height:1.7;}
+.sidebar-logo span{color:var(--text-dim);}
+.theme-switcher{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.3rem;margin-bottom:.5rem;}
+.theme-btn{padding:.3rem .2rem;font-family:var(--mono);font-size:.55rem;letter-spacing:.06em;text-transform:uppercase;border-radius:5px;cursor:pointer;border:1px solid var(--border);background:var(--bg2);color:var(--text-dim);transition:all .15s;display:flex;align-items:center;justify-content:center;white-space:nowrap;}
+.theme-btn:hover{color:var(--text-head);border-color:var(--accent);background:var(--bg3);}
+.theme-btn.active{background:var(--accent);border-color:var(--accent);color:var(--bg);font-weight:600;}
+.cb-toggle{width:100%;display:flex;align-items:center;gap:.5rem;padding:.38rem .6rem;font-family:var(--mono);font-size:.6rem;letter-spacing:.07em;text-transform:uppercase;border-radius:5px;cursor:pointer;border:1px solid var(--border);background:var(--bg2);color:var(--text-dim);transition:all .15s;margin-bottom:.75rem;}
+.cb-toggle:hover{border-color:var(--accent3);color:var(--text-head);background:var(--bg3);}
+.cb-toggle.active{border-color:var(--accent3);color:var(--accent3);background:rgba(192,74,240,.08);}
+.cb-dot{width:10px;height:10px;border-radius:50%;background:linear-gradient(135deg,#cc3311 50%,#009988 50%);flex-shrink:0;}
+.sidebar-nav-label{font-family:var(--mono);font-size:.6rem;color:var(--text-dim);letter-spacing:.1em;text-transform:uppercase;padding:.5rem 0 .3rem .4rem;}
+.nav-link{display:block;padding:.38rem .55rem;border-radius:5px;text-decoration:none;font-family:var(--mono);font-size:.68rem;color:var(--text-dim);letter-spacing:.02em;transition:background .12s,color .12s;line-height:1.5;}
+.nav-link:hover{background:var(--bg3);color:var(--text-head);}
+.nav-link.active{background:var(--bg3);color:var(--accent);}
+.sidebar-footer{margin-top:auto;padding-top:1.25rem;border-top:1px solid var(--border);font-family:var(--mono);font-size:.62rem;color:var(--text-dim);line-height:1.8;}
+.sidebar-footer strong{color:var(--text);}
+
+/* MAIN */
+main{padding:0;min-width:0;display:flex;flex-direction:column;}
+.section{opacity:0;transform:translateY(12px);transition:opacity .45s ease,transform .45s ease;}
+.section.visible{opacity:1;transform:translateY(0);}
+.content-section{padding:3.5rem 3rem;border-bottom:1px solid var(--border);}
+.section-num{display:inline-block;font-family:var(--mono);font-size:.68rem;color:var(--text-dim);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.75rem;}
+h2{font-family:var(--serif);font-size:2rem;font-weight:400;color:var(--text-head);line-height:1.25;margin-bottom:1rem;}
+h3{font-family:var(--sans);font-size:1.05rem;font-weight:600;color:var(--text-head);margin:2rem 0 .75rem;}
+.section-lead{font-size:1.05rem;color:var(--text);max-width:68ch;line-height:1.8;margin-bottom:2rem;}
+p{margin-bottom:1rem;max-width:72ch;}
+p:last-child{margin-bottom:0;}
+code{font-family:var(--mono);font-size:.85em;background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:.1em .4em;color:var(--accent);}
+
+/* HERO */
+.hero{padding:4rem 3rem 3.5rem;border-bottom:1px solid var(--border);position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;inset:0;z-index:0;background:radial-gradient(ellipse 60% 50% at 80% 50%,rgba(74,158,240,.05) 0%,transparent 70%);pointer-events:none;}
+.hero>*{position:relative;z-index:1;}
+.hero-badge{display:inline-flex;align-items:center;gap:.5rem;font-family:var(--mono);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);background:rgba(74,158,240,.07);border:1px solid rgba(74,158,240,.2);border-radius:999px;padding:.3rem .85rem;margin-bottom:1.5rem;}
+.hero h1{font-family:var(--serif);font-size:2.9rem;font-weight:400;color:var(--text-head);line-height:1.15;margin-bottom:1rem;}
+.hero h1 em{font-style:italic;color:var(--accent);}
+.hero-sub{font-size:1.05rem;color:var(--text);max-width:58ch;line-height:1.8;margin-bottom:2rem;}
+.hero-chips{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:2rem;}
+.chip{display:inline-flex;align-items:center;gap:.35rem;font-family:var(--mono);font-size:.7rem;color:var(--text-dim);background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:.3rem .7rem;}
+.chip-accent{color:var(--accent);border-color:rgba(74,158,240,.2);background:rgba(74,158,240,.05);}
+.chip-purple{color:var(--accent3);border-color:rgba(192,74,240,.2);background:rgba(192,74,240,.05);}
+.chip-green{color:var(--success);border-color:rgba(74,240,144,.2);background:rgba(74,240,144,.05);}
+.chip-orange{color:var(--accent2);border-color:rgba(240,137,74,.2);background:rgba(240,137,74,.05);}
+.hero-cta{display:inline-flex;align-items:center;gap:.5rem;font-family:var(--mono);font-size:.78rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;background:var(--accent);color:var(--bg);border:none;border-radius:var(--radius);padding:.7rem 1.4rem;cursor:pointer;text-decoration:none;transition:opacity .15s,transform .15s;box-shadow:var(--glow);}
+.hero-cta:hover{opacity:.88;transform:translateY(-1px);}
+.hero-terminal{margin-top:2.5rem;background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden;max-width:540px;box-shadow:var(--shadow);}
+.hero-terminal-bar{display:flex;align-items:center;gap:.45rem;padding:.6rem .9rem;border-bottom:1px solid var(--border);background:var(--bg3);}
+.tbar-dot{width:10px;height:10px;border-radius:50%;}
+.tbar-dot-r{background:var(--danger);opacity:.7;}
+.tbar-dot-y{background:var(--accent4);opacity:.7;}
+.tbar-dot-g{background:var(--success);opacity:.7;}
+.tbar-title{font-family:var(--mono);font-size:.62rem;color:var(--text-dim);letter-spacing:.05em;margin-left:auto;}
+.hero-terminal-body{padding:1rem 1.25rem;font-family:var(--mono);font-size:.78rem;line-height:1.9;}
+.t-prompt{color:var(--accent);}
+.t-cmd{color:var(--text-head);}
+.t-dim{color:var(--text-dim);}
+.t-acc{color:var(--accent);}
+.t-blue{color:var(--accent3);}
+.t-orange{color:var(--accent2);}
+.t-yellow{color:var(--accent4);}
+.t-green{color:var(--success);}
+.t-danger{color:var(--danger);}
+.t-head{color:var(--text-head);font-weight:600;}
+.t-cursor{display:inline-block;width:8px;height:14px;background:var(--accent);border-radius:1px;opacity:.7;animation:blink 1.1s step-end infinite;vertical-align:text-bottom;margin-left:2px;}
+@keyframes blink{50%{opacity:0;}}
+
+/* ARCH BOX */
+.arch-box{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1.5rem;font-family:var(--mono);font-size:.84rem;line-height:2;color:var(--text);overflow-x:auto;white-space:pre;margin:1.5rem 0;tab-size:2;}
+.c-accent{color:var(--accent);}
+.c-blue{color:var(--accent3);}
+.c-orange{color:var(--accent2);}
+.c-yellow{color:var(--accent4);}
+.c-dim{color:var(--text-dim);}
+.c-green{color:var(--success);}
+.c-danger{color:var(--danger);}
+.c-head{color:var(--text-head);font-weight:600;}
+
+/* CODE BLOCKS */
+.code-wrap{position:relative;background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin:1.5rem 0;}
+.code-label{display:block;font-family:var(--mono);font-size:.65rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);padding:.6rem 1rem;border-bottom:1px solid var(--border);background:var(--bg3);}
+.copy-btn{position:absolute;top:.55rem;right:.6rem;display:flex;align-items:center;gap:.4rem;font-family:var(--mono);font-size:.62rem;color:var(--text-dim);background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:.28rem .6rem;cursor:pointer;transition:border-color .15s,color .15s;}
+.copy-btn:hover{border-color:var(--accent);color:var(--accent);}
+.copy-btn.copied{color:var(--success);border-color:var(--success);}
+pre{font-family:var(--mono);font-size:.84rem;line-height:1.8;color:var(--text);padding:1.2rem 1.25rem;overflow-x:auto;tab-size:4;}
+.kw{color:var(--accent3);}
+.fn{color:var(--accent);}
+.cls{color:var(--accent4);}
+.str{color:var(--success);}
+.num{color:var(--accent2);}
+.cm{color:var(--text-dim);font-style:italic;}
+.kw-sql{color:var(--accent3);}
+.type-sql{color:var(--accent2);}
+.val-sql{color:var(--success);}
+
+/* TERM BOX */
+.term-box{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin:1.5rem 0;}
+.term-bar{display:flex;align-items:center;gap:.45rem;padding:.55rem .9rem;border-bottom:1px solid var(--border);background:var(--bg3);}
+.term-bar-title{font-family:var(--mono);font-size:.62rem;color:var(--text-dim);margin-left:.5rem;letter-spacing:.05em;}
+.term-body{padding:1rem 1.25rem;font-family:var(--mono);font-size:.82rem;line-height:1.85;overflow-x:auto;white-space:pre;}
+
+/* CALLOUTS */
+.callout{background:var(--bg2);border-left:3px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:1rem 1.25rem;font-size:.9rem;line-height:1.7;margin:1.5rem 0;}
+.callout-label{display:block;font-family:var(--mono);font-size:.68rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;}
+.callout.yellow{border-left-color:var(--accent4);}.callout.yellow .callout-label{color:var(--accent4);}
+.callout.blue{border-left-color:var(--accent3);}.callout.blue .callout-label{color:var(--accent3);}
+.callout.orange{border-left-color:var(--accent2);}.callout.orange .callout-label{color:var(--accent2);}
+.callout.danger{border-left-color:var(--danger);}.callout.danger .callout-label{color:var(--danger);}
+.callout.success{border-left-color:var(--success);}.callout.success .callout-label{color:var(--success);}
+
+/* TWO-COL */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.5rem 0;}
+
+/* CONCEPT CARDS */
+.concept-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;margin:1.5rem 0;}
+.concept-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1.1rem 1.2rem;transition:border-color .2s,background .2s;}
+.concept-card:hover{background:var(--bg3);}
+.concept-card.acc:hover{border-color:var(--accent);}
+.concept-card.blu:hover{border-color:var(--accent3);}
+.concept-card.ora:hover{border-color:var(--accent2);}
+.concept-card.grn:hover{border-color:var(--success);}
+.concept-card.yel:hover{border-color:var(--accent4);}
+.concept-card.pur:hover{border-color:var(--accent3);}
+.concept-icon{font-size:1.3rem;margin-bottom:.45rem;display:block;}
+.concept-name{font-family:var(--mono);font-size:.85rem;font-weight:600;margin-bottom:.2rem;}
+.concept-card.acc .concept-name{color:var(--accent);}
+.concept-card.blu .concept-name{color:var(--accent3);}
+.concept-card.ora .concept-name{color:var(--accent2);}
+.concept-card.grn .concept-name{color:var(--success);}
+.concept-card.yel .concept-name{color:var(--accent4);}
+.concept-card.pur .concept-name{color:var(--accent3);}
+.concept-en{font-family:var(--mono);font-size:.65rem;color:var(--text-dim);margin-bottom:.45rem;}
+.concept-desc{font-size:.85rem;color:var(--text);line-height:1.6;}
+
+/* COMPLEXITY TABLE */
+.cmp-table{width:100%;border-collapse:collapse;font-family:var(--sans);font-size:.87rem;margin:1.5rem 0;}
+.cmp-table th{font-family:var(--mono);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);font-weight:600;padding:.6rem .9rem;text-align:left;border-bottom:1px solid var(--border);}
+.cmp-table td{padding:.7rem .9rem;border-bottom:1px solid var(--border);vertical-align:top;line-height:1.6;}
+.cmp-table tr:last-child td{border-bottom:none;}
+.cmp-table tr:hover td{background:var(--bg3);}
+.cmp-table tr.hi td{background:rgba(74,158,240,.04);}
+.good{color:var(--success);}
+.bad{color:var(--danger);}
+.mid{color:var(--accent4);}
+.badge{display:inline-flex;align-items:center;font-family:var(--mono);font-size:.62rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;border-radius:4px;padding:.15rem .5rem;white-space:nowrap;}
+.badge-g{background:rgba(74,240,144,.10);color:var(--success);border:1px solid rgba(74,240,144,.25);}
+.badge-b{background:rgba(122,156,240,.10);color:var(--accent3);border:1px solid rgba(122,156,240,.25);}
+.badge-o{background:rgba(240,137,74,.10);color:var(--accent2);border:1px solid rgba(240,137,74,.25);}
+.badge-r{background:rgba(240,90,90,.10);color:var(--danger);border:1px solid rgba(240,90,90,.25);}
+.badge-y{background:rgba(240,212,74,.10);color:var(--accent4);border:1px solid rgba(240,212,74,.25);}
+
+/* CRUD SIMULATOR */
+.crud-sim{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin:1.5rem 0;}
+.crud-sim-header{padding:.7rem 1.25rem;background:var(--bg3);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;}
+.crud-sim-title{font-family:var(--mono);font-size:.72rem;color:var(--accent);font-weight:600;letter-spacing:.07em;text-transform:uppercase;}
+.crud-tabs{display:flex;padding:.75rem 1.25rem;gap:.5rem;border-bottom:1px solid var(--border);flex-wrap:wrap;}
+.crud-tab{font-family:var(--mono);font-size:.72rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;border-radius:6px;padding:.4rem 1rem;cursor:pointer;border:1px solid var(--border);background:var(--bg3);color:var(--text-dim);transition:all .18s;}
+.crud-tab.post.active,.crud-tab.post:hover{border-color:var(--success);color:var(--success);background:rgba(74,240,144,.08);}
+.crud-tab.get.active,.crud-tab.get:hover{border-color:var(--accent);color:var(--accent);background:rgba(74,158,240,.08);}
+.crud-tab.put.active,.crud-tab.put:hover{border-color:var(--accent4);color:var(--accent4);background:rgba(240,212,74,.08);}
+.crud-tab.del.active,.crud-tab.del:hover{border-color:var(--danger);color:var(--danger);background:rgba(240,90,90,.08);}
+.crud-panel{display:none;padding:1.25rem;}
+.crud-panel.active{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+.crud-block{background:var(--bg3);border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+.crud-block-label{font-family:var(--mono);font-size:.6rem;letter-spacing:.09em;text-transform:uppercase;color:var(--text-dim);padding:.5rem .85rem;border-bottom:1px solid var(--border);background:var(--bg);}
+.crud-block pre{font-size:.77rem;padding:.85rem;margin:0;border:none;background:transparent;color:var(--text);}
+.crud-run-btn{display:flex;align-items:center;gap:.5rem;font-family:var(--mono);font-size:.7rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;border:none;border-radius:6px;padding:.45rem 1rem;cursor:pointer;transition:opacity .15s,transform .12s;margin:0 1.25rem 1rem;}
+.crud-run-btn:hover{opacity:.85;transform:translateY(-1px);}
+.crud-run-btn.post{background:var(--success);color:var(--bg);}
+.crud-run-btn.get{background:var(--accent);color:var(--bg);}
+.crud-run-btn.put{background:var(--accent4);color:var(--bg);}
+.crud-run-btn.del{background:var(--danger);color:var(--bg);}
+.crud-response{margin:0 1.25rem 1.25rem;background:var(--bg3);border:1px solid var(--border);border-radius:8px;overflow:hidden;display:none;}
+.crud-response.show{display:block;}
+.crud-response-bar{font-family:var(--mono);font-size:.62rem;padding:.45rem .85rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.75rem;}
+.crud-response-body{font-family:var(--mono);font-size:.78rem;padding:.85rem;line-height:1.8;white-space:pre;}
+.status-ok{color:var(--success);}
+.status-err{color:var(--danger);}
+.method-post{color:var(--success);}
+.method-get{color:var(--accent);}
+.method-put{color:var(--accent4);}
+.method-del{color:var(--danger);}
+
+/* TABLE VIEWER */
+.db-table-wrap{overflow-x:auto;margin:1.5rem 0;}
+.db-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:.8rem;}
+.db-table th{background:var(--bg3);color:var(--accent);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;padding:.55rem 1rem;text-align:left;border:1px solid var(--border);}
+.db-table td{padding:.55rem 1rem;border:1px solid var(--border);color:var(--text);}
+.db-table tr:hover td{background:var(--bg3);}
+.db-table .id-cell{color:var(--text-dim);}
+.db-table .new-row td{background:rgba(74,240,144,.05);animation:rowIn .5s ease;}
+@keyframes rowIn{from{opacity:0;background:rgba(74,240,144,.25);}to{opacity:1;}}
+
+/* FLOW STEPS */
+.flow-steps{display:flex;flex-direction:column;gap:.5rem;margin:1.5rem 0;}
+.flow-step{display:flex;align-items:flex-start;gap:1rem;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1rem 1.25rem;transition:border-color .2s;}
+.flow-step:hover{border-color:var(--accent);}
+.flow-step-num{flex-shrink:0;width:28px;height:28px;border-radius:50%;background:var(--accent);color:var(--bg);font-family:var(--mono);font-size:.72rem;font-weight:600;display:flex;align-items:center;justify-content:center;margin-top:.1rem;}
+.flow-step-body strong{display:block;font-family:var(--mono);font-size:.82rem;color:var(--text-head);margin-bottom:.25rem;}
+.flow-step-body span{font-size:.85rem;color:var(--text);}
+
+/* NEXT STEPS */
+.next-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.5rem 0;}
+.next-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1.4rem;transition:border-color .2s,background .2s;}
+.next-card:hover{background:var(--bg3);}
+.next-card.acc:hover{border-color:var(--accent);}
+.next-card.blu:hover{border-color:var(--accent3);}
+.next-card.ora:hover{border-color:var(--accent2);}
+.next-card.yel:hover{border-color:var(--accent4);}
+.next-num{font-family:var(--mono);font-size:.65rem;color:var(--text-dim);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.4rem;}
+.next-title{font-family:var(--sans);font-size:1rem;font-weight:600;color:var(--text-head);margin-bottom:.5rem;}
+.next-desc{font-size:.875rem;color:var(--text);line-height:1.65;margin-bottom:.75rem;}
+.next-tag{display:inline-flex;align-items:center;font-family:var(--mono);font-size:.62rem;border-radius:4px;padding:.12rem .45rem;text-transform:uppercase;letter-spacing:.06em;}
+.tag-acc{background:rgba(74,158,240,.07);color:var(--accent);border:1px solid rgba(74,158,240,.18);}
+.tag-blu{background:rgba(192,74,240,.07);color:var(--accent3);border:1px solid rgba(192,74,240,.18);}
+.tag-ora{background:rgba(240,137,74,.07);color:var(--accent2);border:1px solid rgba(240,137,74,.18);}
+.tag-yel{background:rgba(240,212,74,.07);color:var(--accent4);border:1px solid rgba(240,212,74,.18);}
+
+/* CHECKLIST */
+.checklist-wrap{display:flex;flex-direction:column;gap:0;border:1px solid var(--border);border-radius:10px;overflow:hidden;margin:1.5rem 0;}
+.cl-item{display:flex;align-items:flex-start;gap:.9rem;padding:.9rem 1rem;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s;user-select:none;}
+.cl-item:last-child{border-bottom:none;}
+.cl-item:hover{background:var(--bg3);}
+.cl-item[aria-checked="true"]{background:rgba(74,240,144,.04);}
+.cl-item[aria-checked="true"] .cl-text{color:var(--text-dim);text-decoration:line-through;text-decoration-color:var(--success);}
+.cl-box{flex-shrink:0;width:18px;height:18px;border:1.5px solid var(--border);border-radius:4px;margin-top:2px;display:flex;align-items:center;justify-content:center;transition:border-color .15s,background .15s;font-size:.7rem;color:transparent;}
+.cl-item[aria-checked="true"] .cl-box{background:var(--success);border-color:var(--success);color:var(--bg);}
+.cl-item:hover .cl-box{border-color:var(--accent);}
+.cl-text{font-size:.875rem;line-height:1.6;flex:1;transition:color .15s;}
+.cl-badge{flex-shrink:0;font-family:var(--mono);font-size:.58rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;border-radius:4px;padding:.12rem .45rem;align-self:flex-start;margin-top:2px;}
+.cb-conceito{background:rgba(240,90,90,.10);color:var(--danger);border:1px solid rgba(240,90,90,.2);}
+.cb-pratica{background:rgba(122,156,240,.10);color:var(--accent3);border:1px solid rgba(122,156,240,.2);}
+.cb-bonus{background:rgba(240,212,74,.10);color:var(--accent4);border:1px solid rgba(240,212,74,.2);}
+.checklist-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem;}
+#checklist-progress{font-family:var(--mono);font-size:.75rem;color:var(--text-dim);}
+
+/* FOOTER */
+footer{padding:1.5rem 3rem;display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--border);font-family:var(--mono);font-size:.68rem;color:var(--text-dim);gap:1rem;flex-wrap:wrap;margin-top:auto;}
+.footer-version{color:var(--accent);}
+
+/* RESPONSIVE */
+@media(max-width:860px){
+  .mobile-header{display:flex;}
+  .layout{grid-template-columns:1fr;}
+  .sidebar{position:fixed;top:0;left:-280px;height:100vh;width:280px;z-index:100;padding-top:1.25rem;}
+  .sidebar.open{transform:translateX(280px);}
+  .content-section,.hero{padding-left:1.5rem;padding-right:1.5rem;}
+  footer{padding-left:1.5rem;padding-right:1.5rem;}
+  h2{font-size:1.65rem;}
+  .concept-grid{grid-template-columns:1fr 1fr;}
+  .two-col,.next-grid{grid-template-columns:1fr;}
+  .hero h1{font-size:2.1rem;}
+  .hero-terminal{max-width:100%;}
+  .crud-panel.active{grid-template-columns:1fr;}
+}
+@media(max-width:540px){
+  .content-section,.hero{padding-left:1.1rem;padding-right:1.1rem;}
+  footer{padding-left:1.1rem;padding-right:1.1rem;}
+  .concept-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<div id="announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+<a class="skip-link" href="#main-content">Pular para o conteúdo</a>
+<div id="progress-bar" role="progressbar" aria-label="Progresso de leitura" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+
+<header class="mobile-header" role="banner">
+  <span class="mobile-title">BD · Aula 4</span>
+  <button class="hamburger" id="hamburger" aria-label="Abrir menu" aria-expanded="false" aria-controls="sidebar">
+    <span></span><span></span><span></span>
+  </button>
+</header>
+<div id="sidebar-overlay" aria-hidden="true"></div>
+
+<div class="layout">
+
+<!-- ─── SIDEBAR ─── -->
+<nav class="sidebar" id="sidebar" aria-label="Navegação lateral">
+  <div class="sidebar-logo">
+    BD · Aula 4<br>
+    <span>Sistema Corporativo</span>
+  </div>
+
+  <div class="theme-switcher" role="group" aria-label="Selecionar tema">
+    <button class="theme-btn" data-theme-btn="dark"       aria-pressed="false">● Dark</button>
+    <button class="theme-btn" data-theme-btn="nord"       aria-pressed="false">❄ Nord</button>
+    <button class="theme-btn" data-theme-btn="tokyo"      aria-pressed="false">⚡ Tokyo</button>
+    <button class="theme-btn" data-theme-btn="catppuccin" aria-pressed="false">🌸 Capp</button>
+    <button class="theme-btn" data-theme-btn="light"      aria-pressed="false">☀ Light</button>
+    <button class="theme-btn" data-theme-btn="hc"         aria-pressed="false">◎ HC</button>
+  </div>
+  <button class="cb-toggle" id="cb-toggle" aria-pressed="false" title="Paleta segura para daltonismo">
+    <span class="cb-dot" aria-hidden="true"></span>
+    Modo daltônico
+  </button>
+
+  <div class="sidebar-nav-label">Seções</div>
+  <a class="nav-link" href="#sistema"      data-section="sistema"    >01 — Sistema Corporativo</a>
+  <a class="nav-link" href="#arquitetura"  data-section="arquitetura">02 — Arquitetura</a>
+  <a class="nav-link" href="#crud"         data-section="crud"       >03 — CRUD</a>
+  <a class="nav-link" href="#sql"          data-section="sql"        >04 — Estrutura SQL</a>
+  <a class="nav-link" href="#rest"         data-section="rest"       >05 — REST API</a>
+  <a class="nav-link" href="#projeto"      data-section="projeto"    >06 — Estrutura do Projeto</a>
+  <a class="nav-link" href="#implementacao" data-section="implementacao">07 — Implementação</a>
+  <a class="nav-link" href="#seguranca"    data-section="seguranca"  >08 — Segurança</a>
+  <a class="nav-link" href="#checklist"    data-section="checklist"  >09 — Checklist</a>
+  <a class="nav-link" href="#proximos"     data-section="proximos"   >10 — Próximos Passos</a>
+
+  <div class="sidebar-footer">
+    <strong>Node.js + PostgreSQL</strong><br>
+    REST · CRUD · SQL<br>
+    <span>Simulador interativo incluído</span>
+  </div>
+</nav>
+
+<!-- ─── MAIN ─── -->
+<main id="main-content">
+
+<!-- ── HERO ── -->
+<div class="hero section" id="hero">
+  <div class="hero-badge"><span>🗄️</span> Banco de Dados · Aula 4</div>
+  <h1>Sistema Corporativo<br><em>Completo</em></h1>
+  <p class="hero-sub">
+    Do banco isolado ao sistema real: entenda como uma API REST conversa com o PostgreSQL,
+    implemente as quatro operações CRUD, e veja o fluxo completo de uma aplicação corporativa
+    com Node.js — do usuário ao banco e de volta.
+  </p>
+  <div class="hero-chips">
+    <span class="chip chip-accent">✓ CRUD Completo</span>
+    <span class="chip chip-accent">✓ REST API</span>
+    <span class="chip chip-purple">✓ PostgreSQL</span>
+    <span class="chip chip-orange">✓ Node.js + Express</span>
+    <span class="chip chip-green">Simulador Interativo</span>
+    <span class="chip">Segurança SQL Injection</span>
+  </div>
+  <a href="#sistema" class="hero-cta">Começar o guia ↓</a>
+
+  <div class="hero-terminal" aria-hidden="true">
+    <div class="hero-terminal-bar">
+      <span class="tbar-dot tbar-dot-r"></span>
+      <span class="tbar-dot tbar-dot-y"></span>
+      <span class="tbar-dot tbar-dot-g"></span>
+      <span class="tbar-title">server.js · porta 3000</span>
+    </div>
+    <div class="hero-terminal-body"><span class="t-prompt">$</span> <span class="t-cmd">node server.js</span>
+
+<span class="t-green">✓ Servidor rodando na porta 3000</span>
+<span class="t-green">✓ Conectado ao PostgreSQL</span>
+
+<span class="t-dim">POST</span>  <span class="t-acc">/clientes</span>   <span class="t-dim">→</span> <span class="t-green">201</span> <span class="t-dim">{ id: 1, nome: "Ana Silva" }</span>
+<span class="t-dim">GET</span>   <span class="t-acc">/clientes</span>   <span class="t-dim">→</span> <span class="t-blue">200</span> <span class="t-dim">[ { id:1 }, { id:2 } ]</span>
+<span class="t-dim">PUT</span>   <span class="t-acc">/clientes/1</span> <span class="t-dim">→</span> <span class="t-yellow">200</span> <span class="t-dim">{ id: 1, nome: "Ana S. Lima" }</span>
+<span class="t-dim">DELETE</span><span class="t-acc">/clientes/1</span> <span class="t-dim">→</span> <span class="t-danger">200</span> <span class="t-dim">{ mensagem: "excluído" }</span>
+
+<span class="t-dim">SQL  ↳ INSERT · SELECT · UPDATE · DELETE</span><span class="t-cursor"></span></div>
+  </div>
+</div>
+
+<!-- ── 01 SISTEMA CORPORATIVO ── -->
+<section id="sistema" class="content-section section">
+  <span class="section-num">01 — SISTEMA CORPORATIVO</span>
+  <h2>O que é um Sistema Corporativo?</h2>
+  <p class="section-lead">
+    Até agora trabalhamos o banco de dados de forma <em>isolada</em> — comandos SQL direto
+    no terminal. Agora vamos pensar como empresas reais pensam: o banco não é um fim em si
+    mesmo. Ele é o alicerce de um sistema corporativo.
+  </p>
+
+  <p>Um sistema corporativo é uma aplicação desenvolvida para atender processos organizacionais
+  reais. Toda ação do usuário — cadastrar um cliente, consultar um pedido, atualizar um endereço
+  — gera comandos no banco. O banco é invisível para o usuário, mas presente em cada operação.</p>
+
+  <div class="concept-grid">
+    <div class="concept-card acc">
+      <span class="concept-icon">🎓</span>
+      <div class="concept-name">Sistema Acadêmico</div>
+      <div class="concept-en">Ex.: alunos, notas, turmas</div>
+      <p class="concept-desc">Cadastro de alunos, lançamento de notas, controle de frequência — tudo em banco.</p>
+    </div>
+    <div class="concept-card grn">
+      <span class="concept-icon">🏥</span>
+      <div class="concept-name">Sistema Hospitalar</div>
+      <div class="concept-en">Ex.: prontuário, consultas</div>
+      <p class="concept-desc">Pacientes, médicos, exames, prescrições — dados críticos persistidos com consistência.</p>
+    </div>
+    <div class="concept-card ora">
+      <span class="concept-icon">🛍️</span>
+      <div class="concept-name">Sistema de Pedidos</div>
+      <div class="concept-en">Ex.: e-commerce, delivery</div>
+      <p class="concept-desc">Produtos, estoque, clientes, pedidos — relações complexas entre múltiplas tabelas.</p>
+    </div>
+    <div class="concept-card yel">
+      <span class="concept-icon">🏢</span>
+      <div class="concept-name">ERP Empresarial</div>
+      <div class="concept-en">Ex.: SAP, TOTVS, Odoo</div>
+      <p class="concept-desc">Integra finanças, RH, logística em um único banco — máxima complexidade relacional.</p>
+    </div>
+    <div class="concept-card blu">
+      <span class="concept-icon">🏦</span>
+      <div class="concept-name">Aplicativo Bancário</div>
+      <div class="concept-en">Ex.: contas, transferências</div>
+      <p class="concept-desc">Transações atômicas, saldo em tempo real — onde a consistência do banco é vital.</p>
+    </div>
+    <div class="concept-card pur">
+      <span class="concept-icon">📊</span>
+      <div class="concept-name">Dashboard Analytics</div>
+      <div class="concept-en">Ex.: relatórios, KPIs</div>
+      <p class="concept-desc">Leitura intensiva de dados agregados — SQL avançado com GROUP BY, JOINs e índices.</p>
+    </div>
+  </div>
+
+  <div class="callout">
+    <span class="callout-label">🏗️ Mudança de nível</span>
+    A diferença entre um estudante de banco de dados e um profissional de mercado é essa:
+    o estudante aprende SQL. O profissional aprende a <strong>conectar SQL a um sistema real</strong>.
+    Essa aula faz essa transição. O banco que você aprendeu a consultar agora vai responder a
+    requisições HTTP vindas de aplicações rodando em produção.
+  </div>
+</section>
+
+<!-- ── 02 ARQUITETURA ── -->
+<section id="arquitetura" class="content-section section">
+  <span class="section-num">02 — ARQUITETURA</span>
+  <h2>Arquitetura Simplificada</h2>
+  <p class="section-lead">
+    Todo sistema corporativo segue a mesma lógica: há uma camada que o usuário vê
+    (frontend), uma camada que processa regras (API), e uma camada que persiste dados
+    (banco). A API é o <em>intermediário inteligente</em> — ela nunca deixa o banco
+    exposto diretamente ao mundo.
+  </p>
+
+  <div class="arch-box" role="img" aria-label="Diagrama da arquitetura Cliente-API-Banco">
+<span class="c-head">  Arquitetura de 3 Camadas — Sistema Corporativo</span>
+<span class="c-dim">  ──────────────────────────────────────────────────────────────</span>
+
+<span class="c-dim">  ┌─────────────────────────────┐</span>
+<span class="c-dim">  │</span>  <span class="c-accent">CAMADA 1 — CLIENTE</span>          <span class="c-dim">│</span>  <span class="c-dim">← navegador, app mobile, Postman</span>
+<span class="c-dim">  │</span>  <span class="c-dim">React, HTML, Vue, Flutter</span>   <span class="c-dim">│</span>  <span class="c-dim">   o usuário interage aqui</span>
+<span class="c-dim">  └──────────────┬──────────────┘</span>
+                 <span class="c-dim">│  HTTP Request (GET /clientes)</span>
+                 <span class="c-dim">▼</span>
+<span class="c-dim">  ┌─────────────────────────────┐</span>
+<span class="c-dim">  │</span>  <span class="c-blue">CAMADA 2 — API REST</span>         <span class="c-dim">│</span>  <span class="c-dim">← Node.js + Express, porta 3000</span>
+<span class="c-dim">  │</span>  <span class="c-dim">Regras de negócio, validação</span> <span class="c-dim">│</span>  <span class="c-dim">   processa a requisição aqui</span>
+<span class="c-dim">  └──────────────┬──────────────┘</span>
+                 <span class="c-dim">│  SQL Query (SELECT * FROM cliente)</span>
+                 <span class="c-dim">▼</span>
+<span class="c-dim">  ┌─────────────────────────────┐</span>
+<span class="c-dim">  │</span>  <span class="c-orange">CAMADA 3 — BANCO DE DADOS</span>   <span class="c-dim">│</span>  <span class="c-dim">← PostgreSQL, porta 5432</span>
+<span class="c-dim">  │</span>  <span class="c-dim">Persistência, integridade</span>    <span class="c-dim">│</span>  <span class="c-dim">   armazena os dados aqui</span>
+<span class="c-dim">  └─────────────────────────────┘</span>
+
+<span class="c-dim">  Fluxo: Usuário → Request HTTP → API processa → SQL → Banco → Resposta → Usuário</span>
+  </div>
+
+  <h3>Por que a API não deixa o banco exposto?</h3>
+  <table class="cmp-table" aria-label="Comparação: banco direto vs via API">
+    <thead><tr><th>Cenário</th><th>Banco Diretamente Exposto</th><th>Banco via API REST</th></tr></thead>
+    <tbody>
+      <tr><td>Autenticação</td><td class="bad">Qualquer um com credenciais acessa tudo</td><td class="good">A API valida tokens JWT, sessões</td></tr>
+      <tr><td>Validação de dados</td><td class="bad">Dados inválidos entram direto</td><td class="good">A API valida antes de gravar</td></tr>
+      <tr><td>Controle de acesso</td><td class="bad">Impossível por usuário/perfil</td><td class="good">A API filtra por papel e permissão</td></tr>
+      <tr><td>SQL Injection</td><td class="bad">Vulnerável se o cliente montar SQL</td><td class="good">A API usa parâmetros, protegendo o banco</td></tr>
+      <tr class="hi"><td>Conclusão</td><td colspan="2">A API é o guardião do banco. Nenhum cliente deve falar diretamente com o PostgreSQL.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout blue">
+    <span class="callout-label">💡 Ideia central da aula</span>
+    <strong>Banco de dados não é um fim em si mesmo.</strong> Ele é a memória de longo prazo
+    de um sistema corporativo. A API é o cérebro — ela decide o que pode e o que não pode
+    ser feito com essa memória. Você precisa entender os dois para construir sistemas reais.
+  </div>
+</section>
+
+<!-- ── 03 CRUD ── -->
+<section id="crud" class="content-section section">
+  <span class="section-num">03 — CRUD</span>
+  <h2>CRUD: O Coração da Aplicação</h2>
+  <p class="section-lead">
+    CRUD é o acrônimo das quatro operações fundamentais de qualquer sistema que persiste dados.
+    Não importa se é um ERP de R$ 10 milhões ou um app de lista de tarefas — todos giram
+    em torno dessas quatro ações.
+  </p>
+
+  <div class="concept-grid" style="grid-template-columns:repeat(2,1fr);">
+    <div class="concept-card grn">
+      <span class="concept-icon">➕</span>
+      <div class="concept-name">C — Create</div>
+      <div class="concept-en">Criar · INSERT · POST</div>
+      <p class="concept-desc">Inserir um novo registro no banco. Um cliente se cadastra, um produto é adicionado ao estoque, um pedido é criado.</p>
+    </div>
+    <div class="concept-card acc">
+      <span class="concept-icon">🔍</span>
+      <div class="concept-name">R — Read</div>
+      <div class="concept-en">Consultar · SELECT · GET</div>
+      <p class="concept-desc">Buscar e retornar dados existentes. Listar todos os clientes, consultar um produto por ID, exibir o histórico de pedidos.</p>
+    </div>
+    <div class="concept-card yel">
+      <span class="concept-icon">✏️</span>
+      <div class="concept-name">U — Update</div>
+      <div class="concept-en">Atualizar · UPDATE · PUT</div>
+      <p class="concept-desc">Modificar um registro existente. Alterar o email do cliente, atualizar o preço de um produto, mudar o status de um pedido.</p>
+    </div>
+    <div class="concept-card ora">
+      <span class="concept-icon">🗑️</span>
+      <div class="concept-name">D — Delete</div>
+      <div class="concept-en">Excluir · DELETE · DELETE</div>
+      <p class="concept-desc">Remover um registro do banco. Deletar uma conta, remover um item de um carrinho, cancelar e excluir um pedido.</p>
+    </div>
+  </div>
+
+  <div class="callout yellow">
+    <span class="callout-label">Visão prática</span>
+    Quando você abre o Instagram e carrega o feed, isso é um <strong>Read</strong>.
+    Quando você posta uma foto, é um <strong>Create</strong>. Quando edita a legenda, é um <strong>Update</strong>.
+    Quando deleta a postagem, é um <strong>Delete</strong>. Toda interface que você já usou
+    é construída sobre essas quatro operações.
+  </div>
+
+  <h3>Simulador CRUD Interativo</h3>
+  <p>Clique em cada operação para ver o que acontece na API e no banco de dados em tempo real.</p>
+
+  <div class="crud-sim" role="region" aria-label="Simulador CRUD interativo">
+    <div class="crud-sim-header">
+      <span class="crud-sim-title">▸ Simulador CRUD — /clientes</span>
+      <span style="font-family:var(--mono);font-size:.68rem;color:var(--text-dim)" id="sim-db-count">3 registros no banco</span>
+    </div>
+
+    <div class="crud-tabs">
+      <button class="crud-tab post active" onclick="simTab('create')">POST — Create</button>
+      <button class="crud-tab get"         onclick="simTab('read')">GET — Read</button>
+      <button class="crud-tab put"         onclick="simTab('update')">PUT — Update</button>
+      <button class="crud-tab del"         onclick="simTab('delete')">DELETE — Delete</button>
+    </div>
+
+    <!-- CREATE -->
+    <div class="crud-panel active" id="panel-create">
+      <div class="crud-block">
+        <div class="crud-block-label">Requisição HTTP</div>
+        <pre><span class="method-post">POST</span> /clientes HTTP/1.1
+Content-Type: application/json
+
+{
+  <span class="str">"nome"</span>:     <span class="str">"Ana Silva"</span>,
+  <span class="str">"email"</span>:    <span class="str">"ana@email.com"</span>,
+  <span class="str">"telefone"</span>: <span class="str">"85999990001"</span>
+}</pre>
+      </div>
+      <div class="crud-block">
+        <div class="crud-block-label">SQL Executado</div>
+        <pre><span class="kw-sql">INSERT INTO</span> cliente
+  (nome, email, telefone)
+<span class="kw-sql">VALUES</span>
+  (<span class="val-sql">$1</span>, <span class="val-sql">$2</span>, <span class="val-sql">$3</span>)
+<span class="kw-sql">RETURNING</span> *;
+
+<span class="cm">-- $1 = "Ana Silva"</span>
+<span class="cm">-- $2 = "ana@email.com"</span>
+<span class="cm">-- $3 = "85999990001"</span></pre>
+      </div>
+    </div>
+    <button class="crud-run-btn post" onclick="simRun('create')">▶ Executar POST /clientes</button>
+    <div class="crud-response" id="resp-create">
+      <div class="crud-response-bar">
+        <span class="status-ok">201 Created</span>
+        <span style="color:var(--text-dim);font-size:.6rem">application/json</span>
+      </div>
+      <div class="crud-response-body" id="resp-create-body"></div>
+    </div>
+
+    <!-- READ -->
+    <div class="crud-panel" id="panel-read">
+      <div class="crud-block">
+        <div class="crud-block-label">Requisição HTTP</div>
+        <pre><span class="method-get">GET</span> /clientes HTTP/1.1
+Accept: application/json
+
+<span class="cm">// Nenhum body necessário</span>
+<span class="cm">// GET apenas lê dados</span></pre>
+      </div>
+      <div class="crud-block">
+        <div class="crud-block-label">SQL Executado</div>
+        <pre><span class="kw-sql">SELECT</span> *
+<span class="kw-sql">FROM</span> cliente
+<span class="kw-sql">ORDER BY</span> id;
+
+<span class="cm">-- Retorna todos os registros</span>
+<span class="cm">-- ordenados pelo ID</span></pre>
+      </div>
+    </div>
+    <button class="crud-run-btn get" onclick="simRun('read')">▶ Executar GET /clientes</button>
+    <div class="crud-response" id="resp-read">
+      <div class="crud-response-bar">
+        <span class="status-ok">200 OK</span>
+        <span style="color:var(--text-dim);font-size:.6rem">application/json · array</span>
+      </div>
+      <div class="crud-response-body" id="resp-read-body"></div>
+    </div>
+
+    <!-- UPDATE -->
+    <div class="crud-panel" id="panel-update">
+      <div class="crud-block">
+        <div class="crud-block-label">Requisição HTTP</div>
+        <pre><span class="method-put">PUT</span> /clientes/<span class="num">1</span> HTTP/1.1
+Content-Type: application/json
+
+{
+  <span class="str">"nome"</span>:     <span class="str">"Ana S. Lima"</span>,
+  <span class="str">"email"</span>:    <span class="str">"ana.lima@email.com"</span>,
+  <span class="str">"telefone"</span>: <span class="str">"85988880001"</span>
+}</pre>
+      </div>
+      <div class="crud-block">
+        <div class="crud-block-label">SQL Executado</div>
+        <pre><span class="kw-sql">UPDATE</span> cliente
+<span class="kw-sql">SET</span>
+  nome     = <span class="val-sql">$1</span>,
+  email    = <span class="val-sql">$2</span>,
+  telefone = <span class="val-sql">$3</span>
+<span class="kw-sql">WHERE</span> id = <span class="val-sql">$4</span>
+<span class="kw-sql">RETURNING</span> *;
+
+<span class="cm">-- $4 = 1 (id da URL)</span></pre>
+      </div>
+    </div>
+    <button class="crud-run-btn put" onclick="simRun('update')">▶ Executar PUT /clientes/1</button>
+    <div class="crud-response" id="resp-update">
+      <div class="crud-response-bar">
+        <span class="status-ok">200 OK</span>
+        <span style="color:var(--text-dim);font-size:.6rem">application/json · atualizado</span>
+      </div>
+      <div class="crud-response-body" id="resp-update-body"></div>
+    </div>
+
+    <!-- DELETE -->
+    <div class="crud-panel" id="panel-delete">
+      <div class="crud-block">
+        <div class="crud-block-label">Requisição HTTP</div>
+        <pre><span class="method-del">DELETE</span> /clientes/<span class="num">2</span> HTTP/1.1
+
+<span class="cm">// Nenhum body necessário</span>
+<span class="cm">// O ID vem na URL</span></pre>
+      </div>
+      <div class="crud-block">
+        <div class="crud-block-label">SQL Executado</div>
+        <pre><span class="kw-sql">DELETE FROM</span> cliente
+<span class="kw-sql">WHERE</span> id = <span class="val-sql">$1</span>;
+
+<span class="cm">-- $1 = 2 (id da URL)</span>
+<span class="cm">-- Remove permanentemente</span>
+<span class="cm">-- do banco de dados</span></pre>
+      </div>
+    </div>
+    <button class="crud-run-btn del" onclick="simRun('delete')">▶ Executar DELETE /clientes/2</button>
+    <div class="crud-response" id="resp-delete">
+      <div class="crud-response-bar">
+        <span class="status-ok">200 OK</span>
+        <span style="color:var(--text-dim);font-size:.6rem">application/json</span>
+      </div>
+      <div class="crud-response-body" id="resp-delete-body"></div>
+    </div>
+  </div>
+
+  <h3>Estado atual do banco (simulado)</h3>
+  <div class="db-table-wrap">
+    <table class="db-table" id="sim-table" aria-label="Tabela cliente simulada">
+      <thead><tr><th>id</th><th>nome</th><th>email</th><th>telefone</th></tr></thead>
+      <tbody id="sim-table-body">
+        <tr><td class="id-cell">1</td><td>Carlos Souza</td><td>carlos@email.com</td><td>85911110001</td></tr>
+        <tr><td class="id-cell">2</td><td>Maria Lima</td><td>maria@email.com</td><td>85922220002</td></tr>
+        <tr><td class="id-cell">3</td><td>João Ferreira</td><td>joao@email.com</td><td>85933330003</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ── 04 SQL ── -->
+<section id="sql" class="content-section section">
+  <span class="section-num">04 — ESTRUTURA SQL</span>
+  <h2>Estrutura SQL da Aplicação</h2>
+  <p class="section-lead">
+    Antes de escrever uma linha de Node.js, definimos a estrutura do banco.
+    O arquivo <code>schema.sql</code> é o contrato entre a aplicação e o banco —
+    ele define exatamente quais dados existem e como estão organizados.
+  </p>
+
+  <div class="code-wrap">
+    <span class="code-label">schema.sql · tabela de clientes</span>
+    <button class="copy-btn" onclick="copyCode(this)" aria-label="Copiar SQL">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+      copiar
+    </button>
+    <pre><span class="kw-sql">CREATE TABLE</span> cliente (
+    id        <span class="type-sql">SERIAL</span>       <span class="kw-sql">PRIMARY KEY</span>,   <span class="cm">-- auto-incremento, chave primária</span>
+    nome      <span class="type-sql">VARCHAR(100)</span>,               <span class="cm">-- nome completo do cliente</span>
+    email     <span class="type-sql">VARCHAR(100)</span>,               <span class="cm">-- endereço de email</span>
+    telefone  <span class="type-sql">VARCHAR(20)</span>                 <span class="cm">-- telefone com DDD</span>
+);
+
+<span class="cm">-- SERIAL: PostgreSQL cria automaticamente 1, 2, 3, 4...
+-- PRIMARY KEY: garante unicidade — dois clientes não terão o mesmo id
+-- VARCHAR(n): string com limite de n caracteres</span></pre>
+  </div>
+
+  <h3>Anatomia da tabela</h3>
+
+  <div class="arch-box" role="img" aria-label="Estrutura visual da tabela cliente">
+<span class="c-dim">  Tabela: </span><span class="c-accent">cliente</span>
+
+<span class="c-dim">  ┌──────┬──────────────────────┬────────────────────────┬──────────────────┐</span>
+<span class="c-dim">  │</span> <span class="c-accent">id</span>   <span class="c-dim">│</span> <span class="c-blue">nome</span>                 <span class="c-dim">│</span> <span class="c-orange">email</span>                   <span class="c-dim">│</span> <span class="c-yellow">telefone</span>         <span class="c-dim">│</span>
+<span class="c-dim">  │</span> <span class="c-accent">SERIAL</span><span class="c-dim">│</span> <span class="c-blue">VARCHAR(100)</span>         <span class="c-dim">│</span> <span class="c-orange">VARCHAR(100)</span>            <span class="c-dim">│</span> <span class="c-yellow">VARCHAR(20)</span>      <span class="c-dim">│</span>
+<span class="c-dim">  │</span> <span class="c-accent">PK</span>   <span class="c-dim">│</span>                      <span class="c-dim">│</span>                        <span class="c-dim">│</span>                  <span class="c-dim">│</span>
+<span class="c-dim">  ├──────┼──────────────────────┼────────────────────────┼──────────────────┤</span>
+<span class="c-dim">  │</span> <span class="c-accent">1</span>    <span class="c-dim">│</span> Carlos Souza         <span class="c-dim">│</span> carlos@email.com        <span class="c-dim">│</span> 85911110001      <span class="c-dim">│</span>
+<span class="c-dim">  │</span> <span class="c-accent">2</span>    <span class="c-dim">│</span> Maria Lima           <span class="c-dim">│</span> maria@email.com         <span class="c-dim">│</span> 85922220002      <span class="c-dim">│</span>
+<span class="c-dim">  │</span> <span class="c-accent">3</span>    <span class="c-dim">│</span> João Ferreira        <span class="c-dim">│</span> joao@email.com          <span class="c-dim">│</span> 85933330003      <span class="c-dim">│</span>
+<span class="c-dim">  └──────┴──────────────────────┴────────────────────────┴──────────────────┘</span>
+
+<span class="c-dim">  O campo </span><span class="c-accent">id</span><span class="c-dim"> é gerado automaticamente pelo PostgreSQL.
+  A aplicação nunca precisa enviar o id ao inserir — apenas nome, email e telefone.</span>
+  </div>
+
+  <div class="callout orange">
+    <span class="callout-label">Por que SERIAL e não INTEGER?</span>
+    <code>SERIAL</code> é um atalho do PostgreSQL que cria automaticamente uma sequência e usa
+    o próximo número disponível como valor padrão. Você nunca precisa calcular o próximo ID
+    na aplicação — o banco faz isso por você. Em sistemas com múltiplas requisições simultâneas,
+    isso garante que dois clientes não recebam o mesmo ID.
+  </div>
+</section>
+
+<!-- ── 05 REST ── -->
+<section id="rest" class="content-section section">
+  <span class="section-num">05 — REST API</span>
+  <h2>REST API: Mapeando CRUD para HTTP</h2>
+  <p class="section-lead">
+    REST (Representational State Transfer) é uma convenção para criar APIs usando o protocolo
+    HTTP. A beleza do REST é que ele mapeia naturalmente as quatro operações CRUD
+    para os quatro verbos HTTP — e a URL define <em>o quê</em> está sendo operado.
+  </p>
+
+  <div class="arch-box" role="img" aria-label="Mapeamento CRUD para REST">
+<span class="c-head">  CRUD → REST: o mapeamento padrão da indústria</span>
+<span class="c-dim">  ────────────────────────────────────────────────────────────</span>
+
+<span class="c-dim">  CRUD      Método HTTP   URL                  O que faz</span>
+<span class="c-dim">  ────────  ───────────   ──────────────────   ────────────────────────────</span>
+<span class="c-green">  Create</span>  <span class="c-green">  POST</span>        <span class="c-dim">  /clientes</span>           <span class="c-dim">cria um novo cliente</span>
+<span class="c-accent">  Read</span>    <span class="c-accent">  GET</span>         <span class="c-dim">  /clientes</span>           <span class="c-dim">lista todos os clientes</span>
+<span class="c-accent">  Read</span>    <span class="c-accent">  GET</span>         <span class="c-dim">  /clientes/:id</span>       <span class="c-dim">busca um cliente por ID</span>
+<span class="c-yellow">  Update</span>  <span class="c-yellow">  PUT</span>         <span class="c-dim">  /clientes/:id</span>       <span class="c-dim">atualiza um cliente</span>
+<span class="c-orange">  Delete</span>  <span class="c-orange">  DELETE</span>      <span class="c-dim">  /clientes/:id</span>       <span class="c-dim">exclui um cliente</span>
+
+<span class="c-dim">  ────────────────────────────────────────────────────────────</span>
+<span class="c-dim">  :id = parâmetro dinâmico na URL  →  /clientes/1  /clientes/42  /clientes/999</span>
+  </div>
+
+  <h3>Como o Express lê esses verbos</h3>
+  <p>No Express, cada verbo HTTP vira um método: <code>app.get()</code>, <code>app.post()</code>, <code>app.put()</code>, <code>app.delete()</code>. A estrutura é sempre a mesma:</p>
+
+  <div class="code-wrap">
+    <span class="code-label">JavaScript · estrutura de uma rota Express</span>
+    <pre><span class="cm">// Padrão de toda rota: app.MÉTODO(URL, função)</span>
+
+app.<span class="fn">get</span>(<span class="str">'/clientes'</span>, <span class="kw">async</span> (req, res) => {
+    <span class="cm">// req = requisição (o que veio do cliente)</span>
+    <span class="cm">// res = resposta (o que mandamos de volta)</span>
+    <span class="cm">// async porque vamos esperar o banco responder</span>
+
+    <span class="kw">const</span> result = <span class="kw">await</span> pool.<span class="fn">query</span>(<span class="str">'SELECT * FROM cliente'</span>);
+    res.<span class="fn">json</span>(result.rows);  <span class="cm">// envia o resultado como JSON</span>
+});</pre>
+  </div>
+
+  <table class="cmp-table" aria-label="Detalhes dos verbos HTTP">
+    <thead><tr><th>Verbo</th><th>Idempotente?</th><th>Tem body?</th><th>Retorno típico</th></tr></thead>
+    <tbody>
+      <tr><td><span class="badge badge-g">POST</span></td><td class="bad">Não — 2 POSTs criam 2 registros</td><td class="good">Sim — dados do novo recurso</td><td>201 Created + recurso criado</td></tr>
+      <tr><td><span class="badge badge-b">GET</span></td><td class="good">Sim — seguro para chamar várias vezes</td><td class="bad">Não — apenas parâmetros na URL</td><td>200 OK + dados</td></tr>
+      <tr><td><span class="badge badge-y">PUT</span></td><td class="good">Sim — mesmo resultado se repetido</td><td class="good">Sim — campos atualizados</td><td>200 OK + recurso atualizado</td></tr>
+      <tr><td><span class="badge badge-r">DELETE</span></td><td class="good">Sim — deletar o mesmo ID 2x é seguro</td><td class="bad">Não — ID vem na URL</td><td>200 OK + confirmação</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ── 06 PROJETO ── -->
+<section id="projeto" class="content-section section">
+  <span class="section-num">06 — ESTRUTURA DO PROJETO</span>
+  <h2>Estrutura do Projeto</h2>
+  <p class="section-lead">
+    Um projeto bem organizado separa responsabilidades: um arquivo cuida da conexão ao banco,
+    outro cria o servidor, outro define o schema. Essa separação torna o código mais fácil
+    de manter, testar e evoluir.
+  </p>
+
+  <div class="arch-box" role="img" aria-label="Estrutura de arquivos do projeto Node.js">
+<span class="c-head">  Estrutura de pastas — projeto CRUD corporativo</span>
+<span class="c-dim">  ────────────────────────────────────────────────</span>
+<span class="c-dim">
+  meu-sistema/</span>
+<span class="c-dim">  ├── </span><span class="c-accent">package.json</span>    <span class="c-dim">← metadados + dependências (express, pg)</span>
+<span class="c-dim">  ├── </span><span class="c-blue">db.js</span>           <span class="c-dim">← configuração da conexão com o PostgreSQL</span>
+<span class="c-dim">  ├── </span><span class="c-orange">server.js</span>       <span class="c-dim">← servidor Express + todas as rotas CRUD</span>
+<span class="c-dim">  └── </span><span class="c-yellow">schema.sql</span>      <span class="c-dim">← script SQL para criar as tabelas</span>
+<span class="c-dim">
+  ─────────────────────────────────────────────────
+  Separação de responsabilidades:
+  · db.js     → COMO conectar ao banco (credenciais, pool)
+  · server.js → O QUE a API faz (rotas, lógica)
+  · schema.sql→ QUAL é a estrutura dos dados</span>
+  </div>
+
+  <h3>Instalando as dependências</h3>
+
+  <div class="term-box" aria-label="Comandos de instalação">
+    <div class="term-bar">
+      <span class="tbar-dot tbar-dot-r"></span>
+      <span class="tbar-dot tbar-dot-y"></span>
+      <span class="tbar-dot tbar-dot-g"></span>
+      <span class="term-bar-title">terminal</span>
+    </div>
+    <div class="term-body"><span class="c-dim"># 1. Inicializa o projeto (cria package.json)</span>
+<span class="c-accent">$</span> npm init -y
+
+<span class="c-dim"># 2. Instala as duas únicas dependências necessárias</span>
+<span class="c-accent">$</span> npm install express pg
+
+<span class="c-dim"># · express → cria o servidor HTTP e gerencia rotas</span>
+<span class="c-dim"># · pg      → driver Node.js para o PostgreSQL</span>
+
+<span class="c-green">added 67 packages in 2.1s</span></div>
+  </div>
+
+  <div class="two-col">
+    <div class="callout" style="margin:0">
+      <span class="callout-label">Express</span>
+      Framework minimalista para criar servidores HTTP em Node.js.
+      Com poucas linhas você define rotas, middlewares e inicia o servidor.
+      É o padrão da indústria para APIs REST em JavaScript.
+    </div>
+    <div class="callout blue" style="margin:0">
+      <span class="callout-label">pg (node-postgres)</span>
+      Driver oficial para conectar Node.js ao PostgreSQL. O objeto <code>Pool</code>
+      gerencia um conjunto de conexões reutilizáveis — muito mais eficiente do que
+      abrir e fechar uma conexão por requisição.
+    </div>
+  </div>
+</section>
+
+<!-- ── 07 IMPLEMENTAÇÃO ── -->
+<section id="implementacao" class="content-section section">
+  <span class="section-num">07 — IMPLEMENTAÇÃO</span>
+  <h2>Implementação Completa</h2>
+  <p class="section-lead">
+    Agora construímos o sistema peça por peça. Começamos pela conexão ao banco,
+    depois criamos o servidor e, por último, cada uma das quatro rotas CRUD —
+    cada uma com seu SQL parametrizado correspondente.
+  </p>
+
+  <h3>Passo 1 — db.js: conexão com o PostgreSQL</h3>
+  <div class="code-wrap">
+    <span class="code-label">db.js · Pool de conexões</span>
+    <button class="copy-btn" onclick="copyCode(this)" aria-label="Copiar db.js">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+      copiar
+    </button>
+    <pre><span class="kw">const</span> { Pool } = <span class="fn">require</span>(<span class="str">'pg'</span>);
+
+<span class="kw">const</span> pool = <span class="kw">new</span> <span class="cls">Pool</span>({
+    user:     <span class="str">'postgres'</span>,    <span class="cm">// usuário do banco</span>
+    host:     <span class="str">'localhost'</span>,   <span class="cm">// endereço (local em dev)</span>
+    database: <span class="str">'postgres'</span>,    <span class="cm">// nome do banco de dados</span>
+    password: <span class="str">'SUA_SENHA'</span>,   <span class="cm">// ← troque pela sua senha real</span>
+    port:     <span class="num">5432</span>            <span class="cm">// porta padrão do PostgreSQL</span>
+});
+
+<span class="cm">// O Pool reutiliza conexões abertas.
+// Sem Pool: abre conexão → query → fecha → repete (lento)
+// Com Pool: mantém conexões prontas → muito mais eficiente</span>
+
+module.exports = pool;  <span class="cm">// exporta para ser usado no server.js</span></pre>
+  </div>
+
+  <h3>Passo 2 — server.js: servidor base</h3>
+  <div class="code-wrap">
+    <span class="code-label">server.js · servidor Express (base)</span>
+    <button class="copy-btn" onclick="copyCode(this)" aria-label="Copiar server base">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+      copiar
+    </button>
+    <pre><span class="kw">const</span> express = <span class="fn">require</span>(<span class="str">'express'</span>);
+<span class="kw">const</span> pool    = <span class="fn">require</span>(<span class="str">'./db'</span>);      <span class="cm">// importa a conexão</span>
+
+<span class="kw">const</span> app = <span class="fn">express</span>();
+app.<span class="fn">use</span>(express.<span class="fn">json</span>());  <span class="cm">// habilita leitura de JSON no body das requisições</span>
+
+<span class="cm">// ... rotas CRUD aqui (ver abaixo) ...</span>
+
+app.<span class="fn">listen</span>(<span class="num">3000</span>, () => {
+    console.<span class="fn">log</span>(<span class="str">'Servidor rodando na porta 3000'</span>);
+});</pre>
+  </div>
+
+  <h3>Passo 3 — as quatro rotas CRUD</h3>
+
+  <div class="code-wrap">
+    <span class="code-label">server.js · Create — POST /clientes</span>
+    <button class="copy-btn" onclick="copyCode(this)" aria-label="Copiar rota Create">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+      copiar
+    </button>
+    <pre>app.<span class="fn">post</span>(<span class="str">'/clientes'</span>, <span class="kw">async</span> (req, res) => {
+    <span class="kw">const</span> { nome, email, telefone } = req.body;  <span class="cm">// desestrutura o JSON recebido</span>
+
+    <span class="kw">const</span> result = <span class="kw">await</span> pool.<span class="fn">query</span>(
+        <span class="str">'INSERT INTO cliente (nome, email, telefone) VALUES ($1, $2, $3) RETURNING *'</span>,
+        [nome, email, telefone]  <span class="cm">// ← parâmetros seguros (evita SQL Injection!)</span>
+    );
+
+    res.<span class="fn">status</span>(<span class="num">201</span>).<span class="fn">json</span>(result.rows[<span class="num">0</span>]);  <span class="cm">// retorna o registro criado com o id</span>
+});</pre>
+  </div>
+
+  <div class="code-wrap">
+    <span class="code-label">server.js · Read — GET /clientes</span>
+    <button class="copy-btn" onclick="copyCode(this)" aria-label="Copiar rota Read">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+      copiar
+    </button>
+    <pre>app.<span class="fn">get</span>(<span class="str">'/clientes'</span>, <span class="kw">async</span> (req, res) => {
+    <span class="kw">const</span> result = <span class="kw">await</span> pool.<span class="fn">query</span>(
+        <span class="str">'SELECT * FROM cliente ORDER BY id'</span>
+    );
+
+    res.<span class="fn">json</span>(result.rows);  <span class="cm">// retorna um array de todos os clientes</span>
+});</pre>
+  </div>
+
+  <div class="code-wrap">
+    <span class="code-label">server.js · Update — PUT /clientes/:id</span>
+    <button class="copy-btn" onclick="copyCode(this)" aria-label="Copiar rota Update">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+      copiar
+    </button>
+    <pre>app.<span class="fn">put</span>(<span class="str">'/clientes/:id'</span>, <span class="kw">async</span> (req, res) => {
+    <span class="kw">const</span> { id }                    = req.params;  <span class="cm">// id vem da URL: /clientes/42</span>
+    <span class="kw">const</span> { nome, email, telefone } = req.body;   <span class="cm">// novos dados vêm no body</span>
+
+    <span class="kw">const</span> result = <span class="kw">await</span> pool.<span class="fn">query</span>(
+        <span class="str">'UPDATE cliente SET nome=$1, email=$2, telefone=$3 WHERE id=$4 RETURNING *'</span>,
+        [nome, email, telefone, id]
+    );
+
+    res.<span class="fn">json</span>(result.rows[<span class="num">0</span>]);  <span class="cm">// retorna o cliente com os dados atualizados</span>
+});</pre>
+  </div>
+
+  <div class="code-wrap">
+    <span class="code-label">server.js · Delete — DELETE /clientes/:id</span>
+    <button class="copy-btn" onclick="copyCode(this)" aria-label="Copiar rota Delete">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+      copiar
+    </button>
+    <pre>app.<span class="fn">delete</span>(<span class="str">'/clientes/:id'</span>, <span class="kw">async</span> (req, res) => {
+    <span class="kw">const</span> { id } = req.params;
+
+    <span class="kw">await</span> pool.<span class="fn">query</span>(
+        <span class="str">'DELETE FROM cliente WHERE id = $1'</span>,
+        [id]
+    );
+
+    res.<span class="fn">json</span>({ mensagem: <span class="str">'Cliente excluído com sucesso'</span> });
+});</pre>
+  </div>
+
+  <div class="callout success">
+    <span class="callout-label">✓ O padrão que se repete</span>
+    Perceba que todas as rotas seguem o mesmo padrão:
+    <strong>(1)</strong> extrair dados da requisição (<code>req.body</code> ou <code>req.params</code>),
+    <strong>(2)</strong> executar uma query SQL com parâmetros,
+    <strong>(3)</strong> retornar o resultado como JSON.
+    Quando você entender esse padrão, consegue criar qualquer rota CRUD para qualquer tabela.
+  </div>
+</section>
+
+<!-- ── 08 SEGURANÇA ── -->
+<section id="seguranca" class="content-section section">
+  <span class="section-num">08 — SEGURANÇA</span>
+  <h2>Segurança: SQL Injection</h2>
+  <p class="section-lead">
+    SQL Injection é a vulnerabilidade mais explorada em aplicações que usam banco de dados.
+    Ela permite que um atacante <em>injete comandos SQL maliciosos</em> na sua query —
+    podendo destruir dados, burlar autenticação ou vazar todo o banco.
+    A boa notícia: a solução é simples e você já está usando.
+  </p>
+
+  <div class="callout danger">
+    <span class="callout-label">⛔ Código vulnerável — NUNCA faça isso</span>
+    Montar SQL por concatenação de strings abre a porta para ataques devastadores:
+    <br><br>
+    <code style="font-size:.85rem">const sql = 'SELECT * FROM cliente WHERE id = ' + req.params.id;</code>
+    <br><br>
+    Se um atacante enviar <code>id = 1 OR 1=1; DROP TABLE cliente; --</code>, a query vira:
+    <br>
+    <code style="font-size:.85rem">SELECT * FROM cliente WHERE id = 1 OR 1=1; DROP TABLE cliente; --</code>
+    <br><br>
+    Resultado: <strong>toda a tabela é apagada</strong>. Em produção, isso é um incidente crítico.
+  </div>
+
+  <div class="arch-box" role="img" aria-label="Comparação: SQL vulnerável vs protegido">
+<span class="c-danger">  ✗ VULNERÁVEL — concatenação direta</span>
+<span class="c-dim">  ─────────────────────────────────────────────────────────────</span>
+<span class="c-danger">  pool.query('SELECT * FROM cliente WHERE id = ' + id)</span>
+<span class="c-dim">
+  Ataque:  id = "1 OR 1=1; DROP TABLE cliente; --"
+  Query resultante:</span>
+<span class="c-danger">  SELECT * FROM cliente WHERE id = 1 OR 1=1; DROP TABLE cliente; --
+  ↑ retorna TODOS os registros + destrói a tabela</span>
+<span class="c-dim">
+  ─────────────────────────────────────────────────────────────</span>
+<span class="c-green">  ✓ SEGURO — parâmetros $1, $2, $3...</span>
+<span class="c-dim">  ─────────────────────────────────────────────────────────────</span>
+<span class="c-green">  pool.query('SELECT * FROM cliente WHERE id = $1', [id])</span>
+<span class="c-dim">
+  O pg trata o valor de $1 como </span><span class="c-green">dado puro</span><span class="c-dim">, nunca como SQL.
+  O atacante envia "1 OR 1=1;..." mas o banco lê como string literal:
+  </span><span class="c-green">busca por id igual ao texto "1 OR 1=1;..." → nenhum resultado → seguro.</span>
+  </div>
+
+  <h3>A regra de ouro</h3>
+
+  <table class="cmp-table" aria-label="SQL seguro vs inseguro">
+    <thead><tr><th>Prática</th><th>Vulnerável?</th><th>Exemplo</th></tr></thead>
+    <tbody>
+      <tr><td>Concatenação com <code>+</code></td><td class="bad">⛔ Sim</td><td><code>'WHERE id = ' + id</code></td></tr>
+      <tr><td>Template literal <code>${}</code></td><td class="bad">⛔ Sim</td><td><code>`WHERE id = ${id}`</code></td></tr>
+      <tr><td>Parâmetros <code>$1, $2...</code></td><td class="good">✓ Não</td><td><code>'WHERE id = $1', [id]</code></td></tr>
+      <tr class="hi"><td>Regra absoluta</td><td colspan="2"><strong>Nenhum dado do usuário deve ir para o SQL por concatenação. Sempre use parâmetros.</strong></td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout yellow">
+    <span class="callout-label">Por que $1, $2... protege?</span>
+    Quando você usa parâmetros, o driver <code>pg</code> envia a query e os valores
+    <em>separadamente</em> ao PostgreSQL. O banco processa a estrutura SQL primeiro,
+    e depois substitui os <code>$1</code>, <code>$2</code> pelos valores —
+    que são tratados como <strong>dados literais</strong>, nunca como comandos.
+    É impossível injetar SQL por essa via.
+  </div>
+</section>
+
+<!-- ── 09 CHECKLIST ── -->
+<section id="checklist" class="content-section section">
+  <span class="section-num">09 — PRÁTICA</span>
+  <h2>Checklist de Aprendizado</h2>
+  <p class="section-lead">
+    Clique em cada item quando conseguir completá-lo. O progresso fica salvo no navegador.
+  </p>
+
+  <div class="checklist-header">
+    <span style="font-size:.85rem;color:var(--text-dim);">Clique para marcar/desmarcar</span>
+    <span id="checklist-progress" aria-live="polite">0 de 10 concluídos</span>
+  </div>
+
+  <div class="checklist-wrap" role="list" aria-label="Checklist de aprendizado interativo">
+
+    <div class="cl-item" role="checkbox" aria-checked="false" tabindex="0" data-id="bd1">
+      <div class="cl-box" aria-hidden="true">✓</div>
+      <span class="cl-text"><strong>Explicar a arquitetura de 3 camadas</strong> — conseguir dizer em voz alta o que é Cliente, API e Banco e o que cada um faz na cadeia.</span>
+      <span class="cl-badge cb-conceito">CONCEITO</span>
+    </div>
+
+    <div class="cl-item" role="checkbox" aria-checked="false" tabindex="0" data-id="bd2">
+      <div class="cl-box" aria-hidden="true">✓</div>
+      <span class="cl-text"><strong>Mapear CRUD para HTTP</strong> — dado Create, Read, Update ou Delete, saber imediatamente qual método HTTP e qual SQL corresponde.</span>
+      <span class="cl-badge cb-conceito">CONCEITO</span>
+    </div>
+
+    <div class="cl-item" role="checkbox" aria-checked="false" tabindex="0" data-id="bd3">
+      <div class="cl-box" aria-hidden="true">✓</div>
+      <span class="cl-text"><strong>Criar o banco no PostgreSQL</strong> — executar o <code>CREATE TABLE cliente</code> no seu PostgreSQL local e verificar que a tabela foi criada com <code>\d cliente</code>.</span>
+      <span class="cl-badge cb-pratica">PRÁTICA</span>
+    </div>
+
+    <div class="cl-item" role="checkbox" aria-checked="false" tabindex="0" data-id="bd4">
+      <div class="cl-box" aria-hidden="true">✓</div>
+      <span class="cl-text"><strong>Iniciar o projeto Node.js</strong> — rodar <code>npm init -y</code> e <code>npm install express pg</code> e confirmar que o <code>node_modules</code> foi criado.</span>
+      <span class="cl-badge cb-pratica">PRÁTICA</span>
+    </div>
+
+    <div class="cl-item" role="checkbox" aria-checked="false" tabindex="0" data-id="bd5">
+      <div class="cl-box" aria-hidden="true">✓</div>
+      <span class="cl-text"><strong>Criar e testar o db.js</strong> — configurar o Pool com suas credenciais e rodar uma query de teste (<code>SELECT NOW()</code>) para confirmar a conexão.</span>
+      <span class="cl-badge cb-pratica">PRÁTICA</span>
+    </div>
+
+    <div class="cl-item" role="checkbox" aria-checked="false" tabindex="0" data-id="bd6">
+      <div class="cl-box" aria-hidden="true">✓</div>
+      <span class="cl-text"><strong>Implementar e testar o POST /clientes</strong> — usar Thunder Client ou Postman para enviar um JSON e confirmar que o cliente aparece no banco.</span>
+      <span class="cl-badge cb-pratica">PRÁTICA</span>
+    </div>
+
+    <div class="cl-item" role="checkbox" aria-checked="false" tabindex="0" data-id="bd7">
+      <div class="cl-box" aria-hidden="true">✓</div>
+      <span class="cl-text"><strong>Implementar e testar o GET, PUT e DELETE</strong> — completar as quatro rotas e validar cada uma com uma ferramenta de teste de APIs.</span>
+      <span class="cl-badge cb-pratica">PRÁTICA</span>
+    </div>
+
+    <div class="cl-item" role="checkbox" aria-checked="false" tabindex="0" data-id="bd8">
+      <div class="cl-box" aria-hidden="true">✓</div>
+      <span class="cl-text"><strong>Identificar SQL Injection</strong> — conseguir apontar qual linha de um código é vulnerável e reescrever com parâmetros <code>$1</code>.</span>
+      <span class="cl-badge cb-conceito">CONCEITO</span>
+    </div>
+
+    <div class="cl-item" role="checkbox" aria-checked="false" tabindex="0" data-id="bd9">
+      <div class="cl-box" aria-hidden="true">✓</div>
+      <span class="cl-text"><strong>Validar persistência no PostgreSQL</strong> — após cada operação CRUD, confirmar via <code>SELECT * FROM cliente</code> direto no banco que os dados mudaram.</span>
+      <span class="cl-badge cb-pratica">PRÁTICA</span>
+    </div>
+
+    <div class="cl-item" role="checkbox" aria-checked="false" tabindex="0" data-id="bd10">
+      <div class="cl-box" aria-hidden="true">✓</div>
+      <span class="cl-text"><strong>Bônus: GET /clientes/:id</strong> — implementar a rota de busca por ID individual (<code>SELECT * FROM cliente WHERE id = $1</code>) e retornar 404 se não encontrar.</span>
+      <span class="cl-badge cb-bonus">BÔNUS</span>
+    </div>
+
+  </div>
+
+  <div class="callout orange" style="margin-top:1.5rem">
+    <span class="callout-label">⚠ Dica de estudo</span>
+    Não pule o item 5 (testar a conexão isolada). Quando a API não responde, o problema
+    é quase sempre na conexão com o banco — senha errada, porta errada, banco não rodando.
+    Testar o <code>db.js</code> separado elimina essa dúvida antes de ela virar horas de depuração.
+  </div>
+</section>
+
+<!-- ── 10 PRÓXIMOS PASSOS ── -->
+<section id="proximos" class="content-section section">
+  <span class="section-num">10 — PRÓXIMOS PASSOS</span>
+  <h2>Próximos Passos</h2>
+  <p class="section-lead">
+    Você dominou o CRUD básico. Sistemas reais adicionam camadas sobre essa fundação —
+    cada uma resolvendo um problema específico que você vai encontrar em produção.
+  </p>
+
+  <div class="next-grid">
+    <div class="next-card acc">
+      <div class="next-num">Próximo imediato</div>
+      <div class="next-title">Validação de Entradas</div>
+      <p class="next-desc">Antes de inserir, verificar se o nome não está vazio, se o email tem formato válido, se o telefone tem o tamanho certo. Libs como <code>joi</code> ou <code>zod</code> tornam isso declarativo.</p>
+      <span class="next-tag tag-acc">joi · zod · express-validator</span>
+    </div>
+    <div class="next-card blu">
+      <div class="next-num">Nível Intermediário</div>
+      <div class="next-title">Autenticação JWT</div>
+      <p class="next-desc">Proteger as rotas com tokens JWT — só usuários autenticados podem criar, atualizar ou deletar. A leitura pode ser pública. Base de qualquer sistema com login.</p>
+      <span class="next-tag tag-blu">jsonwebtoken · bcrypt</span>
+    </div>
+    <div class="next-card ora">
+      <div class="next-num">Nível Intermediário</div>
+      <div class="next-title">Relacionamentos e JOINs</div>
+      <p class="next-desc">Um sistema real tem múltiplas tabelas relacionadas — clientes têm pedidos, pedidos têm itens, itens têm produtos. Chaves estrangeiras e JOINs conectam esses dados.</p>
+      <span class="next-tag tag-ora">FOREIGN KEY · JOIN · CASCADE</span>
+    </div>
+    <div class="next-card yel">
+      <div class="next-num">Nível Avançado</div>
+      <div class="next-title">Variáveis de Ambiente</div>
+      <p class="next-desc">Nunca suba senha de banco para o GitHub. O arquivo <code>.env</code> com a lib <code>dotenv</code> mantém credenciais fora do código-fonte — prática obrigatória em produção.</p>
+      <span class="next-tag tag-yel">dotenv · .gitignore · segurança</span>
+    </div>
+  </div>
+
+  <h3>Fluxo completo revisitado</h3>
+  <div class="flow-steps">
+    <div class="flow-step">
+      <div class="flow-step-num">1</div>
+      <div class="flow-step-body">
+        <strong>Usuário envia um cadastro</strong>
+        <span>O frontend coleta nome, email e telefone e faz <code>POST /clientes</code> com JSON no body.</span>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-step-num">2</div>
+      <div class="flow-step-body">
+        <strong>A API recebe o JSON</strong>
+        <span>O Express parseia o body. A rota <code>app.post('/clientes')</code> é ativada. Os dados são extraídos de <code>req.body</code>.</span>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-step-num">3</div>
+      <div class="flow-step-body">
+        <strong>A API executa o INSERT com parâmetros</strong>
+        <span><code>pool.query('INSERT INTO cliente ... VALUES ($1,$2,$3)', [nome,email,telefone])</code> — seguro contra SQL Injection.</span>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-step-num">4</div>
+      <div class="flow-step-body">
+        <strong>O PostgreSQL persiste os dados</strong>
+        <span>O banco grava o registro, gera o ID automaticamente via SERIAL e retorna a linha completa graças ao <code>RETURNING *</code>.</span>
+      </div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-step-num">5</div>
+      <div class="flow-step-body">
+        <strong>A API devolve a resposta</strong>
+        <span>O Express envia <code>res.status(201).json(result.rows[0])</code> — o cliente criado com o ID atribuído, de volta para o frontend.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout">
+    <span class="callout-label">🏁 Encerramento da Aula 4</span>
+    Banco de dados não vive sozinho. Ele sustenta sistemas corporativos reais — acadêmicos,
+    hospitalares, financeiros. Você agora sabe conectar o SQL que aprendeu a uma API REST
+    funcional. Esse é o padrão que alimenta a maioria dos sistemas em produção no mundo.
+    <strong>O próximo passo é aplicar isso a um domínio mais complexo, com mais tabelas e relacionamentos.</strong>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div>
+    Banco de Dados · Aula 4 — Sistema Corporativo Completo<br>
+    <span style="color:var(--text-dim);font-size:.7rem;">Node.js · Express · PostgreSQL · CRUD · REST · SQL Injection</span>
+  </div>
+  <span class="footer-version">ADS / Eng. Software · Prof. Abraão Henrique S. Rosal</span>
+</footer>
+
+</main>
+</div>
+
+<script>
+/* ── THEME ─────────────────────────────────────────── */
+var html = document.documentElement;
+function setTheme(name){
+  html.setAttribute('data-theme',name);
+  localStorage.setItem('bd-theme',name);
+  document.querySelectorAll('[data-theme-btn]').forEach(function(b){
+    var a=b.dataset.themeBtn===name;
+    b.classList.toggle('active',a);
+    b.setAttribute('aria-pressed',a?'true':'false');
+  });
+  announce('Tema '+name+' aplicado');
+}
+(function(){
+  var t=html.getAttribute('data-theme')||'dark';
+  document.querySelectorAll('[data-theme-btn]').forEach(function(b){
+    var a=b.dataset.themeBtn===t;
+    b.classList.toggle('active',a);
+    b.setAttribute('aria-pressed',a?'true':'false');
+  });
+})();
+document.querySelectorAll('[data-theme-btn]').forEach(function(b){
+  b.addEventListener('click',function(){setTheme(b.dataset.themeBtn);});
+});
+
+/* ── COLORBLIND ─────────────────────────────────────── */
+var cbToggle=document.getElementById('cb-toggle');
+function setCB(on){
+  if(on){html.setAttribute('data-colorblind','true');cbToggle.classList.add('active');cbToggle.setAttribute('aria-pressed','true');}
+  else{html.removeAttribute('data-colorblind');cbToggle.classList.remove('active');cbToggle.setAttribute('aria-pressed','false');}
+  localStorage.setItem('bd-cb',on?'true':'false');
+  announce(on?'Modo daltônico ativado':'Modo daltônico desativado');
+}
+(function(){if(html.hasAttribute('data-colorblind')){cbToggle.classList.add('active');cbToggle.setAttribute('aria-pressed','true');}})();
+cbToggle.addEventListener('click',function(){setCB(!html.hasAttribute('data-colorblind'));});
+
+/* ── ARIA LIVE ──────────────────────────────────────── */
+var announcer=document.getElementById('announcer');
+function announce(msg){announcer.textContent='';requestAnimationFrame(function(){announcer.textContent=msg;});}
+
+/* ── PROGRESS BAR ───────────────────────────────────── */
+var bar=document.getElementById('progress-bar');
+function updateProgress(){
+  var s=document.documentElement.scrollHeight-window.innerHeight;
+  if(s<=0){bar.style.width='100%';return;}
+  var p=(window.scrollY/s)*100;
+  bar.style.width=p+'%';
+  bar.setAttribute('aria-valuenow',Math.round(p));
+}
+window.addEventListener('scroll',updateProgress,{passive:true});
+updateProgress();
+
+/* ── MOBILE ─────────────────────────────────────────── */
+var sidebar=document.getElementById('sidebar');
+var hamburger=document.getElementById('hamburger');
+var overlay=document.getElementById('sidebar-overlay');
+function toggleSidebar(open){
+  var isOpen=open!==undefined?open:!sidebar.classList.contains('open');
+  sidebar.classList.toggle('open',isOpen);
+  hamburger.classList.toggle('active',isOpen);
+  overlay.classList.toggle('visible',isOpen);
+  hamburger.setAttribute('aria-expanded',isOpen?'true':'false');
+  overlay.setAttribute('aria-hidden',isOpen?'false':'true');
+}
+hamburger.addEventListener('click',function(){toggleSidebar();});
+overlay.addEventListener('click',function(){toggleSidebar(false);});
+sidebar.querySelectorAll('.nav-link').forEach(function(l){l.addEventListener('click',function(){toggleSidebar(false);});});
+
+/* ── ACTIVE NAV + FADE ──────────────────────────────── */
+var sections=document.querySelectorAll('section[id],.hero');
+var navLinks=document.querySelectorAll('.nav-link[data-section]');
+var secObs=new IntersectionObserver(function(entries){
+  entries.forEach(function(e){
+    if(e.isIntersecting)navLinks.forEach(function(l){l.classList.toggle('active',l.dataset.section===e.target.id);});
+  });
+},{rootMargin:'-20% 0px -60% 0px',threshold:0});
+sections.forEach(function(s){secObs.observe(s);});
+var fadeObs=new IntersectionObserver(function(entries){
+  entries.forEach(function(e){
+    if(e.isIntersecting){e.target.classList.add('visible');fadeObs.unobserve(e.target);}
+  });
+},{threshold:0.06});
+document.querySelectorAll('.section').forEach(function(s){fadeObs.observe(s);});
+
+/* ── COPY BUTTONS ───────────────────────────────────── */
+function copyCode(btn){
+  var pre=btn.closest('.code-wrap').querySelector('pre');
+  navigator.clipboard.writeText(pre.innerText).then(function(){
+    btn.textContent='✓ copiado';btn.classList.add('copied');
+    setTimeout(function(){
+      btn.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> copiar';
+      btn.classList.remove('copied');
+    },2200);
+  });
+}
+
+/* ── CHECKLIST ──────────────────────────────────────── */
+var CL_KEY='bd-cl';
+var clState={};
+try{clState=JSON.parse(localStorage.getItem(CL_KEY)||'{}');}catch(e){}
+function renderCL(){
+  var items=document.querySelectorAll('.cl-item[data-id]');
+  var done=0;
+  items.forEach(function(item){
+    var ok=!!clState[item.dataset.id];
+    item.setAttribute('aria-checked',ok?'true':'false');
+    if(ok)done++;
+  });
+  var prog=document.getElementById('checklist-progress');
+  if(prog)prog.textContent=done+' de '+items.length+' concluídos'+(done===items.length?' — tudo feito ✓':'');
+}
+document.querySelectorAll('.cl-item[data-id]').forEach(function(item){
+  function toggle(){
+    clState[item.dataset.id]=!clState[item.dataset.id];
+    try{localStorage.setItem(CL_KEY,JSON.stringify(clState));}catch(e){}
+    renderCL();
+  }
+  item.addEventListener('click',toggle);
+  item.addEventListener('keydown',function(e){if(e.key===' '||e.key==='Enter'){e.preventDefault();toggle();}});
+});
+renderCL();
+
+/* ═══════════════════════════════════════════════════════
+   CRUD SIMULATOR
+══════════════════════════════════════════════════════ */
+var simDB=[
+  {id:1,nome:'Carlos Souza',email:'carlos@email.com',telefone:'85911110001'},
+  {id:2,nome:'Maria Lima',email:'maria@email.com',telefone:'85922220002'},
+  {id:3,nome:'João Ferreira',email:'joao@email.com',telefone:'85933330003'}
+];
+var simNextId=4;
+var currentTab='create';
+
+function simTab(tab){
+  currentTab=tab;
+  document.querySelectorAll('.crud-panel').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.crud-tab').forEach(function(b){b.classList.remove('active');});
+  var panel=document.getElementById('panel-'+tab);
+  if(panel)panel.classList.add('active');
+  var map={create:'post',read:'get',update:'put',delete:'del'};
+  var btn=document.querySelector('.crud-tab.'+map[tab]);
+  if(btn)btn.classList.add('active');
+  ['create','read','update','delete'].forEach(function(t){
+    var r=document.getElementById('resp-'+t);
+    if(r)r.classList.remove('show');
+  });
+}
+
+function simRun(op){
+  var respEl=document.getElementById('resp-'+op);
+  var bodyEl=document.getElementById('resp-'+op+'-body');
+  if(!respEl||!bodyEl)return;
+  respEl.classList.add('show');
+
+  if(op==='create'){
+    var newRow={id:simNextId++,nome:'Ana Silva',email:'ana@email.com',telefone:'85999990001'};
+    simDB.push(newRow);
+    bodyEl.innerHTML='<span style="color:var(--success)">'+JSON.stringify(newRow,null,2)+'</span>';
+    renderSimTable(newRow.id);
+    updateSimCount();
+  } else if(op==='read'){
+    bodyEl.innerHTML='<span style="color:var(--accent)">'+JSON.stringify(simDB,null,2)+'</span>';
+    renderSimTable(null,true);
+  } else if(op==='update'){
+    var idx=simDB.findIndex(function(r){return r.id===1;});
+    if(idx>=0){
+      simDB[idx]={id:1,nome:'Ana S. Lima',email:'ana.lima@email.com',telefone:'85988880001'};
+      bodyEl.innerHTML='<span style="color:var(--accent4)">'+JSON.stringify(simDB[idx],null,2)+'</span>';
+      renderSimTable(1,'update');
+    }
+  } else if(op==='delete'){
+    var before=simDB.length;
+    simDB=simDB.filter(function(r){return r.id!==2;});
+    if(simDB.length<before){
+      var result={mensagem:'Cliente excluído com sucesso'};
+      bodyEl.innerHTML='<span style="color:var(--danger)">'+JSON.stringify(result,null,2)+'</span>';
+      renderSimTable(null,false,2);
+      updateSimCount();
+    }
+  }
+}
+
+function renderSimTable(newId,flash,deletedId){
+  var tbody=document.getElementById('sim-table-body');
+  if(!tbody)return;
+  tbody.innerHTML='';
+  simDB.forEach(function(row){
+    var tr=document.createElement('tr');
+    if(newId&&row.id===newId)tr.classList.add('new-row');
+    tr.innerHTML='<td class="id-cell">'+row.id+'</td><td>'+row.nome+'</td><td>'+row.email+'</td><td>'+row.telefone+'</td>';
+    tbody.appendChild(tr);
+  });
+  updateSimCount();
+}
+
+function updateSimCount(){
+  var el=document.getElementById('sim-db-count');
+  if(el)el.textContent=simDB.length+' registro'+(simDB.length!==1?'s':'')+' no banco';
+}
+</script>
+</body>
+</html>
